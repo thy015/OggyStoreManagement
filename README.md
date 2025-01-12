@@ -33,6 +33,7 @@ Server
 
 Project Structure
 
+```
 root/
 ├── client/                  # React Native app
 │   ├── src/
@@ -51,7 +52,7 @@ root/
 │   ├── server.js            # Main server file
 │   └── package.json
 └── README.md
-
+```
 Getting Started
 Prerequisites
 
