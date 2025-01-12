@@ -1,118 +1,50 @@
-Overview
+# Welcome to your Expo app 👋
 
-This project is a mobile application built with React Native that communicates with a backend server for data processing and storage. The app is designed to be fast, secure, and user-friendly, making use of modern tools and practices.
-Features
+This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
 
-    Client:
-        Cross-platform mobile app for iOS and Android.
-        User authentication and authorization (JWT).
-        Interactive UI with state management.
-        RESTful API communication.
-    Server:
-        Backend built with Node.js and Express.
-        Database integration (e.g., MongoDB, MySQL).
-        User authentication and role-based access control.
-        Scalable API endpoints.
+## Get started
 
-Technologies Used
-Client
+1. Install dependencies
 
-    React Native
-    Redux or Context API (for state management)
-    React Navigation
-    Axios (for API requests)
-    Expo (if applicable)
+   ```bash
+   npm install
+   ```
 
-Server
+2. Start the app
 
-    Node.js
-    Express.js
-    Database: MongoDB / MySQL
-    JWT (Authentication)
-    dotenv (Environment variable management)
+   ```bash
+    npx expo start
+   ```
 
-Project Structure
+In the output, you'll find options to open the app in a
 
-root/
-├── client/                  # React Native app
-│   ├── src/
-│   │   ├── components/      # Reusable UI components
-│   │   ├── screens/         # App screens
-│   │   ├── navigation/      # Navigation setup
-│   │   ├── services/        # API services
-│   │   └── store/           # State management
-│   ├── App.js               # Main app entry point
-│   └── package.json
-├── server/                  # Backend server
-│   ├── routes/              # API routes
-│   ├── controllers/         # Route handlers
-│   ├── models/              # Database models
-│   ├── middleware/          # Custom middleware
-│   ├── server.js            # Main server file
-│   └── package.json
-└── README.md
+- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
+- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
+- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
+- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
 
-Getting Started
-Prerequisites
+You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
 
-    Node.js installed on your system.
-    React Native CLI or Expo CLI installed.
-    MongoDB or MySQL server running (depending on the database used).
+## Get a fresh project
 
-Installation
+When you're ready, run:
 
-    Clone the repository:
+```bash
+npm run reset-project
+```
 
-git clone https://github.com/your-repo/react-native-app.git
-cd react-native-app
+This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
 
-Install dependencies for both client and server:
+## Learn more
 
-    # Install client dependencies
-    cd client
-    npm install
+To learn more about developing your project with Expo, look at the following resources:
 
-    # Install server dependencies
-    cd ../server
-    npm install
+- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
+- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
 
-Usage
-Running the Client
+## Join the community
 
-    Navigate to the client directory:
+Join our community of developers creating universal apps.
 
-cd client
-
-Start the React Native app:
-
-    npm start
-
-    If using Expo, scan the QR code with your device to open the app.
-
-Running the Server
-
-    Navigate to the server directory:
-
-cd server
-
-Start the backend server:
-
-    npm start
-
-    The server will run at http://localhost:5000 (or the port specified in .env).
-
-Environment Variables
-Client
-
-Create a .env file in the client/ directory and include:
-
-API_URL=http://localhost:5000/api
-
-Server
-
-Create a .env file in the server/ directory and include:
-
-PORT=5000
-DB_URI=mongodb+srv://<username>:<password>@cluster.mongodb.net/myDB
-JWT_SECRET=your_jwt_secret
-
+- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
+- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
