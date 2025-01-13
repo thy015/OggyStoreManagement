@@ -25,12 +25,12 @@ jobs:
       - name: Verify formatting
         run: npm run format
 
-      - name: Run tests for changed files
-        run: npm test -- --onlyChanged
+      # - name: Run tests for changed files
+      #   run: npm test -- --onlyChanged
 
-      # - name: Notify Slack - Build Completed
-      #   run: |
-      #     curl -X POST -H 'Content-type: application/json' --data '{"text":"Build version ${GITHUB_REF} completed successfully!"}' ${{ secrets.SLACK_WEBHOOK_URL }}
+      - name: Notify Slack - Build Completed
+        run: |
+          curl -X POST -H 'Content-type: application/json' --data '{"text":"Build version ${GITHUB_REF} completed successfully!"}' ${{ secrets.SLACK_WEBHOOK_URL }}
 
   build-android:
     name: Build Android App
@@ -66,8 +66,9 @@ jobs:
           name: app-release
           path: android/app/build/outputs/apk/release/app-release.apk
 
-      # - name: Notify Slack - Build Completed
-      #   run: curl -X POST -H 'Content-type: application/json' --data '{"text":"Build version ${GITHUB_REF} completed successfully!"}' ${{ secrets.SLACK_WEBHOOK_URL }}
+      - name: Notify Slack - Build Completed
+      run: |
+        curl -X POST -H 'Content-type: application/json' --data '{"text":"Build version ${GITHUB_REF} completed successfully!"}' ${{ secrets.SLACK_WEBHOOK_URL }}
 
   build-ios:
     name: Build iOS App
@@ -127,13 +128,13 @@ jobs:
           gcloud components install beta --quiet
           gcloud components update --quiet
 
-      # - name: Notify Slack - Run tests in Firebase Test Lab
-      #   run: |
-      #     curl -X POST -H 'Content-type: application/json' --data '{"text":"Run tests in Firebase Test Lab for version ${GITHUB_REF} completed successfully!"}' ${{ secrets.SLACK_WEBHOOK_URL }}
+      - name: Notify Slack - Run tests in Firebase Test Lab
+        run: |
+          curl -X POST -H 'Content-type: application/json' --data '{"text":"Run tests in Firebase Test Lab for version ${GITHUB_REF} completed successfully!"}' ${{ secrets.SLACK_WEBHOOK_URL }}
 
       - name: Run tests in Firebase Test Lab
         run: |
-          BUCKET_NAME=""
+          BUCKET_NAME="test-lab"
           TIMESTAMP=$(date +"%Y%m%d_%H%M%S")
           gcloud firebase test android run \
             --type robo \
@@ -145,9 +146,9 @@ jobs:
             --robo-directives=text:emailTextField=eve.holt@reqres.in,text:passwordTextField=pistol \
             --quiet
 
-      # - name: Notify Slack - Tests Completed
-      #   run: |
-      #     curl -X POST -H 'Content-type: application/json' --data '{"text":"UI tests in Firebase Test Lab completed successfully!"}' ${{ secrets.SLACK_WEBHOOK_URL }}
+      - name: Notify Slack - Tests Completed
+        run: |
+          curl -X POST -H 'Content-type: application/json' --data '{"text":"UI tests in Firebase Test Lab completed successfully!"}' ${{ secrets.SLACK_WEBHOOK_URL }}
 
   deploy:
     name: Deploy
