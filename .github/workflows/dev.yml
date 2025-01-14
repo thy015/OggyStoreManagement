@@ -104,7 +104,7 @@ jobs:
 
   firebase-test-lab:
     name: Run UI tests with Firebase Test Lab
-    needs: build-android
+    needs: [build-android, build-ios]
     runs-on: ubuntu-22.04
     permissions:
       contents: "read"
