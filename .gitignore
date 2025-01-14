@@ -3,7 +3,6 @@
 # dependencies
 node_modules/
 ios/
-android/
 .idea/
 */firebaseConfig.ts
 # Expo
