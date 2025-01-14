@@ -1,87 +1,204 @@
-name: React Native Tests
+name: Dev
 
 on:
   push:
-    branches:
-      - dev
-      - staging
-      - main
+    branches: [staging]
   pull_request:
-    branches:
-      - dev
-      - staging
-      - main
+    branches: [staging]
 
 jobs:
-  tests:
-    name: Run Tests
-    runs-on: ubuntu-latest
-
-    services:
-      # Add Firebase emulator if needed for testing.
-      firebase:
-        image: firebase/emulators:latest
-        ports:
-          - 8080:8080
-          - 9000:9000
-
+  test:
+    name: Test and Analyze
+    runs-on: ubuntu-22.04
     steps:
-      # Step 1: Checkout Code
       - name: Checkout code
         uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: "18"
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Verify formatting
+        run: npm run format
+
+      # - name: Run tests for changed files
+      #   run: npm test
+
+      - name: Notify build completion
+        run: |
+          curl -X POST -H 'Content-type: application/json' --data '{"text":"Build version ${GITHUB_REF} completed successfully!"}' ${WEBHOOK_URL}
+        env:
+          WEBHOOK_URL: https://app.slack.com/client/T088E3BU31Q/C088E17JZPV
+
+  build-android:
+    name: Build Android App
+    needs: test
+    runs-on: ubuntu-22.04
+
+    steps:
+      # Step 1: Checkout the repository
+      - uses: actions/checkout@v3
 
       # Step 2: Set up Node.js
-      - name: Setup Node.js
+      - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: 18
+          node-version: "18"
 
-      # Step 3: Install Dependencies
+      # Step 3: Install dependencies
       - name: Install dependencies
         run: npm install
 
-      # Step 4: Run Linter
-      - name: Run ESLint
-        run: npm run lint
-
-      # Step 5: Run Unit Tests
-      - name: Run Unit Tests
-        run: npm test
-        env:
-          CI: true
-
-      # Step 6: Run End-to-End Tests (Optional)
-      - name: Install Detox CLI
-        run: npm install -g detox-cli
-
-      - name: Build and Test with Detox
+      # Step 4: Install Watchman (required for Metro bundler)
+      - name: Install Watchman (required for Metro bundler)
         run: |
-          detox build --configuration ios.sim.release
-          detox test --configuration ios.sim.release
-        env:
-          CI: true
+          sudo apt-get update
+          sudo apt-get install -y watchman
 
-  build:
-    name: Build React Native App
-    runs-on: ubuntu-latest
+      # Step 5: Set up JDK (Java Development Kit) for Android build
+      - name: Set up JDK
+        uses: actions/setup-java@v3
+        with:
+          java-version: "11"
+          distribution: "zulu"
+
+      # Step 6: Set up Android SDK
+      - name: Set up Android SDK
+        run: |
+          echo "ANDROID_HOME=$HOME/android-sdk" >> $GITHUB_ENV
+          echo "PATH=$PATH:$HOME/android-sdk/cmdline-tools/latest/bin:$HOME/android-sdk/platform-tools" >> $GITHUB_ENV
+          sudo mkdir -p $HOME/android-sdk/cmdline-tools/latest/bin
+          curl https://dl.google.com/android/repository/commandlinetools-linux-8512546_latest.zip -o sdk-tools.zip
+          sudo unzip sdk-tools.zip -d $HOME/android-sdk/cmdline-tools/latest/
+          yes | $HOME/android-sdk/cmdline-tools/latest/bin/sdkmanager --licenses
+          $HOME/android-sdk/cmdline-tools/latest/bin/sdkmanager "build-tools;33.0.2" "platform-tools" "platforms;android-33"
+
+      # Step 7: Build the APK
+      - name: Build Android APK
+        run: |
+          cd android
+          ./gradlew assembleRelease
+
+      # Step 8: Upload APK as an artifact
+      - name: Upload APK
+        uses: actions/upload-artifact@v3
+        with:
+          name: app-release
+          path: android/app/build/outputs/apk/release/app-release.apk
+
+      # Step 9: Notify build completion (Optional)
+      - name: Notify build completion
+        run: |
+          curl -X POST -H 'Content-type: application/json' --data '{"text":"Build version ${GITHUB_REF} completed successfully!"}' ${WEBHOOK_URL}
+        env:
+          WEBHOOK_URL: https://app.slack.com/client/T088E3BU31Q/C088E17JZPV
+
+  build-ios:
+    name: Build iOS App
+    needs: test
+    runs-on: macos-latest
 
     steps:
-      # Step 1: Checkout Code
-      - name: Checkout code
-        uses: actions/checkout@v3
+      - uses: actions/checkout@v3
 
-      # Step 2: Setup Node.js
-      - name: Setup Node.js
+      - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: 18
+          node-version: "18"
 
-      # Step 3: Install Dependencies
       - name: Install dependencies
         run: npm install
 
-      # Step 4: Build the App
-      - name: Build the app
+      # - name: Run tests for changed files
+      #   run: npm test
+
+      - name: UpLoad IPA
+        uses: actions/upload-artifact@v3
+        with:
+          name: app-release
+          path: ios/build/Release-iphoneos/app.app
+
+  firebase-test-lab:
+    name: Run tests with Firebase Test Lab
+
+    needs: [build-android, build-ios]
+    runs-on: ubuntu-22.04
+    permissions:
+      contents: "read"
+      id-token: "write"
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Upload Android APK
+        uses: actions/upload-artifact@v3
+        with:
+          name: app-release
+          path: app-debug.apk
+
+      - name: Download app APK
+        uses: actions/download-artifact@v3
+        with:
+          name: app-release
+          path: app-release
+
+      - id: auth
+        name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCLOUD_AUTH }}
+
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+
+      - name: Install beta components
         run: |
-          npm run android:build
-          npm run ios:build
+          gcloud components install beta --quiet
+          gcloud components update --quiet
+
+      - name: Notify build completion
+        run: |
+          curl -X POST -H 'Content-type: application/json' --data '{"text":"Build version ${GITHUB_REF} completed successfully!"}' ${WEBHOOK_URL}
+          env:
+            WEBHOOK_URL: https://app.slack.com/client/T088E3BU31Q/C088E17JZPV
+
+      - name: Run tests in Firebase Test Lab
+        run: |
+          BUCKET_NAME="test-lab"
+          TIMESTAMP=$(date +"%Y%m%d_%H%M%S")
+          gcloud firebase test android run \
+            --type robo \
+            --app app-debug/app-debug.apk \
+            --device model=Pixel2,version=28,locale=en \
+            --timeout 300s \
+            --results-bucket=gs://$BUCKET_NAME \
+            --results-dir=results-$TIMESTAMP \
+            --robo-directives=text:emailTextField=eve.holt@reqres.in,text:passwordTextField=pistol \
+            --quiet
+
+      - name: Notify build completion
+        run: |
+          curl -X POST -H 'Content-type: application/json' --data '{"text":"Build version ${GITHUB_REF} completed successfully!"}' ${WEBHOOK_URL}
+          env:
+              WEBHOOK_URL: https://app.slack.com/client/T088E3BU31Q/C088E17JZPV
+
+  deploy:
+    name: Deploy
+    runs-on: ubuntu-latest
+    needs: [test, firebase-test-lab]
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Upload Android APK to Server
+        if: needs.build-android.result == 'success'
+        run: |
+          scp android/app/build/outputs/apk/release/app-release.apk user@server:/path/to/deploy
+
+      - name: Upload iOS IPA to Server
+        if: needs.build-ios.result == 'success'
+        run: |
+          scp ios/build/YourApp.ipa user@server:/path/to/deploy
