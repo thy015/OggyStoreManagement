@@ -56,6 +56,7 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y watchman
 
+
       # - name: Run tests for changed files
       #   run: npm test
 
@@ -70,9 +71,15 @@ jobs:
 
       - name: Notify build completion
         run: |
+
           curl -X POST -H 'Content-type: application/json' --data '{"text":"Build version ${GITHUB_REF} completed successfully!"}' ${WEBHOOK_URL}
           env:
             WEBHOOK_URL: https://app.slack.com/client/T088E3BU31Q/C088E17JZPV
+
+          curl -X POST -H 'Content-type: application/json' \
+            --data '{"text":"Build completed successfully!"}' \
+                https://app.slack.com/client/T088E3BU31Q/C088E17JZPV
+
 
   build-ios:
     name: Build iOS App
@@ -103,7 +110,9 @@ jobs:
           path: ios/build/Release-iphoneos/app.app
 
   firebase-test-lab:
+
     name: Run tests with Firebase Test Lab
+    
     needs: [build-android, build-ios]
     runs-on: ubuntu-22.04
     permissions:
