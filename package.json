@@ -10,7 +10,8 @@
     "web": "expo start --web",
     "test": "jest --watch",
     "lint": "expo lint",
-    "format": "prettier --write ."
+    "format": "prettier --write .",
+    "build": "expo build"
   },
   "jest": {
     "preset": "jest-expo"
