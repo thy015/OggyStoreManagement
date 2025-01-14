@@ -72,10 +72,11 @@ jobs:
           echo "ANDROID_HOME=$HOME/android-sdk" >> $GITHUB_ENV
           echo "PATH=$PATH:$HOME/android-sdk/cmdline-tools/latest/bin:$HOME/android-sdk/platform-tools" >> $GITHUB_ENV
           sudo mkdir -p $HOME/android-sdk/cmdline-tools/latest/bin
-          curl https://dl.google.com/android/repository/commandlinetools-linux-8512546_latest.zip -o sdk-tools.zip
-          sudo unzip sdk-tools.zip -d $HOME/android-sdk/cmdline-tools/latest/
+          curl -o sdk-tools.zip https://dl.google.com/android/repository/commandlinetools-linux-8512546_latest.zip
+          sudo unzip -qq sdk-tools.zip -d $HOME/android-sdk/cmdline-tools/latest/
+          rm sdk-tools.zip
+          $HOME/android-sdk/cmdline-tools/latest/bin/sdkmanager --sdk_root=$HOME/android-sdk "build-tools;33.0.2" "platform-tools" "platforms;android-33"
           yes | $HOME/android-sdk/cmdline-tools/latest/bin/sdkmanager --licenses
-          $HOME/android-sdk/cmdline-tools/latest/bin/sdkmanager "build-tools;33.0.2" "platform-tools" "platforms;android-33"
 
       # Step 7: Build the APK
       - name: Build Android APK
