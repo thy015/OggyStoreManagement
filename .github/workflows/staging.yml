@@ -67,16 +67,28 @@ jobs:
           distribution: "zulu"
 
       # Step 6: Set up Android SDK
+      # Step 6: Set up Android SDK
       - name: Set up Android SDK
         run: |
+          # Set environment variables
           echo "ANDROID_HOME=$HOME/android-sdk" >> $GITHUB_ENV
           echo "PATH=$PATH:$HOME/android-sdk/cmdline-tools/latest/bin:$HOME/android-sdk/platform-tools" >> $GITHUB_ENV
-          sudo mkdir -p $HOME/android-sdk/cmdline-tools/latest/bin
+
+          # Create necessary directories
+          mkdir -p $HOME/android-sdk/cmdline-tools
+          mkdir -p $HOME/android-sdk/platform-tools
+
+          # Download and extract command line tools
           curl -o sdk-tools.zip https://dl.google.com/android/repository/commandlinetools-linux-8512546_latest.zip
-          sudo unzip -qq sdk-tools.zip -d $HOME/android-sdk/cmdline-tools/latest/
+          unzip -qq sdk-tools.zip -d $HOME/android-sdk/cmdline-tools
           rm sdk-tools.zip
+
+          # Move extracted files to the correct directory
+          mv $HOME/android-sdk/cmdline-tools/cmdline-tools $HOME/android-sdk/cmdline-tools/latest
+
+          # Accept licenses and install required components
+          $HOME/android-sdk/cmdline-tools/latest/bin/sdkmanager --sdk_root=$HOME/android-sdk --licenses
           $HOME/android-sdk/cmdline-tools/latest/bin/sdkmanager --sdk_root=$HOME/android-sdk "build-tools;33.0.2" "platform-tools" "platforms;android-33"
-          yes | $HOME/android-sdk/cmdline-tools/latest/bin/sdkmanager --licenses
 
       # Step 7: Build the APK
       - name: Build Android APK
