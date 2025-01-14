@@ -97,35 +97,10 @@ jobs:
         env:
           WEBHOOK_URL: https://app.slack.com/client/T088E3BU31Q/C088E17JZPV
 
-  build-ios:
-    name: Build iOS App
-    needs: test
-    runs-on: macos-latest
-
-    steps:
-      - uses: actions/checkout@v3
-
-      - name: Set up Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: "18"
-
-      - name: Install dependencies
-        run: npm install
-
-      # - name: Run tests for changed files
-      #   run: npm test
-
-      - name: UpLoad IPA
-        uses: actions/upload-artifact@v3
-        with:
-          name: app-release
-          path: ios/build/Release-iphoneos/app.app
-
   firebase-test-lab:
     name: Run tests with Firebase Test Lab
 
-    needs: [build-android, build-ios]
+    needs: [build-android]
     runs-on: ubuntu-22.04
     permissions:
       contents: "read"
