@@ -76,7 +76,7 @@ jobs:
           npm install -g eas-cli
       # Build APK for staging
       - name: Build APK
-        run: eas build --profile production --platform android
+        run: eas build --profile production --platform android --non-interactive
 
       # Step 8: Notify build completion (Optional)
       - name: Notify build completion
