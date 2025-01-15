@@ -1,0 +1,36 @@
+name: Deploy Application
+
+on:
+  schedule:
+    - cron: "0 0 * * *" # Đây là thời gian chạy vào 00:00 UTC mỗi ngày
+  push:
+    branches:
+      - main # Chỉ chạy khi có thay đổi trên nhánh main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Set up reactnative.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: "16"
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build project
+        run: npm run build
+
+      - name: Deploy to server
+        run: |
+          ssh -i $DEPLOY_KEY user@server "cd /path/to/app && git pull"
+        env:
+          DEPLOY_KEY: ${{ secrets.DEPLOY_KEY }}
+
+      - name: Notify success
+        run: echo "Deployment completed successfully."
