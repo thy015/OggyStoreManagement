@@ -35,6 +35,7 @@ jobs:
           WEBHOOK_URL: https://app.slack.com/client/T088E3BU31Q/C088E17JZPV
 
   staging-build:
+    needs: test
     runs-on: ubuntu-latest
     permissions:
       contents: read
