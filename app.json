@@ -1,7 +1,8 @@
 {
   "expo": {
     "name": "SQA",
-    "slug": "SQA",
+    "slug": "test",
+    "owner": "chikaturin",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
@@ -15,7 +16,8 @@
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "package": "com.chikaturin.sqa"
     },
     "web": {
       "bundler": "metro",
@@ -36,6 +38,14 @@
     ],
     "experiments": {
       "typedRoutes": true
+    },
+    "extra": {
+      "router": {
+        "origin": false
+      },
+      "eas": {
+        "projectId": "1b721f0e-cd82-45bf-bbce-07affc1f64aa"
+      }
     }
   }
 }

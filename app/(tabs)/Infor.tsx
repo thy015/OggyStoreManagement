@@ -4,7 +4,7 @@ import { ThemedText } from "@/components/ThemedText";
 import { SafeAreaView } from "react-native-safe-area-context";
 import userFakedata from "../Components/fakedata.jsx";
 import { onAuthStateChanged } from "firebase/auth";
-import { FIREBASE_AUTH } from "@/config/firebaseConfig";
+import { FIREBASE_AUTH } from "../../config/firebaseConfig.ts";
 import { signOut } from "firebase/auth";
 import { router } from "expo-router";
 import CustomButton from "../Components/CustomButton";
