@@ -1,18 +1,20 @@
 import { View, Image,  } from "react-native";
 import React, { useState  } from "react";
-import { ThemedText } from "@/components/ThemedText";
 import { SafeAreaView } from "react-native-safe-area-context";
-import userFakedata from "../Components/fakedata.jsx";
 import { onAuthStateChanged } from "firebase/auth";
-import { FIREBASE_AUTH } from "../../config/firebaseConfig.ts";
+import { FIREBASE_AUTH } from "@/config/firebaseConfig.js";
 import { signOut } from "firebase/auth";
 import { router } from "expo-router";
-import CustomButton from "../Components/CustomButton";
-
+//@ts-ignore
+import CustomButton from "@/app/components/customButton.tsx";
+//@ts-ignore
+import { ThemedText } from "@/app/components/ThemedText.tsx";
+//@ts-ignore
+import userFakeData from "@/app/localData/fakedata.tsx";
 const Infor = () => {
   const auth = FIREBASE_AUTH;
   const [email, setEmail] = useState<string>("");
-  const { Avatar } = userFakedata;
+  const { Avatar } = userFakeData;
 
   onAuthStateChanged(auth, (user) => {
     if (user) {
@@ -23,7 +25,7 @@ const Infor = () => {
 
   const submitLogout = () => {
     signOut(auth).then(() => {
-      router.replace("/");
+      router.replace({ pathname: "/" });
     });
   };
 

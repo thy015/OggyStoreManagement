@@ -9,10 +9,10 @@ import {
   Platform,
 } from "react-native";
 import React, { useState } from "react";
-import CustomButton from "../Components/CustomButton";
+import CustomButton from "@/app/components/customButton";
 import { Link, router } from "expo-router";
-import { ThemedView } from "@/components/ThemedView";
-import { ThemedText } from "@/components/ThemedText";
+import { ThemedView } from "@/app/components/ThemedView";
+import { ThemedText } from "@/app/components/ThemedText";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
 
@@ -79,7 +79,7 @@ const SignIn = () => {
             <ThemedView className="ml-2">
               <ThemedView className="flex-row items-center justify-center w-full h-fit mt-10">
                 <Image
-                  source={require("../../assets/images/logo.png")}
+                  source={require("@/assets/images/logo.png")}
                   className="w-32 h-32"
                   resizeMode="contain"
                 />
@@ -138,7 +138,7 @@ const SignIn = () => {
                 Don't have account,
               </ThemedText>
               <Link
-                href="/sign-up"
+                href="/api/(authens)/sign-up"
                 className="font-bold text-[#FF9C01] text-lg"
               >
                 {" "}

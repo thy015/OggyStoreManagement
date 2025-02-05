@@ -1,9 +1,9 @@
-import { Link, Stack } from "expo-router";
-import { StyleSheet } from "react-native";
+import { Stack, Link } from "expo-router";
+import { Button, StyleSheet } from "react-native";
 import React from "react"
-
-import { ThemedText } from "@/components/ThemedText";
-import { ThemedView } from "@/components/ThemedView";
+import { Image } from "react-native";
+import { ThemedText } from "@/app/components/ThemedText";
+import { ThemedView } from "@/app/components/ThemedView";
 
 export default function NotFoundScreen() {
   return (
@@ -11,8 +11,11 @@ export default function NotFoundScreen() {
       <Stack.Screen options={{ title: "Oops!" }} />
       <ThemedView style={styles.container}>
         <ThemedText type="title">This screen doesn't exist.</ThemedText>
+        <Image
+          source={require('@/assets/icons/404-page-not-found.svg')}
+        />
         <Link href="/" style={styles.link}>
-          <ThemedText type="link">Go to home screen!</ThemedText>
+          <Button title="Go to home" /> 
         </Link>
       </ThemedView>
     </>

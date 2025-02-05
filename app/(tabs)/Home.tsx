@@ -15,7 +15,7 @@ import { PanGestureHandler } from "react-native-gesture-handler";
 import { SafeAreaView } from "react-native-safe-area-context";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
-import { FIREBASE_DB } from "../../config/firebaseConfig.ts";
+import { FIREBASE_DB } from "../../config/firebaseConfig.js";
 import { collection, addDoc } from "firebase/firestore";
 
 const Home: React.FC = () => {

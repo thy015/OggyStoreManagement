@@ -13,9 +13,9 @@
     ".expo/types/**/*.ts",
     "expo-env.d.ts",
     "nativewind-env.d.ts",
-    "app/Components/CustomButton.tsx",
+    "app/components/customButton.tsx",
     "app/(tabs)/_layout.tsx",
     "app/(tabs)/Home.tsx",
     "app/(tabs)/Infor.tsx"
-  ]
+, "config/firebaseConfig.js"  ]
 }

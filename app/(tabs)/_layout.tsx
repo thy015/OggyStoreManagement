@@ -69,7 +69,7 @@ const TabLayout: React.FC = () => {
               headerShown: false,
               tabBarIcon: ({ color, focused }) => (
                 <TabIcon
-                  icon={require("../../components/Icons/home.png")}
+                  icon={require("@/assets/icons/home.png")}
                   color={color}
                   name="Home"
                   focused={focused}
@@ -85,7 +85,7 @@ const TabLayout: React.FC = () => {
               headerShown: false,
               tabBarIcon: ({ color, focused }) => (
                 <TabIcon
-                  icon={require("../../components/Icons/clock.png")}
+                  icon={require("@/assets/icons/clock.png")}
                   color={color}
                   name="History"
                   focused={focused}
@@ -101,7 +101,7 @@ const TabLayout: React.FC = () => {
               headerShown: false,
               tabBarIcon: ({ color, focused }) => (
                 <TabIcon
-                  icon={require("../../components/Icons/profile.png")}
+                  icon={require("@/assets/icons/profile.png")}
                   color={color}
                   name="Infor"
                   focused={focused}

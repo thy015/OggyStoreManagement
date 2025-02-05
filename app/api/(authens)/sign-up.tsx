@@ -10,10 +10,10 @@ import {
   Platform,
 } from "react-native";
 import React, { useState } from "react";
-import CustomButton from "../Components/CustomButton";
+import CustomButton from "@/app/components/customButton";
 import { Link, router } from "expo-router";
-import { ThemedText } from "@/components/ThemedText";
-import { ThemedView } from "@/components/ThemedView";
+import { ThemedText } from "@/app/components/ThemedText";
+import { ThemedView } from "@/app/components/ThemedView";
 import { getAuth, createUserWithEmailAndPassword } from "firebase/auth";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -48,7 +48,7 @@ const SignUp = () => {
       const user = userCredential.user;
 
       Alert.alert("sign-up success");
-      router.replace("/sign-in");
+      router.replace("/api/(authens)/sign-in");
     } catch (e) {
       const error = e as Error;
       console.error("Error during signup:", error.message || e);
@@ -86,7 +86,7 @@ const SignUp = () => {
             <ThemedView className="ml-2">
               <ThemedView className="flex-row items-center justify-center w-full h-fit mt-10">
                 <Image
-                  source={require("../../assets/images/logo.png")}
+                  source={require("@/assets/images/logo.png")}
                   className="w-32 h-32"
                   resizeMode="contain"
                 />
@@ -161,7 +161,7 @@ const SignUp = () => {
                 Have an account already?,
               </ThemedText>
               <Link
-                href="/sign-in"
+                href="/api/(authens)/sign-in"
                 className="font-bold text-[#FF9C01] text-lg"
               >
                 {" "}

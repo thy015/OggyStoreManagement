@@ -1,6 +1,6 @@
 import React from "react";
 import { TouchableOpacity, ActivityIndicator } from "react-native";
-import { ThemedText } from "@/components/ThemedText";
+import { ThemedText } from "@/app/components/ThemedText";
 
 type Props = {
   title: string;
