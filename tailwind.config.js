@@ -12,7 +12,11 @@ module.exports = {
       },
       fontFamily: {
         sans: ["Inter", "sans-serif"],
-        oswald: ["Oswald", "sans-serif"],
+        oswaldRegular: ["Oswald", "sans-serif"],
+        oswaldLight: ["Oswald-Light", "sans-serif"],
+        inriaBold: ["Inria-Bold", "sans-serif"],
+        inriaRegular: ["Inria-Regular", "sans-serif"],
+        inriaLight: ["Inria-Light", "sans-serif"],
       },
     },
   },

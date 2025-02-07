@@ -1,6 +1,7 @@
 {
   "extends": "expo/tsconfig.base",
   "compilerOptions": {
+    "allowImportingTsExtensions": true,
     "strict": true,
     "paths": {
       "@firebase/auth": ["./node_modules/@firebase/auth/dist/index.rn.d.ts"],
@@ -17,5 +18,5 @@
     "app/(tabs)/_layout.tsx",
     "app/(tabs)/Home.tsx",
     "app/(tabs)/Infor.tsx"
-, "config/firebaseConfig.js"  ]
+, "config/firebaseConfig.ts", "app/+loading.tsx"  ]
 }

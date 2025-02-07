@@ -2,14 +2,11 @@ import { View, Image,  } from "react-native";
 import React, { useState  } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { onAuthStateChanged } from "firebase/auth";
-import { FIREBASE_AUTH } from "@/config/firebaseConfig.js";
+import { FIREBASE_AUTH } from "@/config/firebaseConfig.ts";
 import { signOut } from "firebase/auth";
 import { router } from "expo-router";
-//@ts-ignore
 import CustomButton from "@/app/components/customButton.tsx";
-//@ts-ignore
 import { ThemedText } from "@/app/components/ThemedText.tsx";
-//@ts-ignore
 import userFakeData from "@/app/localData/fakedata.tsx";
 const Infor = () => {
   const auth = FIREBASE_AUTH;
