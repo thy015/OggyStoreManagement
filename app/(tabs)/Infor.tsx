@@ -1,16 +1,16 @@
-import { View, Image,  } from "react-native";
-import React, { useState  } from "react";
-import { SafeAreaView } from "react-native-safe-area-context";
-import { onAuthStateChanged } from "firebase/auth";
-import { FIREBASE_AUTH } from "@/config/firebaseConfig.ts";
-import { signOut } from "firebase/auth";
-import { router } from "expo-router";
-import CustomButton from "@/app/components/customButton.tsx";
-import { ThemedText } from "@/app/components/ThemedText.tsx";
-import userFakeData from "@/app/localData/fakedata.tsx";
+import { View, Image } from 'react-native';
+import React, { useState } from 'react';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { onAuthStateChanged } from 'firebase/auth';
+import { FIREBASE_AUTH } from '@/config/firebaseConfig.ts';
+import { signOut } from 'firebase/auth';
+import { router } from 'expo-router';
+import CustomButton from '@/components/customButton';
+import { ThemedText } from '@/components/ThemedText';
+import userFakeData from '@/app/localData/fakedata.tsx';
 const Infor = () => {
   const auth = FIREBASE_AUTH;
-  const [email, setEmail] = useState<string>("");
+  const [email, setEmail] = useState<string>('');
   const { Avatar } = userFakeData;
 
   onAuthStateChanged(auth, (user) => {
@@ -22,7 +22,7 @@ const Infor = () => {
 
   const submitLogout = () => {
     signOut(auth).then(() => {
-      router.replace({ pathname: "/" });
+      router.replace({ pathname: '/' });
     });
   };
 
@@ -33,15 +33,15 @@ const Infor = () => {
           style={{
             width: 140,
             height: 140,
-            resizeMode: "contain",
-            borderRadius: "50%",
+            resizeMode: 'contain',
+            borderRadius: '50%',
           }}
           source={Avatar}
         />
         <ThemedText className="mt-2 text-xl">{email}</ThemedText>
         <CustomButton
           isLoading={false}
-          title={"Sign Out"}
+          title={'Sign Out'}
           handlePress={submitLogout}
           containerStyles="w-full mt-7 px-4"
         />

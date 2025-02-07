@@ -4,8 +4,15 @@
     "allowImportingTsExtensions": true,
     "strict": true,
     "paths": {
-      "@firebase/auth": ["./node_modules/@firebase/auth/dist/index.rn.d.ts"],
-      "@/*": ["./*"]
+      "@firebase/auth": [
+        "./node_modules/@firebase/auth/dist/index.rn.d.ts"
+      ],
+      "@/*": [
+        "./*"
+      ],
+      "tailwind.config": [
+        "./tailwind.config.js"
+      ]
     }
   },
   "include": [
@@ -14,9 +21,11 @@
     ".expo/types/**/*.ts",
     "expo-env.d.ts",
     "nativewind-env.d.ts",
-    "app/components/customButton.tsx",
+    "components/customButton.tsx",
     "app/(tabs)/_layout.tsx",
     "app/(tabs)/Home.tsx",
-    "app/(tabs)/Infor.tsx"
-, "config/firebaseConfig.ts", "app/+loading.tsx"  ]
+    "app/(tabs)/Infor.tsx",
+    "config/firebaseConfig.ts",
+    "app/+loading.tsx"
+  ]
 }

@@ -1,6 +1,6 @@
-import React from "react";
-import { TouchableOpacity, ActivityIndicator } from "react-native";
-import { ThemedText } from "@/app/components/ThemedText";
+import React from 'react';
+import { TouchableOpacity, ActivityIndicator } from 'react-native';
+import { ThemedText } from '@/components/ThemedText';
 
 type Props = {
   title: string;
@@ -13,8 +13,8 @@ type Props = {
 const CustomButton: React.FC<Props> = ({
   title,
   handlePress,
-  containerStyles = "",
-  textStyles = "",
+  containerStyles = '',
+  textStyles = '',
   isLoading,
 }) => {
   return (
@@ -22,7 +22,7 @@ const CustomButton: React.FC<Props> = ({
       onPress={handlePress}
       activeOpacity={0.7}
       className={`bg-[#fdab40] min-h-[62px] rounded-xl justify-center items-center ${containerStyles} ${
-        isLoading ? "opacity-50" : ""
+        isLoading ? 'opacity-50' : ''
       }`}
       disabled={isLoading}
     >
