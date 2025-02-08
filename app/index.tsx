@@ -1,58 +1,51 @@
-import { Text, Image } from "react-native";
-import React, { useEffect } from "react";
-import "../global.css";
-import { ThemedText } from "@/components/ThemedText";
-import { ThemedView } from "@/components/ThemedView";
-import { SafeAreaView } from "react-native-safe-area-context";
-import { router } from "expo-router";
-import CustomButton from "./Components/CustomButton";
-import { onAuthStateChanged } from "firebase/auth";
-import { FIREBASE_AUTH } from "@/config/firebaseConfig";
+import { Text, Image } from 'react-native';
+import React, { useEffect } from 'react';
+import '../global.css';
+import { ThemedView } from '@/components/ThemedView';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { router } from 'expo-router';
+import { onAuthStateChanged } from 'firebase/auth';
+import { FIREBASE_AUTH } from '@/config/firebaseConfig';
 
 const Index = () => {
   const auth = FIREBASE_AUTH;
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
-      if (user) {
-        router.push("/Home");
-      }
+      setTimeout(() => {
+        if (user) {
+          router.push('/(tabs)/Home');
+        } else {
+          router.push('/api/(authens)/sign-in');
+        }
+      }, 2000);
     });
 
     return () => unsubscribe();
   }, []);
 
   return (
-    <SafeAreaView className="w-full h-screen overflow-auto px-4">
-      <ThemedView className="flex-row items-center justify-center w-full h-fit mt-10 ">
+    <SafeAreaView className="w-full h-screen overflow-auto px-4 bg-white">
+      <ThemedView className="flex-row items-center justify-center w-full h-fit mt-32 ml-4">
         <Image
-          source={require("../assets/images/logo.png")}
-          className="w-32 h-32"
+          source={require('../assets/images/money-investment.png')}
+          className="h-[320px]"
           resizeMode="contain"
         />
-        <Text className="text-5xl text-[#FF8C00] font-bold text-center">
-          DOG FARM
-        </Text>
       </ThemedView>
 
       <ThemedView className="flex items-center relative w-full h-fit mt-3">
-        <Image
-          source={require("../assets/images/cards.png")}
-          className="max-w-[380px] w-full h-[380px]"
-          resizeMode="contain"
-        />
-        <ThemedText className="text-3xl font-bold mt-4">
-          WELCOME DOGGYAPP
-        </ThemedText>
-        <ThemedText className="text-2xl text-center mt-4">
-          App nơi hội tụ những chú chó xuất sắc và đặc biệt
-        </ThemedText>
-        <CustomButton
-          isLoading={false}
-          title="Get Started"
-          handlePress={() => router.push("/sign-in")}
-          containerStyles="w-full mt-7 px-4"
-        />
+        <Text className="text-6xl font-inriaRegular mt-6 text-purpleDark">
+          Oggy
+        </Text>
+        <Text className="text-3xl font-inriaRegular mt-2 text-purpleDark">
+          Financial Mangement
+        </Text>
+      </ThemedView>
+      <ThemedView className="flex items-center relative w-full h-fit mt-64">
+        <Text className="text-2xl font-inriaRegular mt-6 text-purple opacity-[0.8]">
+          EST. 2025
+        </Text>
       </ThemedView>
     </SafeAreaView>
   );
