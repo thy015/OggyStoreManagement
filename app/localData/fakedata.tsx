@@ -1,4 +1,4 @@
-const avatar= require("@/assets/images/avatar.jpg");
+const avatar= require("@/assets/images/avatar.png");
 
 const userFakeData = {
   UserName: "Nguyễn Hoài Thanh",
