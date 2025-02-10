@@ -14,7 +14,7 @@ type TabIconProps = {
   focused: boolean;
 };
 
-const TabIcon: React.FC<TabIconProps> = ({ icon, color, name, focused }) => {
+export const TabIcon: React.FC<TabIconProps> = ({ icon, color, name, focused }) => {
   return (
     <View
       style={{
@@ -147,7 +147,9 @@ const TabLayout: React.FC = () => {
             }}
           />
         </Tabs>
+          
         <StatusBar backgroundColor="#161622" style="light" />
+        
       </GestureHandlerRootView>
     </>
   );

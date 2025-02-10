@@ -299,11 +299,11 @@ const Home: React.FC = () => {
                     </Button>
                     </View>
                     {/* display 10 recent cards */}
-                  <ScrollView style={{ height: 300 }}>
+                
                     <View>
                       <ReceiptList />
                     </View>
-                  </ScrollView>
+                                  
                   </View>
                 </View>
               </View>
