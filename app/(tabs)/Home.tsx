@@ -19,7 +19,7 @@ import { FIREBASE_DB } from '../../config/firebaseConfig.ts';
 import { collection, addDoc } from 'firebase/firestore';
 import { BarChart } from 'react-native-gifted-charts';
 import { Button, ButtonText } from '@/components/ui/button/index.tsx';
-import ReceiptCard from '@/components/receiptCard.tsx';
+import ReceiptList from '@/components/receiptCard.tsx';
 
 const Home: React.FC = () => {
   const [image, setImage] = useState<string>('');
@@ -301,7 +301,7 @@ const Home: React.FC = () => {
                     {/* display 10 recent cards */}
                   <ScrollView style={{ height: 300 }}>
                     <View>
-                      <ReceiptCard />
+                      <ReceiptList />
                     </View>
                   </ScrollView>
                   </View>
