@@ -23,7 +23,15 @@ const Receipt = () => {
   const [totalAmount, setTotalAmount] = useState<number>(0);
   const [items, setItems] = useState<string[]>([]);
   const [dateTime, setDateTime] = useState<string>('');
-  const [textImage, setTextImage] = useState<string>(``);
+  const [textImage, setTextImage] = useState<string>(`*List of items*
+Lorem Ipsum: $25
+Lorem Dolor: $15
+Sit Amet: $10
+Consectetur: $20
+Adipiscing Elit: $10
+Sed Diam: $15
+Total Amount: $95
+Date ~ Time: March 22, 2023 ~ 10:45 AM`);
   const [isImageFullScreen, setIsImageFullScreen] = useState<Boolean>(false);
 
   const toggleImageView = () => {
@@ -73,7 +81,7 @@ const Receipt = () => {
     }
 
     try {
-      const response = await fetch(`http://192.168.2.34:5000/upload`, {
+      const response = await fetch(`http://172.20.10.8:5000/upload`, {
         method: 'POST',
         body: formData,
         headers: {
@@ -97,7 +105,7 @@ const Receipt = () => {
   const formatVND = (amount: number): string => {
     return new Intl.NumberFormat('vi-VN', {
       style: 'currency',
-      currency: 'VND',
+      currency: 'USD',
     }).format(amount);
   };
 
@@ -117,7 +125,7 @@ const Receipt = () => {
     console.log('Processing image:', imageURI);
     if (imageURI) {
       try {
-        const response = await fetch('http://192.168.2.34:5000/image', {
+        const response = await fetch('http://172.20.10.8:5000/image', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -203,18 +211,25 @@ const Receipt = () => {
       }
     }
 
-    const match = text.match(/list of items[:\s]*([\s\S]*?)\s*total amount:/i);
+    text = text.toLowerCase();
+    text = text.replace(/\*/g, '');
+    const match = text.match(/list of items[?:\s]*([\s\S]*?)\s*total amount:/i);
+
     let items = [];
 
     if (match) {
-      const itemLines = match[1].trim().split('\n');
-      items = itemLines.map((item) => item.replace(/^\*\s*/, '').trim());
+      const itemLines = match[1]
+        .trim()
+        .split('\n')
+        .filter((line) => line.trim() !== '');
+      items = itemLines.map((item) => item.replace(/^\d+\.\s*/, '').trim());
+      console.log(items);
     } else {
       console.log('Không tìm thấy danh sách mục!');
     }
 
     const match2 = text.match(
-      /date:\s*(\d{2}[-\/]\d{2}[-\/]\d{4})(?:,\s*(\d{2}:\d{2}(?::\d{2})?))?|time:\s*(\d{2}:\d{2}(?::\d{2})?)/
+      /date\s*~\s*time:\s*([a-zA-Z]+\s+\d{1,2},\s*\d{4})\s*~\s*([\d:]+\s*(?:am|pm)?)/i
     );
 
     if (match2) {
@@ -230,15 +245,28 @@ const Receipt = () => {
   };
 
   useEffect(() => {
-    const { totalAmount, items } = total_listProduct(textImage);
-    setTotalAmount(totalAmount);
-    setItems(items);
-    console.log(totalAmount, items);
+    if (textImage) {
+      const { totalAmount, items } = total_listProduct(textImage);
+      setTotalAmount(totalAmount);
+      setItems(items);
+      console.log(totalAmount, items);
+    }
   }, [textImage]);
 
   return (
     <View className="w-full bg-slate-100 h-full relative">
       <View className="mt-3 px-2">
+        <View className="w-full h-fit px-2 bg-white py-4 mb-3  rounded-lg">
+          <Text className="text-2xl w-full text-center font-bold text-[#a294f9]">
+            INCOME AND EXPENDITURE
+          </Text>
+          <View className=" w-full flex-row justify-between">
+            <View className="bg-pink-300 w-1/2 border-r border-b-gray-500">
+              <Text>Total Income</Text>
+            </View>
+            <Text className="bg-red-300 w-1/2">bbb</Text>
+          </View>
+        </View>
         {textImage ? (
           <View>
             <View className="w-full h-fit px-2 bg-white py-4 rounded-lg ">
@@ -273,7 +301,8 @@ const Receipt = () => {
               <Text className="text-2xl text-green-600">* PRODUCT LIST:</Text>
               <View className="mt-2">
                 {items.map((item, index) => (
-                  <View key={index} className="flex-row w-full justify-between">
+                  <View key={index} className="flex-row w-full ">
+                    <Text className="text-2xl mr-3 ml-4">{index + 1}</Text>
                     <Text className="text-2xl">{item}</Text>
                   </View>
                 ))}
