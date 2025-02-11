@@ -13,8 +13,12 @@
       "tailwind.config": [
         "./tailwind.config.js"
       ]
-    }
+    },
+    "noImplicitAny": false,
+    "skipLibCheck": true,
+    "types": ["jest", "react-native"]
   },
+  
   "include": [
     "**/*.ts",
     "**/*.tsx",
@@ -26,6 +30,8 @@
     "app/(tabs)/Home.tsx",
     "app/(tabs)/Infor.tsx",
     "config/firebaseConfig.ts",
-    "app/+loading.tsx"
-  ]
+    "app/+loading.tsx",
+    "__tests__/(authens)/sign-in.test.ts",
+    "__tests__", "config/jest.config.js",
+    "src", "__tests__"  ]
 }
