@@ -18,9 +18,9 @@ const TabIcon: React.FC<TabIconProps> = ({ icon, color, name, focused }) => {
   return (
     <View
       style={{
-        flexDirection:focused ? 'row':'column',
+        flexDirection: focused ? 'row' : 'column',
         alignItems: 'center',
-        gap:8,
+        gap: 8,
         paddingVertical: 10,
         justifyContent: 'center',
         position: 'absolute',
@@ -31,7 +31,7 @@ const TabIcon: React.FC<TabIconProps> = ({ icon, color, name, focused }) => {
         shadowOpacity: 0.1,
         shadowRadius: 10,
         elevation: focused ? 3 : 0,
-        top: 3, 
+        top: 3,
       }}
       className="w-32 pt-4"
     >
@@ -45,17 +45,17 @@ const TabIcon: React.FC<TabIconProps> = ({ icon, color, name, focused }) => {
           style={{ width: 24, height: 24, tintColor: color }}
         />
       )}
-      {focused &&
-      <Text
-        style={{
-          color: color,
-          fontSize: 12,
-          fontWeight: focused ? '600' : '400',
-        }}
-      >
-        {name}
-      </Text>
-      }
+      {focused && (
+        <Text
+          style={{
+            color: color,
+            fontSize: 12,
+            fontWeight: focused ? '600' : '400',
+          }}
+        >
+          {name}
+        </Text>
+      )}
     </View>
   );
 };
@@ -72,14 +72,14 @@ const TabLayout: React.FC = () => {
             tabBarStyle: {
               backgroundColor: '#fdfdfd',
               borderTopWidth: 0,
-              position:'relative',
+              position: 'relative',
               height: 75,
               paddingBottom: 10,
               elevation: 10,
               shadowColor: '#000',
               shadowOpacity: 0.1,
               shadowRadius: 10,
-              marginTop:10
+              marginTop: 10,
             },
           }}
         >
@@ -98,22 +98,22 @@ const TabLayout: React.FC = () => {
               ),
             }}
           />
-          
+
           <Tabs.Screen
-          name="Receipt"
-          options={{
-            title: 'Receipt',
-            header: () => <CustomHeader />,
-            tabBarIcon: ({ color, focused }) => (
-              <TabIcon
-                icon={<Receipt size={24} color={color} />}
-                color={color}
-                name="Receipt"
-                focused={focused}
-              />
-            ),
-          }}
-        />
+            name="Receipt"
+            options={{
+              title: 'Receipt',
+              header: () => <CustomHeader />,
+              tabBarIcon: ({ color, focused }) => (
+                <TabIcon
+                  icon={<Receipt size={24} color={color} />}
+                  color={color}
+                  name="Receipt"
+                  focused={focused}
+                />
+              ),
+            }}
+          />
 
           <Tabs.Screen
             name="History"
@@ -135,7 +135,7 @@ const TabLayout: React.FC = () => {
             name="Infor"
             options={{
               title: 'Infor',
-              header:()=> false,
+              header: () => false,
               tabBarIcon: ({ color, focused }) => (
                 <TabIcon
                   icon={require('@/assets/icons/profile.png')}

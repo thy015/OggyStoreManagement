@@ -20,6 +20,7 @@ import { collection, addDoc } from 'firebase/firestore';
 import { BarChart } from 'react-native-gifted-charts';
 import { Button, ButtonText } from '@/components/ui/button/index.tsx';
 import ReceiptList from '@/components/receiptCard.tsx';
+import { router } from 'expo-router';
 
 const Home: React.FC = () => {
   const [image, setImage] = useState<string>('');
@@ -250,60 +251,58 @@ const Home: React.FC = () => {
 
                 <View className="bg-purpleLight h-full rounded-tl-[40px] rounded-tr-[40px] shadow-md">
                   <View className="w-full h-full px-2 text-right mt-6 ml-3 flex flex-col">
-                      {/* tool bar */}
-                    <View className='flex flex-row'>
-                    <Button
-                      style={{
-                        width: '30%',
-                        height: 50,
-                        borderRadius: 10,
-                        backgroundColor: 'white',
-                        justifyContent: 'center',
-                        alignItems: 'center',
-                      }}
-                    >
-                      <ButtonText className="text-black text-sm font-roboto">
-                        Change year
-                      </ButtonText>
-                    </Button>
-                    <Button
-                      style={{
-                        width: '30%',
-                        height: 50,
-                        borderRadius: 10,
-                        backgroundColor: 'white',
-                        justifyContent: 'center',
-                        alignItems: 'center',
-                        marginLeft: 10,
-                      }}
-                    >
-                      <ButtonText className="text-black text-sm font-roboto text-center">
-                        View total income
-                      </ButtonText>
-                    </Button>
+                    {/* tool bar */}
+                    <View className="flex flex-row">
+                      <Button
+                        style={{
+                          width: '30%',
+                          height: 50,
+                          borderRadius: 10,
+                          backgroundColor: 'white',
+                          justifyContent: 'center',
+                          alignItems: 'center',
+                        }}
+                      >
+                        <ButtonText className="text-black text-sm font-roboto">
+                          Change year
+                        </ButtonText>
+                      </Button>
+                      <Button
+                        style={{
+                          width: '30%',
+                          height: 50,
+                          borderRadius: 10,
+                          backgroundColor: 'white',
+                          justifyContent: 'center',
+                          alignItems: 'center',
+                          marginLeft: 10,
+                        }}
+                      >
+                        <ButtonText className="text-black text-sm font-roboto text-center">
+                          View total income
+                        </ButtonText>
+                      </Button>
 
-                    <Button
-                      style={{
-                        width: '30%',
-                        height: 50,
-                        borderRadius: 10,
-                        backgroundColor: 'white',
-                        justifyContent: 'center',
-                        alignItems: 'center',
-                        marginLeft: 10,
-                      }}
-                    >
-                      <ButtonText className="text-black text-sm font-roboto text-center">
-                        ...
-                      </ButtonText>
-                    </Button>
+                      <Button
+                        style={{
+                          width: '30%',
+                          height: 50,
+                          borderRadius: 10,
+                          backgroundColor: 'white',
+                          justifyContent: 'center',
+                          alignItems: 'center',
+                          marginLeft: 10,
+                        }}
+                      >
+                        <ButtonText className="text-black text-sm font-roboto text-center">
+                          ...
+                        </ButtonText>
+                      </Button>
                     </View>
                     {/* display 10 recent cards */}
-                  <ScrollView style={{ height: 300 }}>
-                    <View>
-                      <ReceiptList />
-                    </View>
-                  </ScrollView>
+                    <ScrollView style={{ height: 300 }}>
+                      <View>{/* <ReceiptList /> */}</View>
+                    </ScrollView>
                   </View>
                 </View>
               </View>
