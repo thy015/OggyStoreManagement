@@ -1,10 +1,12 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   Image,
   View,
   Text,
   TouchableOpacity,
   ActivityIndicator,
+  TouchableWithoutFeedback,
+  Animated,
 } from 'react-native';
 import { ThemedView } from '@/components/ThemedView';
 import * as ImagePicker from 'expo-image-picker';
@@ -14,7 +16,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import AntDesign from '@expo/vector-icons/AntDesign';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import { FIREBASE_DB } from '../../config/firebaseConfig.ts';
-import { collection, addDoc } from 'firebase/firestore';
+import { collection, addDoc, getDocs, doc } from 'firebase/firestore';
 
 const Receipt = () => {
   const [image, setImage] = useState<string>('');
@@ -23,16 +25,23 @@ const Receipt = () => {
   const [totalAmount, setTotalAmount] = useState<number>(0);
   const [items, setItems] = useState<string[]>([]);
   const [dateTime, setDateTime] = useState<string>('');
-  const [textImage, setTextImage] = useState<string>(`*List of items*
-Lorem Ipsum: $25
-Lorem Dolor: $15
-Sit Amet: $10
-Consectetur: $20
-Adipiscing Elit: $10
-Sed Diam: $15
-Total Amount: $95
-Date ~ Time: March 22, 2023 ~ 10:45 AM`);
+  const [textImage, setTextImage] = useState<string>(`  *List of items*
+  Lorem Ipsum: $25
+  Lorem Dolor: $15
+  Sit Amet: $10
+  Consectetur: $20
+  Adipiscing Elit: $10
+  Sed Diam: $15
+  Total Amount: $95
+  Date ~ Time: March 22, 2023 ~ 10:45 AM`);
+
   const [isImageFullScreen, setIsImageFullScreen] = useState<Boolean>(false);
+  const [switchCategory, setSwitchCategory] = useState(false);
+  const [switchTextCategory, setSwitchTextCategory] = useState(false);
+  const colorAnim = useRef(new Animated.Value(0)).current;
+  const textColorAnim = useRef(new Animated.Value(0)).current;
+
+  //get data history from firebase
 
   const toggleImageView = () => {
     if (loading == false) {
@@ -40,11 +49,57 @@ Date ~ Time: March 22, 2023 ~ 10:45 AM`);
     }
   };
 
+  useEffect(() => {
+    Animated.timing(colorAnim, {
+      toValue: switchCategory ? 1 : 0,
+      duration: 1000,
+      useNativeDriver: false,
+    }).start();
+
+    Animated.timing(textColorAnim, {
+      toValue: switchCategory ? 1 : 0,
+      duration: 2000,
+      useNativeDriver: false,
+    }).start();
+  }, [switchCategory]);
+
+  const fadeAnim = useRef(new Animated.Value(1)).current;
+  const handlePress = () => {
+    Animated.timing(fadeAnim, {
+      toValue: 0,
+      duration: 900,
+      useNativeDriver: false,
+    }).start(() => {
+      setSwitchTextCategory((prev) => !prev);
+      Animated.timing(fadeAnim, {
+        toValue: 1,
+        duration: 900,
+        useNativeDriver: false,
+      }).start();
+    });
+  };
+
+  const backgroundColor = colorAnim.interpolate({
+    inputRange: [0, 1],
+    outputRange: ['white', '#8d7fdb'],
+  });
+
+  const textColor = textColorAnim.interpolate({
+    inputRange: [0, 1],
+    outputRange: ['red', '#31ef0b'],
+  });
+
+  const textColor2 = textColorAnim.interpolate({
+    inputRange: [0, 1],
+    outputRange: ['#7a6fbb', 'white'],
+  });
+
   const acceptImage = async () => {
     try {
-      const docRef = await addDoc(collection(FIREBASE_DB, 'TextImage'), {
-        text: textImage,
-        image: imageURI,
+      const docRef = await addDoc(collection(FIREBASE_DB, 'History'), {
+        DateTime: dateTime,
+        Monney: totalAmount,
+        Type: 'Spended',
       });
 
       // const docRef2 = await addDoc(collection(FIREBASE_DB, 'InvoiceTotal'), {
@@ -189,7 +244,7 @@ Date ~ Time: March 22, 2023 ~ 10:45 AM`);
     }
   };
 
-  const total_listProduct = (text) => {
+  const total_listProduct = (text: string) => {
     console.log('Text:', typeof text, text);
     if (!text || typeof text !== 'string') {
       console.log('Không có dữ liệu hợp lệ!');
@@ -207,7 +262,10 @@ Date ~ Time: March 22, 2023 ~ 10:45 AM`);
       line = line.trim();
       if (line.startsWith('total amount:')) {
         totalAmount = parseInt(line.replace(/\D/g, ''), 10) || 0;
+        console.log('Total Amount:', totalAmount);
         break;
+      } else {
+        console.log('Không tìm thấy Total Amount!');
       }
     }
 
@@ -215,7 +273,7 @@ Date ~ Time: March 22, 2023 ~ 10:45 AM`);
     text = text.replace(/\*/g, '');
     const match = text.match(/list of items[?:\s]*([\s\S]*?)\s*total amount:/i);
 
-    let items = [];
+    let items: string[] = [];
 
     if (match) {
       const itemLines = match[1]
@@ -248,23 +306,79 @@ Date ~ Time: March 22, 2023 ~ 10:45 AM`);
     if (textImage) {
       const { totalAmount, items } = total_listProduct(textImage);
       setTotalAmount(totalAmount);
-      setItems(items);
+      setItems(Array.isArray(items) ? items : []);
       console.log(totalAmount, items);
     }
   }, [textImage]);
 
   return (
-    <View className="w-full bg-slate-100 h-full relative">
-      <View className="mt-3 px-2">
-        <View className="w-full h-fit px-2 bg-white py-4 mb-3  rounded-lg">
-          <Text className="text-2xl w-full text-center font-bold text-[#a294f9]">
-            INCOME AND EXPENDITURE
+    <ScrollView className="w-full overflow-y-auto bg-slate-100 h-full relative">
+      <View className="relative w-full h-full">
+        <View className="w-full bg-[#907fff8d] h-fit px-2 py-4 mb-3  rounded-b-lg">
+          <Text className="text-5xl font-inriaRegular mt-6 text-white">
+            Welcome back,
           </Text>
-          <View className=" w-full flex-row justify-between">
-            <View className="bg-pink-300 w-1/2 border-r border-b-gray-500">
-              <Text>Total Income</Text>
+          <Text className="text-3xl font-inriaRegular mt-2 text-white">
+            Oggy Financial Management!
+          </Text>
+          <View className=" w-full mt-3">
+            <View className="w-full flex-row justify-center items-center">
+              <TouchableWithoutFeedback
+                className="w-[90%]"
+                onPress={() => {
+                  setSwitchCategory(!switchCategory), handlePress();
+                }}
+              >
+                <Animated.View
+                  style={[
+                    { backgroundColor },
+                    { borderRadius: 10, padding: 20, width: '90%' },
+                  ]}
+                >
+                  <Animated.Text
+                    style={{
+                      color: textColor2,
+                      fontSize: 21,
+                      textAlign: 'center',
+                      fontFamily: 'InriaSerif-Regular',
+                      opacity: fadeAnim,
+                    }}
+                  >
+                    {switchTextCategory ? 'Total Income' : 'Total Spending'}
+                  </Animated.Text>
+                  <Animated.Text
+                    style={{
+                      color: textColor,
+                      fontSize: 21,
+                      textAlign: 'center',
+                      fontFamily: 'InriaSerif-Regular',
+                      opacity: fadeAnim,
+                    }}
+                  >
+                    {switchTextCategory
+                      ? `+${formatVND(320)}`
+                      : `-${formatVND(200)}`}
+                  </Animated.Text>
+                  <Animated.Text
+                    style={{
+                      color: textColor2,
+                      fontSize: 12,
+                      textAlign: 'center',
+                      fontFamily: 'oswaldLight',
+                      opacity: fadeAnim,
+                      marginTop: 3,
+                      width: '100%',
+                    }}
+                  >
+                    Please press to switch to{' '}
+                    {switchTextCategory ? 'Spended' : 'Income'}
+                  </Animated.Text>
+                </Animated.View>
+              </TouchableWithoutFeedback>
             </View>
-            <Text className="bg-red-300 w-1/2">bbb</Text>
+            <View className="flex-row justify-center items-center">
+              <View className="bg-[#907fff8d] p-2 rounded-b-lg w-[80%]"></View>
+            </View>
           </View>
         </View>
         {textImage ? (
@@ -292,7 +406,7 @@ Date ~ Time: March 22, 2023 ~ 10:45 AM`);
                     PAYMENT DATE:{' '}
                   </Text>
                   <Text className="text-lg  font-bold">
-                    {dateTime ? dateTime : 'Không xác định'}
+                    {dateTime ? dateTime : 'underfine'}
                   </Text>
                 </View>
               </View>
@@ -332,7 +446,7 @@ Date ~ Time: March 22, 2023 ~ 10:45 AM`);
         )}
       </View>
       <SafeAreaView className="w-full flex-1 h-full ">
-        <ScrollView className="overflow-y-auto w-full">
+        <ScrollView className="overflow-y-auto bg-pink-200 h-full w-full">
           {image && isImageFullScreen && (
             <TouchableOpacity
               onPress={toggleImageView}
@@ -360,8 +474,8 @@ Date ~ Time: March 22, 2023 ~ 10:45 AM`);
         </ScrollView>
       </SafeAreaView>
       {!isImageFullScreen && (
-        <View className="absolute bottom-1 w-full px-1 h-fit z-0">
-          <View className="bg-[#f3f3f3] z-0 w-full py-4 rounded-xl flex justify-end border border-[#a294f9]">
+        <View className="absolute bottom-1 w-full px-1 h-fit z-50">
+          <View className="bg-[#f3f3f3] static z-0 w-full py-4 rounded-xl flex justify-end border border-[#a294f9]">
             {image && (
               <TouchableOpacity onPress={toggleImageView} className="mb-3">
                 <Image
@@ -441,7 +555,7 @@ Date ~ Time: March 22, 2023 ~ 10:45 AM`);
           </View>
         </View>
       )}
-    </View>
+    </ScrollView>
   );
 };
 

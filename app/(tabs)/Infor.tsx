@@ -1,5 +1,5 @@
-import { View, Image } from 'react-native';
-import React, { useState } from 'react';
+import { View, Image, Animated, TouchableWithoutFeedback } from 'react-native';
+import React, { useState, useEffect } from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { onAuthStateChanged } from 'firebase/auth';
 import { FIREBASE_AUTH } from '@/config/firebaseConfig.ts';
@@ -12,7 +12,7 @@ import { ThemedText } from '@/components/ThemedText';
 import userFakeData from '@/app/localData/fakedata.tsx';
 const Infor = () => {
   const db = FIREBASE_DB;
-  const [data, setData] = React.useState([]);
+  const [data, setData] = React.useState<string[]>([]);
   const auth = FIREBASE_AUTH;
   const [email, setEmail] = useState<string>('');
   const { Avatar } = userFakeData;
@@ -79,7 +79,7 @@ const Infor = () => {
     }
   };
 
-  const total_listProduct = (text) => {
+  const total_listProduct = (text: string) => {
     console.log('Text:', typeof text, text);
     if (!text || typeof text !== 'string') {
       console.log('Không có dữ liệu hợp lệ!');
@@ -107,7 +107,7 @@ const Infor = () => {
     const match = text.match(
       /\*\*list of items:\*\*\s*([\s\S]*?)\s*\*\*total amount:\*\*/
     );
-    let items = [];
+    let items: string[] = [];
 
     if (match) {
       const itemLines = match[1].trim().split('\n');

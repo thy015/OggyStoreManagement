@@ -13,9 +13,6 @@
     "format": "prettier --write .",
     "build": "expo build"
   },
-  "jest": {
-    "preset": "jest-expo"
-  },
   "dependencies": {
     "@expo/vector-icons": "^14.0.2",
     "@fortawesome/fontawesome-free": "^6.7.1",
@@ -56,6 +53,7 @@
     "react-native-gesture-handler": "~2.20.2",
     "react-native-gifted-charts": "1.4.56",
     "react-native-image-picker": "^7.2.3",
+    "react-native-linear-gradient": "2.8.3",
     "react-native-permissions": "^5.2.1",
     "react-native-reanimated": "~3.16.1",
     "react-native-safe-area-context": "^4.12.0",

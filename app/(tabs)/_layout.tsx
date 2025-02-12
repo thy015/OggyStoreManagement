@@ -4,7 +4,9 @@ import { Image, Text, View } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import React from 'react';
 import { Receipt } from 'lucide-react-native';
+import AntDesign from '@expo/vector-icons/AntDesign';
 import CustomHeader from '@/components/header';
+import Octicons from '@expo/vector-icons/Octicons';
 
 // Định nghĩa type cho TabIcon props
 type TabIconProps = {
@@ -100,22 +102,6 @@ const TabLayout: React.FC = () => {
           />
 
           <Tabs.Screen
-            name="Receipt"
-            options={{
-              title: 'Receipt',
-              header: () => <CustomHeader />,
-              tabBarIcon: ({ color, focused }) => (
-                <TabIcon
-                  icon={<Receipt size={24} color={color} />}
-                  color={color}
-                  name="Receipt"
-                  focused={focused}
-                />
-              ),
-            }}
-          />
-
-          <Tabs.Screen
             name="History"
             options={{
               title: 'History',
@@ -125,6 +111,38 @@ const TabLayout: React.FC = () => {
                   icon={require('@/assets/icons/clock.png')}
                   color={color}
                   name="History"
+                  focused={focused}
+                />
+              ),
+            }}
+          />
+
+          <Tabs.Screen
+            name="Receipt"
+            options={{
+              title: 'Receipt',
+              header: () => <CustomHeader />,
+              tabBarIcon: ({ color, focused }) => (
+                <TabIcon
+                  icon={<AntDesign name="qrcode" size={24} color={color} />}
+                  color={color}
+                  name="Receipt"
+                  focused={focused}
+                />
+              ),
+            }}
+          />
+
+          <Tabs.Screen
+            name="Notification"
+            options={{
+              title: 'Notification',
+              header: () => <CustomHeader />,
+              tabBarIcon: ({ color, focused }) => (
+                <TabIcon
+                  icon={<Octicons name="bell" size={24} color={color} />}
+                  color={color}
+                  name="Notification"
                   focused={focused}
                 />
               ),
