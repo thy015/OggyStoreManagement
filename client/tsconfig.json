@@ -13,8 +13,11 @@
       "tailwind.config": [
         "./tailwind.config.js"
       ]
-    }
+    },
+    "noImplicitAny": false,
+    "skipLibCheck": true,
   },
+  
   "include": [
     "**/*.ts",
     "**/*.tsx",
@@ -26,6 +29,6 @@
     "app/(tabs)/Home.tsx",
     "app/(tabs)/Infor.tsx",
     "config/firebaseConfig.ts",
-    "app/+loading.tsx"
-  ]
+    "app/+loading.tsx",
+ ]
 }
