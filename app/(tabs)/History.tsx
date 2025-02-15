@@ -345,12 +345,6 @@ const History = () => {
     <View className="w-full bg-slate-100 h-screen relative">
       <View className="relative w-full h-fit">
         <View className="w-full bg-[#907fff8d] h-fit px-2 py-4  rounded-b-lg">
-          <Text className="text-5xl font-inriaRegular mt-6 text-white">
-            Welcome back,
-          </Text>
-          <Text className="text-3xl font-inriaRegular mt-2 text-white">
-            Oggy Financial Management!
-          </Text>
           <View className=" w-full mt-3">
             <View className="w-full flex-row justify-center items-center">
               <TouchableWithoutFeedback
@@ -410,6 +404,11 @@ const History = () => {
               <View className="bg-[#907fff8d] p-2 rounded-b-lg w-[80%]"></View>
             </View>
           </View>
+        </View>
+      </View>
+      <View className="w-full flex-row justify-center items-center">
+        <View className="p-3 mt-3 w-[98%] border border-gray-300 rounded-lg  bg-white flex-row justify-between">
+          <Text className="w-[90%] text-gray-300">search</Text>
         </View>
       </View>
       <ScrollView className="h-full  overflow-y-auto">

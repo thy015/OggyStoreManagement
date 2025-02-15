@@ -20,7 +20,6 @@ import { collection, addDoc } from 'firebase/firestore';
 import { BarChart } from 'react-native-gifted-charts';
 import { Button, ButtonText } from '@/components/ui/button/index.tsx';
 import ReceiptList from '@/components/receiptCard.tsx';
-import { router } from 'expo-router';
 
 const Home: React.FC = () => {
   const [image, setImage] = useState<string>('');
@@ -300,11 +299,10 @@ const Home: React.FC = () => {
                       </Button>
                     </View>
                     {/* display 10 recent cards */}
-                    <ScrollView style={{ height: 300 }}>
-                      <View>
-                        <ReceiptList />
-                      </View>
-                    </ScrollView>
+
+                    <View>
+                      <ReceiptList />
+                    </View>
                   </View>
                 </View>
               </View>
@@ -315,6 +313,79 @@ const Home: React.FC = () => {
               </View>
             )}
           </SafeAreaView>
+          {!isImageFullScreen && (
+            // display toolbar
+            <View className="absolute bottom-1 left-56 w-full px-12 h-fit z-0">
+              <View className="px-3 z-10 w-[50%] py-4 rounded-xl flex bg-white ">
+                {image && (
+                  <TouchableOpacity onPress={toggleImageView} className="mb-3">
+                    <Image
+                      source={{ uri: image }}
+                      style={{
+                        width: '100%',
+                        height: 200,
+                        resizeMode: 'contain',
+                        marginBottom: 10,
+                      }}
+                    />
+                  </TouchableOpacity>
+                )}
+                <View className="flex-row w-full items-center ">
+                  <TouchableOpacity
+                    onPress={takePhoto}
+                    activeOpacity={0.7}
+                    className="ml-3"
+                  >
+                    <FontAwesome name="camera" size={25} />
+                  </TouchableOpacity>
+
+                  <TouchableOpacity
+                    onPress={pickImage}
+                    activeOpacity={0.7}
+                    className="ml-auto"
+                  >
+                    <AntDesign name="pluscircleo" size={25} />
+                  </TouchableOpacity>
+
+                  {image && (
+                    <TouchableOpacity
+                      onPress={() => setImage('')}
+                      activeOpacity={0.7}
+                      className="ml-auto mr-5"
+                    >
+                      <FontAwesome name="close" size={30} />
+                    </TouchableOpacity>
+                  )}
+                  {textImage && (
+                    <TouchableOpacity
+                      onPress={() => setTextImage('')}
+                      activeOpacity={0.7}
+                      className="ml-auto mr-5"
+                    >
+                      <FontAwesome name="close" size={30} />
+                    </TouchableOpacity>
+                  )}
+                  {textImage ? (
+                    <TouchableOpacity
+                      onPress={acceptImage}
+                      activeOpacity={0.7}
+                      className="ml-auto mr-6"
+                    >
+                      <AntDesign name="check" size={32} />
+                    </TouchableOpacity>
+                  ) : (
+                    <TouchableOpacity
+                      onPress={sendImage}
+                      activeOpacity={0.7}
+                      className="ml-auto mr-6"
+                    >
+                      <FontAwesome name="send" size={25} />
+                    </TouchableOpacity>
+                  )}
+                </View>
+              </View>
+            </View>
+          )}
         </View>
       </PanGestureHandler>
     </GestureHandlerRootView>

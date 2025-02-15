@@ -144,6 +144,116 @@ const Infor = () => {
           containerStyles="w-full mt-7 px-4"
         />
       </View>
+      <SafeAreaView className="w-full flex-1 h-full ">
+        <ScrollView className="overflow-y-auto bg-pink-200 h-full w-full">
+          {image && isImageFullScreen && (
+            <TouchableOpacity
+              onPress={toggleImageView}
+              activeOpacity={0.7}
+              className="ml-4 top-10 z-20"
+            >
+              <FontAwesome name="close" size={30} color="#a294f9" />
+            </TouchableOpacity>
+          )}
+          {isImageFullScreen && (
+            <View className="w-full h-[60vh] ">
+              <TouchableOpacity onPress={toggleImageView} className="mb-3">
+                <Image
+                  source={{ uri: image }}
+                  style={{
+                    width: '100%',
+                    height: '100%',
+                    resizeMode: 'contain',
+                    marginBottom: 10,
+                  }}
+                />
+              </TouchableOpacity>
+            </View>
+          )}
+        </ScrollView>
+      </SafeAreaView>
+      {!isImageFullScreen && (
+        <View className="absolute bottom-1 w-full px-1 h-fit z-50">
+          <View className="bg-[#f3f3f3] static z-0 w-full py-4 rounded-xl flex justify-end border border-[#a294f9]">
+            {image && (
+              <TouchableOpacity onPress={toggleImageView} className="mb-3">
+                <Image
+                  source={{ uri: image }}
+                  style={{
+                    width: '100%',
+                    height: 200,
+                    resizeMode: 'contain',
+                    marginBottom: 10,
+                  }}
+                />
+              </TouchableOpacity>
+            )}
+            <View className="flex-row w-full items-center">
+              <TouchableOpacity
+                onPress={takePhoto}
+                activeOpacity={0.7}
+                className="ml-3"
+              >
+                <FontAwesome name="camera" size={30} color="#a294f9" />
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                onPress={pickImage}
+                activeOpacity={0.7}
+                className="ml-auto"
+              >
+                <AntDesign name="pluscircleo" size={35} color="#a294f9" />
+              </TouchableOpacity>
+
+              {image && (
+                <TouchableOpacity
+                  onPress={() => setImage('')}
+                  activeOpacity={0.7}
+                  disabled={loading}
+                  className="ml-auto mr-5"
+                >
+                  <FontAwesome name="close" size={38} color="#a294f9" />
+                </TouchableOpacity>
+              )}
+              {textImage && (
+                <TouchableOpacity
+                  onPress={() => setTextImage('')}
+                  activeOpacity={0.7}
+                  className="ml-auto mr-5"
+                >
+                  <FontAwesome name="close" size={35} color="#a294f9" />
+                </TouchableOpacity>
+              )}
+              {textImage ? (
+                <TouchableOpacity
+                  onPress={acceptImage}
+                  activeOpacity={0.7}
+                  className="ml-auto mr-6"
+                >
+                  <AntDesign name="check" size={32} color="#a294f9" />
+                </TouchableOpacity>
+              ) : (
+                <TouchableOpacity
+                  onPress={async () => {
+                    if (!loading) {
+                      await sendImage();
+                    }
+                  }}
+                  activeOpacity={0.7}
+                  disabled={loading}
+                  className="ml-auto mr-6 opacity-80"
+                >
+                  <FontAwesome
+                    name="send"
+                    size={30}
+                    color={loading ? '#ccc' : '#a294f9'}
+                  />
+                </TouchableOpacity>
+              )}
+            </View>
+          </View>
+        </View>
+      )}
     </SafeAreaView>
   );
 };

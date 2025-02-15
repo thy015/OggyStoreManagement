@@ -25,16 +25,16 @@ const Receipt = () => {
   const [totalAmount, setTotalAmount] = useState<number>(0);
   const [items, setItems] = useState<string[]>([]);
   const [dateTime, setDateTime] = useState<string>('');
-  const [textImage, setTextImage] = useState<string>(`  *List of items*
-  Lorem Ipsum: $25
-  Lorem Dolor: $15
-  Sit Amet: $10
-  Consectetur: $20
-  Adipiscing Elit: $10
-  Sed Diam: $15
-  Total Amount: $95
-  Date ~ Time: March 22, 2023 ~ 10:45 AM`);
-
+  const [textImage, setTextImage] = useState<string>(``);
+  // *List of items*
+  // Lorem Ipsum: $25
+  // Lorem Dolor: $15
+  // Sit Amet: $10
+  // Consectetur: $20
+  // Adipiscing Elit: $10
+  // Sed Diam: $15
+  // Total Amount: $95
+  // Date ~ Time: March 22, 2023 ~ 10:45 AM
   const [isImageFullScreen, setIsImageFullScreen] = useState<Boolean>(false);
   const [switchCategory, setSwitchCategory] = useState(false);
   const [switchTextCategory, setSwitchTextCategory] = useState(false);
@@ -241,6 +241,7 @@ const Receipt = () => {
 
     if (!result.canceled) {
       setImage(result.assets[0].uri);
+      console.log('Image:', result.assets[0].uri);
     }
   };
 
@@ -312,249 +313,139 @@ const Receipt = () => {
   }, [textImage]);
 
   return (
-    <ScrollView className="w-full overflow-y-auto bg-slate-100 h-full relative">
-      <View className="relative w-full h-full">
-        <View className="w-full bg-[#907fff8d] h-fit px-2 py-4 mb-3  rounded-b-lg">
-          <Text className="text-5xl font-inriaRegular mt-6 text-white">
-            Welcome back,
-          </Text>
-          <Text className="text-3xl font-inriaRegular mt-2 text-white">
-            Oggy Financial Management!
-          </Text>
-          <View className=" w-full mt-3">
-            <View className="w-full flex-row justify-center items-center">
-              <TouchableWithoutFeedback
-                className="w-[90%]"
-                onPress={() => {
-                  setSwitchCategory(!switchCategory), handlePress();
-                }}
+    <ScrollView className="w-full overflow-y-auto bg-slate-100 h-full ">
+      <View className="w-full bg-[#907fff8d] h-fit px-2 py-4 mb-3  rounded-b-lg">
+        <Text className="text-5xl font-inriaRegular mt-6 text-white">
+          Welcome back,
+        </Text>
+        <Text className="text-3xl font-inriaRegular mt-2 text-white">
+          Oggy Financial Management!
+        </Text>
+        <View className=" w-full mt-3">
+          <View className="w-full flex-row justify-center items-center">
+            <TouchableWithoutFeedback
+              className="w-[90%]"
+              onPress={() => {
+                setSwitchCategory(!switchCategory), handlePress();
+              }}
+            >
+              <Animated.View
+                style={[
+                  { backgroundColor },
+                  { borderRadius: 10, padding: 20, width: '90%' },
+                ]}
               >
-                <Animated.View
-                  style={[
-                    { backgroundColor },
-                    { borderRadius: 10, padding: 20, width: '90%' },
-                  ]}
+                <Animated.Text
+                  style={{
+                    color: textColor2,
+                    fontSize: 21,
+                    textAlign: 'center',
+                    fontFamily: 'InriaSerif-Regular',
+                    opacity: fadeAnim,
+                  }}
                 >
-                  <Animated.Text
-                    style={{
-                      color: textColor2,
-                      fontSize: 21,
-                      textAlign: 'center',
-                      fontFamily: 'InriaSerif-Regular',
-                      opacity: fadeAnim,
-                    }}
-                  >
-                    {switchTextCategory ? 'Total Income' : 'Total Spending'}
-                  </Animated.Text>
-                  <Animated.Text
-                    style={{
-                      color: textColor,
-                      fontSize: 21,
-                      textAlign: 'center',
-                      fontFamily: 'InriaSerif-Regular',
-                      opacity: fadeAnim,
-                    }}
-                  >
-                    {switchTextCategory
-                      ? `+${formatVND(320)}`
-                      : `-${formatVND(200)}`}
-                  </Animated.Text>
-                  <Animated.Text
-                    style={{
-                      color: textColor2,
-                      fontSize: 12,
-                      textAlign: 'center',
-                      fontFamily: 'oswaldLight',
-                      opacity: fadeAnim,
-                      marginTop: 3,
-                      width: '100%',
-                    }}
-                  >
-                    Please press to switch to{' '}
-                    {switchTextCategory ? 'Spended' : 'Income'}
-                  </Animated.Text>
-                </Animated.View>
-              </TouchableWithoutFeedback>
-            </View>
-            <View className="flex-row justify-center items-center">
-              <View className="bg-[#907fff8d] p-2 rounded-b-lg w-[80%]"></View>
-            </View>
+                  {switchTextCategory ? 'Total Income' : 'Total Spending'}
+                </Animated.Text>
+                <Animated.Text
+                  style={{
+                    color: textColor,
+                    fontSize: 21,
+                    textAlign: 'center',
+                    fontFamily: 'InriaSerif-Regular',
+                    opacity: fadeAnim,
+                  }}
+                >
+                  {switchTextCategory
+                    ? `+${formatVND(320)}`
+                    : `-${formatVND(200)}`}
+                </Animated.Text>
+                <Animated.Text
+                  style={{
+                    color: textColor2,
+                    fontSize: 12,
+                    textAlign: 'center',
+                    fontFamily: 'oswaldLight',
+                    opacity: fadeAnim,
+                    marginTop: 3,
+                    width: '100%',
+                  }}
+                >
+                  Please press to switch to{' '}
+                  {switchTextCategory ? 'Spended' : 'Income'}
+                </Animated.Text>
+              </Animated.View>
+            </TouchableWithoutFeedback>
+          </View>
+          <View className="flex-row justify-center items-center">
+            <View className="bg-[#907fff8d] p-2 rounded-b-lg w-[80%]"></View>
           </View>
         </View>
-        {textImage ? (
-          <View>
-            <View className="w-full h-fit px-2 bg-white py-4 rounded-lg ">
-              <View className=" border-b border-b-gray-500 ">
-                <Text className="text-2xl text-green-600">
-                  * TOTAL INVOICE AMOUNT:
-                </Text>
-                <Text className="m-2 text-3xl text-red-500 ml-6">
-                  {formatVND(totalAmount)}
-                </Text>
-              </View>
-              <View className="mt-2">
-                <View className="flex-row w-full justify-between">
-                  <Text className="text-lg text-gray-500 font-bold">
-                    TOTAL AMOUNT:{' '}
-                  </Text>
-                  <Text className="text-lg  font-bold">
-                    {formatVND(totalAmount)}
-                  </Text>
-                </View>
-                <View className="flex-row w-full justify-between">
-                  <Text className="text-lg text-gray-500 font-bold">
-                    PAYMENT DATE:{' '}
-                  </Text>
-                  <Text className="text-lg  font-bold">
-                    {dateTime ? dateTime : 'underfine'}
-                  </Text>
-                </View>
-              </View>
-            </View>
-            <View className="w-full h-fit px-2 bg-white py-4 rounded-lg mt-2">
-              <Text className="text-2xl text-green-600">* PRODUCT LIST:</Text>
-              <View className="mt-2">
-                {items.map((item, index) => (
-                  <View key={index} className="flex-row w-full ">
-                    <Text className="text-2xl mr-3 ml-4">{index + 1}</Text>
-                    <Text className="text-2xl">{item}</Text>
-                  </View>
-                ))}
-              </View>
-            </View>
-          </View>
-        ) : (
-          <View className={`flex items-center relative w-full h-[100vh] mt-44`}>
-            <Text
-              className="text-6xl font-inriaRegular mt-6 text-purpleDark"
-              style={{ display: loading ? 'none' : 'flex' }}
-            >
-              Oggy
-            </Text>
-            <Text
-              className="text-3xl font-inriaRegular mt-2 text-purpleDark"
-              style={{ display: loading ? 'none' : 'flex' }}
-            >
-              Financial Mangement
-            </Text>
-            {loading && (
-              <View className="w-full h-screen mt-20 items-center absolute  flex-1">
-                <ActivityIndicator size="large" color="#8477d8" />
-              </View>
-            )}
-          </View>
-        )}
       </View>
-      <SafeAreaView className="w-full flex-1 h-full ">
-        <ScrollView className="overflow-y-auto bg-pink-200 h-full w-full">
-          {image && isImageFullScreen && (
+      <View className="w-full h-full">
+        <View>
+          {' '}
+          {textImage ? (
+            <View></View>
+          ) : (
+            <View className={`flex items-center w-full h-full justify-center`}>
+              <Text
+                className="text-6xl font-inriaRegular mt-6 text-purpleDark"
+                style={{ display: loading ? 'none' : 'flex' }}
+              >
+                Oggy
+              </Text>
+              <Text
+                className="text-3xl font-inriaRegular mt-2 text-purpleDark"
+                style={{ display: loading ? 'none' : 'flex' }}
+              >
+                Financial Mangement
+              </Text>
+              {loading && (
+                <View className="w-full h-screen mt-20 items-center absolute  flex-1">
+                  <ActivityIndicator size="large" color="#8477d8" />
+                </View>
+              )}
+            </View>
+          )}
+        </View>
+        <View
+          className={`w-fit absolute bottom-1 flex-row justify-between items-center right-1 rounded-l-lg p-4 bg-red-200 h-fit z-50`}
+        >
+          <Animated.Text
+            style={{
+              fontSize: 16,
+              color: '#a294f9',
+              fontWeight: 'bold',
+              opacity: fadeAnim,
+            }}
+          >
+            {'<'}
+          </Animated.Text>
+          <View className="flex-row w-fit items-center">
             <TouchableOpacity
-              onPress={toggleImageView}
+              onPress={takePhoto}
               activeOpacity={0.7}
-              className="ml-4 top-10 z-20"
+              className="mx-3"
             >
-              <FontAwesome name="close" size={30} color="#a294f9" />
+              <FontAwesome name="camera" size={30} color="#a294f9" />
             </TouchableOpacity>
-          )}
-          {isImageFullScreen && (
-            <View className="w-full h-[60vh] ">
-              <TouchableOpacity onPress={toggleImageView} className="mb-3">
-                <Image
-                  source={{ uri: image }}
-                  style={{
-                    width: '100%',
-                    height: '100%',
-                    resizeMode: 'contain',
-                    marginBottom: 10,
-                  }}
-                />
-              </TouchableOpacity>
-            </View>
-          )}
-        </ScrollView>
-      </SafeAreaView>
-      {!isImageFullScreen && (
-        <View className="absolute bottom-1 w-full px-1 h-fit z-50">
-          <View className="bg-[#f3f3f3] static z-0 w-full py-4 rounded-xl flex justify-end border border-[#a294f9]">
-            {image && (
-              <TouchableOpacity onPress={toggleImageView} className="mb-3">
-                <Image
-                  source={{ uri: image }}
-                  style={{
-                    width: '100%',
-                    height: 200,
-                    resizeMode: 'contain',
-                    marginBottom: 10,
-                  }}
-                />
-              </TouchableOpacity>
-            )}
-            <View className="flex-row w-full items-center">
-              <TouchableOpacity
-                onPress={takePhoto}
-                activeOpacity={0.7}
-                className="ml-3"
-              >
-                <FontAwesome name="camera" size={30} color="#a294f9" />
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                onPress={pickImage}
-                activeOpacity={0.7}
-                className="ml-auto"
-              >
-                <AntDesign name="pluscircleo" size={35} color="#a294f9" />
-              </TouchableOpacity>
-
-              {image && (
-                <TouchableOpacity
-                  onPress={() => setImage('')}
-                  activeOpacity={0.7}
-                  disabled={loading}
-                  className="ml-auto mr-5"
-                >
-                  <FontAwesome name="close" size={38} color="#a294f9" />
-                </TouchableOpacity>
-              )}
-              {textImage && (
-                <TouchableOpacity
-                  onPress={() => setTextImage('')}
-                  activeOpacity={0.7}
-                  className="ml-auto mr-5"
-                >
-                  <FontAwesome name="close" size={35} color="#a294f9" />
-                </TouchableOpacity>
-              )}
-              {textImage ? (
-                <TouchableOpacity
-                  onPress={acceptImage}
-                  activeOpacity={0.7}
-                  className="ml-auto mr-6"
-                >
-                  <AntDesign name="check" size={32} color="#a294f9" />
-                </TouchableOpacity>
-              ) : (
-                <TouchableOpacity
-                  onPress={async () => {
-                    if (!loading) {
-                      await sendImage();
-                    }
-                  }}
-                  activeOpacity={0.7}
-                  disabled={loading}
-                  className="ml-auto mr-6 opacity-80"
-                >
-                  <FontAwesome
-                    name="send"
-                    size={30}
-                    color={loading ? '#ccc' : '#a294f9'}
-                  />
-                </TouchableOpacity>
-              )}
-            </View>
+            <TouchableOpacity
+              onPress={pickImage}
+              activeOpacity={0.7}
+              className={`mx-3`}
+            >
+              <AntDesign name="pluscircleo" size={35} color="#a294f9" />
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={pickImage}
+              activeOpacity={0.7}
+              className={`mx-3`}
+            >
+              <AntDesign name="pluscircleo" size={35} color="#a294f9" />
+            </TouchableOpacity>
           </View>
         </View>
-      )}
+      </View>
     </ScrollView>
   );
 };
