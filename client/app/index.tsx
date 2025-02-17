@@ -16,7 +16,7 @@ const Index = () => {
         if (user) {
           router.push('/(tabs)/Home');
         } else {
-          router.push('/api/(authens)/sign-in');
+          router.push('/(authens)/sign-in');
         }
       }, 2000);
     });
