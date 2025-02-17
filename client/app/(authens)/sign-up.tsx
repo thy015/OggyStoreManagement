@@ -38,7 +38,7 @@ const SignUp = () => {
       const user = userCredential.user;
 
       Alert.alert('sign-up success');
-      router.replace(`/api/(authens)/sign-in?email=${formField.Email}&password=${formField.Password}`);
+      router.replace(`./(authens)/sign-in?email=${formField.Email}&password=${formField.Password}`);
     } catch (e) {
       const error = e as Error;
       console.error('Error during signup:', error.message || e);
@@ -135,7 +135,7 @@ const SignUp = () => {
               </Button>
 
               <Link
-                href="/api/(authens)/sign-up"
+                href="./(authens)/sign-up"
                 className="text-[#8a8a91] text-md mt-6 font-semibold"
               >
                 {' '}
@@ -148,7 +148,7 @@ const SignUp = () => {
                 Already have an account?
               </Text>
               <Link
-                href="/api/(authens)/sign-in"
+                href="./(authens)/sign-in"
                 className="text-[#a294f9] text-md font-semibold underline"
               >
                 {' '}
