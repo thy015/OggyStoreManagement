@@ -22,21 +22,13 @@ import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { white } from 'tailwindcss/colors';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { AI_KEY, GOOGLE_VISION_API_KEY } from '@env';
-const genAI = new GoogleGenerativeAI(AI_KEY);
+const genAI = new GoogleGenerativeAI('AIzaSyAd3xy-Zqiv7WNAzonVYddvvqXP56GA0Zg');
 
 const Receipt = () => {
   const [image, setImage] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(false);
   const [textImage, setTextImage] = useState<string>(``);
-  // *List of items*
-  // Lorem Ipsum: $25
-  // Lorem Dolor: $15
-  // Sit Amet: $10
-  // Consectetur: $20
-  // Adipiscing Elit: $10
-  // Sed Diam: $15
-  // Total Amount: $95
-  // Date ~ Time: March 22, 2023 ~ 10:45 AM
+  const [data, setData] = useState<any>({});
 
   const [isImageFullScreen, setIsImageFullScreen] = useState<Boolean>(false);
   const [switchCategory, setSwitchCategory] = useState(false);
@@ -51,10 +43,12 @@ const Receipt = () => {
       const imagebase64 = await convertImageToBase64(image);
       const prompt = `
         Chuyển đổi đoạn văn bản sau thành định dạng JSON của hóa đơn thanh toán.
-         ${text} Đảm bảo JSON chỉ bao gồm các trường:  'items' (mỗi item có 'productName', 'quantity', 'price'), 'totalAmount', "Date.
+        ghi là 'json {....}'
+         ${text} Đảm bảo JSON chỉ bao gồm các trường:  'items' (mỗi item có 'productName', 'quantity', 'price'), 'totalAmount', 'Date','category'.
         nếu price là giá tiền nước khác thì chuyển thành định dạng số tiền price thành VND.
-        Đảm bảo định dạng hợp lệ. nếu không hợp lệ thì sẽ tạo mã JSON "note" thông báo rằng cái gì không hợp lệ theo mã json.
-        Đảm bảo có phân loại "category" thể loại giao dịch ví dụ như ( đồ ăn , vui chơi , mua sắm, sinh hoạt ,...) 
+        1Baht(B) =757,76VND
+        Đảm bảo có phân loại "category" thể loại giao dịch ví dụ như ( đồ ăn , vui chơi , mua sắm, sinh hoạt ,...)
+        Bạn chỉ cần viết ra mỗi json không cần giải thích thêm.
       `;
 
       const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
@@ -67,6 +61,13 @@ const Receipt = () => {
       setGeneratedText(result || '');
       setTextImage(result || '');
       console.log('Generated text:', result);
+      const Json = 'text:' + result;
+      const cleanedResult = Json.replace(/text:\s*```json|```/g, '').trim();
+
+      // Chuyển đổi thành object
+      const json = JSON.parse(cleanedResult);
+      console.log('Json:', json);
+      setData(json);
     } catch (error) {
       console.error('Error generating text:', error);
       setGeneratedText('Lỗi khi gọi API!');
@@ -130,13 +131,11 @@ const Receipt = () => {
   const SaveReceipt = async () => {
     try {
       const docRef = await addDoc(collection(FIREBASE_DB, 'History'), {
-        Receipt: textImage,
+        date: data.Date,
+        category: data.category,
+        totalAmount: data.totalAmount,
+        items: data.items,
       });
-
-      // const docRef2 = await addDoc(collection(FIREBASE_DB, 'InvoiceTotal'), {
-      //   total: total_listProduct(textImage).totalAmount,
-      //   listProduct: total_listProduct(textImage).items,
-      // });
       console.log('Send data to firebase success', docRef.id);
       setImage('');
       setTextImage('');
@@ -145,95 +144,12 @@ const Receipt = () => {
     }
   };
 
-  // const sendImage = async () => {
-  //   if (!image) {
-  //     alert('Please select an image');
-  //     return;
-  //   }
-
-  //   console.log('Uploading image');
-
-  //   setLoading(true);
-
-  //   const formData = new FormData();
-
-  //   if (image) {
-  //     formData.append('file', {
-  //       uri: image,
-  //       name: 'uploaded_image.jpg',
-  //       type: 'image/jpeg',
-  //     } as any);
-  //   }
-
-  //   try {
-  //     const response = await fetch(`http://172.20.10.8:5000/upload`, {
-  //       method: 'POST',
-  //       body: formData,
-  //       headers: {
-  //         'Content-Type': 'multipart/form-data',
-  //       },
-  //     });
-
-  //     const data = await response.json();
-  //     if (response.ok) {
-  //       setImageURI(data.url);
-  //       console.log('Uploaded image URL:', data.url);
-  //     } else {
-  //       console.error('Error uploading image:', data);
-  //     }
-  //   } catch (error) {
-  //     setLoading(false);
-  //     console.error('Error:', error);
-  //   }
-  // };
-
   const formatVND = (amount: number): string => {
     return new Intl.NumberFormat('vi-VN', {
       style: 'currency',
-      currency: 'USD',
+      currency: 'VND',
     }).format(amount);
   };
-
-  // useEffect(() => {
-  //   if (imageURI) {
-  //     (async () => {
-  //       try {
-  //         await processingChange();
-  //       } catch (error) {
-  //         console.error('Error in processingChange:', error);
-  //       }
-  //     })();
-  //   }
-  // }, [imageURI]);
-
-  // const processingChange = async () => {
-  //   console.log('Processing image:', imageURI);
-  //   if (imageURI) {
-  //     try {
-  //       const response = await fetch('http://172.20.10.8:5000/image', {
-  //         method: 'POST',
-  //         headers: {
-  //           'Content-Type': 'application/json',
-  //           Accept: 'application/json',
-  //         },
-  //         body: JSON.stringify({ image_path: imageURI }),
-  //         mode: 'cors',
-  //       });
-
-  //       const data = await response.json();
-
-  //       if (response.ok) {
-  //         setTextImage(data);
-  //         setImage('');
-  //         setLoading(false);
-  //       }
-  //       console.log('Fetch success: send image to text', data);
-  //     } catch (error) {
-  //       setLoading(false);
-  //       console.log('Fetch error: send image to text fail', error);
-  //     }
-  //   }
-  // };
 
   const pickImage = async () => {
     setTextImage('');
@@ -251,6 +167,7 @@ const Receipt = () => {
 
     if (!result.canceled) {
       setImage(result.assets[0].uri);
+      console.log('Image:', result.assets[0].uri);
     }
   };
 
@@ -321,73 +238,6 @@ const Receipt = () => {
     }
   };
 
-  // const total_listProduct = (text: string) => {
-  //   console.log('Text:', typeof text, text);
-  //   if (!text || typeof text !== 'string') {
-  //     console.log('Không có dữ liệu hợp lệ!');
-  //     return { totalAmount: 0, items: '' };
-  //   }
-
-  //   text = text.toLowerCase();
-  //   text = text.replace(/\*/g, '');
-
-  //   console.log('\n Text of lower:', text);
-  //   let totalAmount = 0;
-  //   const lines = text.split('\n');
-
-  //   for (let line of lines) {
-  //     line = line.trim();
-  //     if (line.startsWith('total amount:')) {
-  //       totalAmount = parseInt(line.replace(/\D/g, ''), 10) || 0;
-  //       console.log('Total Amount:', totalAmount);
-  //       break;
-  //     } else {
-  //       console.log('Không tìm thấy Total Amount!');
-  //     }
-  //   }
-
-  //   text = text.toLowerCase();
-  //   text = text.replace(/\*/g, '');
-  //   const match = text.match(/list of items[?:\s]*([\s\S]*?)\s*total amount:/i);
-
-  //   let items: string[] = [];
-
-  //   if (match) {
-  //     const itemLines = match[1]
-  //       .trim()
-  //       .split('\n')
-  //       .filter((line) => line.trim() !== '');
-  //     items = itemLines.map((item) => item.replace(/^\d+\.\s*/, '').trim());
-  //     console.log(items);
-  //   } else {
-  //     console.log('Không tìm thấy danh sách mục!');
-  //   }
-
-  //   const match2 = text.match(
-  //     /date\s*~\s*time:\s*([a-zA-Z]+\s+\d{1,2},\s*\d{4})\s*~\s*([\d:]+\s*(?:am|pm)?)/i
-  //   );
-
-  //   if (match2) {
-  //     const date = match2[1];
-  //     const time = match2[2];
-  //     setDateTime(`${date}~${time}`);
-  //     console.log('Date:', date, 'Time:', time);
-  //   } else {
-  //     console.log('Không tìm thấy Date hoặc Time!');
-  //   }
-
-  //   return { totalAmount, items };
-  // };
-
-  // useEffect(() => {
-  //   if (textImage) {
-  //     const { totalAmount, items } = total_listProduct(textImage);
-  //     setTotalAmount(totalAmount);
-  //     setItems(Array.isArray(items) ? items : []);
-  //     console.log(totalAmount, items);
-  //   }
-  // }, [textImage]);
-
   return (
     <View className="w-full h-full">
       <ScrollView
@@ -411,7 +261,7 @@ const Receipt = () => {
                       setSwitchCategory(!switchCategory);
                       handlePress();
                     }}
-                    accessible={false} // 🛠 Fix chặn sự kiện bấm
+                    accessible={false}
                   >
                     <Animated.View
                       style={[
@@ -498,8 +348,52 @@ const Receipt = () => {
             </View>
             {textImage && (
               <ScrollView className="absolute w-full h-3/4 bg-white bottom-0 rounded-t-lg p-4 z-50">
-                <Text className="text-xl">{textImage}</Text>
-                <View className="flex-row items-center w-full  justify-between h-fit ">
+                <View className="border-b p-2  border-gray-300">
+                  <Text className="text-lg text-[#8477d8] font-inriaRegular">
+                    Category
+                  </Text>
+                  <Text className="text-xl ml-2 font-inriaRegular">
+                    {data.category}
+                  </Text>
+                </View>
+                <View className="border-b p-2  border-gray-300">
+                  <Text className="text-lg text-[#8477d8] font-inriaRegular">
+                    Date
+                  </Text>
+                  <Text className="text-xl ml-2 font-inriaRegular">
+                    {data.Date}
+                  </Text>
+                </View>
+                <View className="border-b p-2 border-gray-300">
+                  <Text className="text-lg text-[#8477d8] font-inriaRegular">
+                    List of items
+                  </Text>
+                  <View className="ml-2 ">
+                    {data.items.length > 0 &&
+                      data.items.map((item: any, index: number) => (
+                        <View
+                          key={index}
+                          className="flex-row justify-between items-center"
+                        >
+                          <Text className="text-xl font-inriaRegular">
+                            {item.productName}
+                            {'   '}SL: {item.quantity}
+                            {'   '}
+                            {formatVND(item.price)}
+                          </Text>
+                        </View>
+                      ))}
+                  </View>
+                </View>
+                <View className="border-b p-2  border-gray-300">
+                  <Text className="text-lg text-[#8477d8] font-inriaRegular">
+                    Total Amount
+                  </Text>
+                  <Text className="text-xl ml-2 font-inriaRegular font-bold text-red-600">
+                    {formatVND(data.totalAmount)}
+                  </Text>
+                </View>
+                <View className="flex-row mt-8  w-full  justify-between h-fit items-end ">
                   <TouchableOpacity
                     className="w-1/2"
                     onPress={SaveReceipt}
