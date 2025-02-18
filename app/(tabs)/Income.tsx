@@ -1,12 +1,12 @@
 import { View, Text } from 'react-native';
 import React from 'react';
 
-const Notification = () => {
+const Income = () => {
   return (
     <View>
-      <Text>Notification</Text>
+      <Text>Income</Text>
     </View>
   );
 };
 
-export default Notification;
+export default Income;

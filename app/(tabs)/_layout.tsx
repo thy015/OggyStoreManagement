@@ -7,6 +7,7 @@ import { Receipt } from 'lucide-react-native';
 import AntDesign from '@expo/vector-icons/AntDesign';
 import CustomHeader from '@/components/header';
 import Octicons from '@expo/vector-icons/Octicons';
+import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 
 // Định nghĩa type cho TabIcon props
 type TabIconProps = {
@@ -134,15 +135,21 @@ const TabLayout: React.FC = () => {
           />
 
           <Tabs.Screen
-            name="Notification"
+            name="Income"
             options={{
-              title: 'Notification',
+              title: 'Income',
               header: () => <CustomHeader />,
               tabBarIcon: ({ color, focused }) => (
                 <TabIcon
-                  icon={<Octicons name="bell" size={24} color={color} />}
+                  icon={
+                    <MaterialCommunityIcons
+                      name="wallet-plus"
+                      size={24}
+                      color={color}
+                    />
+                  }
                   color={color}
-                  name="Notification"
+                  name="Income"
                   focused={focused}
                 />
               ),
