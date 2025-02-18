@@ -20,7 +20,9 @@ import { collection, addDoc, getDocs, doc } from 'firebase/firestore';
 import axios from 'axios';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { white } from 'tailwindcss/colors';
-const GOOGLE_VISION_API_KEY = 'AIzaSyA6AjixXUNl-y2egUortvsH8H6G8w0azpg';
+import { GoogleGenerativeAI } from '@google/generative-ai';
+import { AI_KEY, GOOGLE_VISION_API_KEY } from '@env';
+const genAI = new GoogleGenerativeAI(AI_KEY);
 
 const Receipt = () => {
   const [image, setImage] = useState<string>('');
@@ -42,6 +44,34 @@ const Receipt = () => {
   const colorAnim = useRef(new Animated.Value(0)).current;
   const textColorAnim = useRef(new Animated.Value(0)).current;
   const [show, setShow] = useState(false);
+  const [generatedText, setGeneratedText] = useState('');
+
+  const generateText = async (text: string) => {
+    try {
+      const imagebase64 = await convertImageToBase64(image);
+      const prompt = `
+        Chuyển đổi đoạn văn bản sau thành định dạng JSON của hóa đơn thanh toán.
+         ${text} Đảm bảo JSON chỉ bao gồm các trường:  'items' (mỗi item có 'productName', 'quantity', 'price'), 'totalAmount', "Date.
+        nếu price là giá tiền nước khác thì chuyển thành định dạng số tiền price thành VND.
+        Đảm bảo định dạng hợp lệ. nếu không hợp lệ thì sẽ tạo mã JSON "note" thông báo rằng cái gì không hợp lệ theo mã json.
+        Đảm bảo có phân loại "category" thể loại giao dịch ví dụ như ( đồ ăn , vui chơi , mua sắm, sinh hoạt ,...) 
+      `;
+
+      const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+
+      const response = await model.generateContent([prompt]);
+
+      const result =
+        response.response.candidates?.[0]?.content?.parts?.[0]?.text || '';
+
+      setGeneratedText(result || '');
+      setTextImage(result || '');
+      console.log('Generated text:', result);
+    } catch (error) {
+      console.error('Error generating text:', error);
+      setGeneratedText('Lỗi khi gọi API!');
+    }
+  };
 
   const toggleShow = () => {
     setShow(!show);
@@ -278,8 +308,8 @@ const Receipt = () => {
 
       const textAnnotations = response.data.responses[0].textAnnotations;
       if (textAnnotations && textAnnotations.length > 0) {
-        setTextImage(textAnnotations[0].description);
         console.log('Text:', textAnnotations[0].description);
+        generateText(textAnnotations[0].description);
       } else {
         setTextImage('Không tìm thấy văn bản nào!');
       }
