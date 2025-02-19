@@ -1,6 +1,6 @@
-import axios, { AxiosInstance, AxiosRequestConfig } from 'axios';
-import { SERVER_API_URL } from '@env'
-type HttpMethod = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
+import axios, { AxiosInstance, AxiosRequestConfig } from "axios";
+import { SERVER_API_URL } from "@env";
+type HttpMethod = "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
 
 // Custom error class for API errors
 export class APIError extends Error {
@@ -10,7 +10,7 @@ export class APIError extends Error {
     public response?: unknown
   ) {
     super(message);
-    this.name = 'APIError';
+    this.name = "APIError";
   }
 }
 // Export a singleton instance with convenience methods
@@ -55,8 +55,8 @@ export const makeRequest = async <TData = unknown, TError = unknown>(
     headers: options?.headers,
     params: options?.params,
     ...(options?.isRest && { transformResponse: [] }),
-    ...(method !== 'GET' &&
-      method !== 'DELETE' && {
+    ...(method !== "GET" &&
+      method !== "DELETE" && {
         data: options?.data ?? {},
       }),
   };
@@ -66,11 +66,11 @@ export const makeRequest = async <TData = unknown, TError = unknown>(
 
     return response.data;
   } catch (error) {
-    console.error('Request error:', error);
+    console.error("Request error:", error);
     if (error instanceof APIError) {
       throw error;
     }
-    throw new APIError('An unexpected error occurred', 500, error as TError);
+    throw new APIError("An unexpected error occurred", 500, error as TError);
   }
 };
 
@@ -78,27 +78,27 @@ export const api = {
   get: <TData = unknown, TError = unknown>(
     url: string,
     options?: ApiRequestOptions
-  ) => makeRequest<TData, TError>('GET', url, options),
+  ) => makeRequest<TData, TError>("GET", url, options),
 
   post: <TData = unknown, TError = unknown>(
     url: string,
     options?: ApiRequestOptions
-  ) => makeRequest<TData, TError>('POST', url, options),
+  ) => makeRequest<TData, TError>("POST", url, options),
 
   put: <TData = unknown, TError = unknown>(
     url: string,
     options?: ApiRequestOptions
-  ) => makeRequest<TData, TError>('PUT', url, options),
+  ) => makeRequest<TData, TError>("PUT", url, options),
 
   patch: <TData = unknown, TError = unknown>(
     url: string,
     options?: ApiRequestOptions
-  ) => makeRequest<TData, TError>('PATCH', url, options),
+  ) => makeRequest<TData, TError>("PATCH", url, options),
 
   delete: <TData = unknown, TError = unknown>(
     url: string,
     options?: ApiRequestOptions
-  ) => makeRequest<TData, TError>('DELETE', url, options),
+  ) => makeRequest<TData, TError>("DELETE", url, options),
 };
 
 export default api;
