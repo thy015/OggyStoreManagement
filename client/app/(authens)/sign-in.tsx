@@ -16,6 +16,7 @@ import { getAuth, signInWithEmailAndPassword } from 'firebase/auth';
 import {UserIcon} from 'lucide-react-native'
 import { Button, ButtonText } from '@/components/ui/button';
 import Spinner from '@/components/spinner';
+import { authensAPI } from '../apis/authens';
 
 const SignIn = () => {
   const auth = getAuth();
@@ -42,20 +43,13 @@ const SignIn = () => {
     }
     setLoading(true)
     try {
-      await signInWithEmailAndPassword(
-        auth,
-        formField.Email,
-        formField.Password
-      )
-        .then((userCredential) => {
-          const user = userCredential.user;
-          console.log(user);
-          router.replace('/Home');
-        })
-        .catch((error) => {
-          const errorMessage = error.message;
-          Alert.alert('Please check your email and password ' + errorMessage);
-        });
+      const response = await authensAPI.signIn(formField.Email, formField.Password) as { status: number };
+      if (response.status === 200) {
+        router.push('./(tabs)/Home');
+      }
+      else{
+        Alert.alert('Check your email and password');
+      }
     } catch (e) {
       Alert.alert('error of signin' + e);
     } finally{
@@ -151,7 +145,7 @@ const SignIn = () => {
               </Button>
 
               <Link
-                href="/api/(authens)/sign-up"
+                href="./(authens)/sign-up"
                 className="text-[#8a8a91] text-md mt-6 font-semibold"
               >
                 {' '}
@@ -162,7 +156,7 @@ const SignIn = () => {
             <ThemedView className="items-center justify-center mt-6 flex flex-row">
                 <Text className="text-[#8a8a91] text-md font-semibold mr-3">Don't have an account?</Text>
                 <Link
-                  href="/api/(authens)/sign-up"
+                  href="./(authens)/sign-up"
                   className="text-[#a294f9] text-md font-semibold underline"
                 >
                   {' '}
