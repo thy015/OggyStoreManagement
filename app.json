@@ -10,7 +10,10 @@
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "infoPlist": {
+        "NSMicrophoneUsageDescription": "Ứng dụng cần quyền truy cập micro để ghi âm."
+      }
     },
     "android": {
       "adaptiveIcon": {

@@ -135,9 +135,9 @@ const TabLayout: React.FC = () => {
           />
 
           <Tabs.Screen
-            name="Income"
+            name="Chat_Speech"
             options={{
-              title: 'Income',
+              title: 'Chat_Speech',
               header: () => <CustomHeader />,
               tabBarIcon: ({ color, focused }) => (
                 <TabIcon
@@ -149,7 +149,7 @@ const TabLayout: React.FC = () => {
                     />
                   }
                   color={color}
-                  name="Income"
+                  name="Chat"
                   focused={focused}
                 />
               ),

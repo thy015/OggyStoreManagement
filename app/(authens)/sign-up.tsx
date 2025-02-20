@@ -9,32 +9,20 @@ import {
   Image,
 } from 'react-native';
 import React, { useState } from 'react';
-import { Link, useLocalSearchParams, useRouter } from 'expo-router';
+import { Link, router } from 'expo-router';
 import { ThemedView } from '@/components/ThemedView';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { getAuth, signInWithEmailAndPassword } from 'firebase/auth';
+import { getAuth, createUserWithEmailAndPassword } from 'firebase/auth';
 import { UserIcon } from 'lucide-react-native';
 import { Button, ButtonText } from '@/components/ui/button';
 import Spinner from '@/components/spinner';
 
-const SignIn = () => {
+const SignUp = () => {
   const auth = getAuth();
-  const router = useRouter();
   const [formField, setFormField] = useState({ Email: '', Password: '' });
   const [focusEmail, setFocusEmail] = useState(false);
   const [focusPassword, setFocusPassword] = useState(false);
   const [loading, setLoading] = useState<boolean>(false);
-  //auto fill
-  const { email, password } = useLocalSearchParams();
-
-  React.useEffect(() => {
-    if (email || password) {
-      setFormField({
-        Email: Array.isArray(email) ? email[0] : email || '',
-        Password: Array.isArray(password) ? password[0] : password || '',
-      });
-    }
-  }, [email, password]);
 
   const submit = async () => {
     if (!formField.Email || !formField.Password) {
@@ -42,22 +30,20 @@ const SignIn = () => {
     }
     setLoading(true);
     try {
-      await signInWithEmailAndPassword(
+      const userCredential = await createUserWithEmailAndPassword(
         auth,
         formField.Email,
         formField.Password
-      )
-        .then((userCredential) => {
-          const user = userCredential.user;
-          console.log(user);
-          router.replace('/Home');
-        })
-        .catch((error) => {
-          const errorMessage = error.message;
-          Alert.alert('Please check your email and password ' + errorMessage);
-        });
+      );
+      const user = userCredential.user;
+
+      Alert.alert('sign-up success');
+      router.replace(
+        `/api/(authens)/sign-in?email=${formField.Email}&password=${formField.Password}`
+      );
     } catch (e) {
-      Alert.alert('error of signin' + e);
+      const error = e as Error;
+      console.error('Error during signup:', error.message || e);
     } finally {
       setLoading(false);
     }
@@ -147,7 +133,7 @@ const SignIn = () => {
                 }}
                 onPress={submit}
               >
-                <ButtonText className="text-white text-lg">SIGN IN</ButtonText>
+                <ButtonText className="text-white text-lg">SIGN UP</ButtonText>
               </Button>
 
               <Link
@@ -161,14 +147,14 @@ const SignIn = () => {
 
             <ThemedView className="items-center justify-center mt-6 flex flex-row">
               <Text className="text-[#8a8a91] text-md font-semibold mr-3">
-                Don't have an account?
+                Already have an account?
               </Text>
               <Link
-                href="/api/(authens)/sign-up"
+                href="/api/(authens)/sign-in"
                 className="text-[#a294f9] text-md font-semibold underline"
               >
                 {' '}
-                SIGN UP
+                SIGN IN
               </Link>
             </ThemedView>
             <ThemedView className="flex items-center relative w-full h-fit opacity-[0.5] mt-4">
@@ -190,4 +176,4 @@ const SignIn = () => {
   );
 };
 
-export default SignIn;
+export default SignUp;

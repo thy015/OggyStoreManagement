@@ -11,25 +11,34 @@ import {
 import { ThemedView } from '@/components/ThemedView';
 import * as ImagePicker from 'expo-image-picker';
 import { ScrollView } from 'react-native-gesture-handler';
-import { PanGestureHandler } from 'react-native-gesture-handler';
-import { SafeAreaView } from 'react-native-safe-area-context';
 import AntDesign from '@expo/vector-icons/AntDesign';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import { FIREBASE_DB } from '../../config/firebaseConfig.ts';
-import { collection, addDoc, getDocs, doc } from 'firebase/firestore';
+import {
+  collection,
+  addDoc,
+  getDoc,
+  updateDoc,
+  doc,
+  onSnapshot,
+} from 'firebase/firestore';
 import axios from 'axios';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { white } from 'tailwindcss/colors';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { AI_KEY, GOOGLE_VISION_API_KEY } from '@env';
-const genAI = new GoogleGenerativeAI('AIzaSyAd3xy-Zqiv7WNAzonVYddvvqXP56GA0Zg');
+const genAI = new GoogleGenerativeAI(AI_KEY);
 
+interface MoneyDB {
+  Spended: number;
+  Income: number;
+}
 const Receipt = () => {
+  const [MoneyDB, setMoneyDB] = useState<MoneyDB[]>([]);
   const [image, setImage] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(false);
   const [textImage, setTextImage] = useState<string>(``);
   const [data, setData] = useState<any>({});
-
   const [isImageFullScreen, setIsImageFullScreen] = useState<Boolean>(false);
   const [switchCategory, setSwitchCategory] = useState(false);
   const [switchTextCategory, setSwitchTextCategory] = useState(false);
@@ -37,15 +46,16 @@ const Receipt = () => {
   const textColorAnim = useRef(new Animated.Value(0)).current;
   const [show, setShow] = useState(false);
   const [generatedText, setGeneratedText] = useState('');
+  const [totalSpended, setTotalSpended] = useState(0);
+  const [totalIncome, setTotalIncome] = useState(0);
 
   const generateText = async (text: string) => {
     try {
-      const imagebase64 = await convertImageToBase64(image);
       const prompt = `
         Chuyển đổi đoạn văn bản sau thành định dạng JSON của hóa đơn thanh toán.
         ghi là 'json {....}'
          ${text} Đảm bảo JSON chỉ bao gồm các trường:  'items' (mỗi item có 'productName', 'quantity', 'price'), 'totalAmount', 'Date','category'.
-        nếu price là giá tiền nước khác thì chuyển thành định dạng số tiền price thành VND.
+        nếu price là giá tiền nước khác thì chuyển thành định dạng số tiền price của các nước khác thành VND.
         1Baht(B) =757,76VND
         Đảm bảo có phân loại "category" thể loại giao dịch ví dụ như ( đồ ăn , vui chơi , mua sắm, sinh hoạt ,...)
         Bạn chỉ cần viết ra mỗi json không cần giải thích thêm.
@@ -128,6 +138,31 @@ const Receipt = () => {
     outputRange: ['#7a6fbb', 'white'],
   });
 
+  useEffect(() => {
+    const unsubscribe = onSnapshot(
+      collection(FIREBASE_DB, 'Money'),
+      (querySnapshot) => {
+        const fetchedData: MoneyDB[] = [];
+
+        let totalSpendedCalc = 0;
+        let totalIncomeCalc = 0;
+
+        querySnapshot.forEach((doc) => {
+          const data = doc.data() as MoneyDB;
+          fetchedData.push(data);
+          totalSpendedCalc += data.Spended || 0;
+          totalIncomeCalc += data.Income || 0;
+        });
+
+        setMoneyDB(fetchedData);
+        setTotalSpended(totalSpendedCalc);
+        setTotalIncome(totalIncomeCalc);
+      }
+    );
+
+    return () => unsubscribe();
+  }, []);
+
   const SaveReceipt = async () => {
     try {
       const docRef = await addDoc(collection(FIREBASE_DB, 'History'), {
@@ -135,12 +170,38 @@ const Receipt = () => {
         category: data.category,
         totalAmount: data.totalAmount,
         items: data.items,
+        type: 'spend',
       });
-      console.log('Send data to firebase success', docRef.id);
+      updateMoney();
       setImage('');
       setTextImage('');
     } catch (e) {
       console.error('Error adding document: ', e);
+    }
+  };
+
+  const updateMoney = async () => {
+    try {
+      const moneyRef = doc(FIREBASE_DB, 'Money', '01');
+      const moneySnap = await getDoc(moneyRef);
+
+      if (moneySnap.exists()) {
+        const moneyData = moneySnap.data() as MoneyDB;
+        let newIncome = moneyData.Income || 0;
+        let newSpended = moneyData.Spended || 0;
+
+        newSpended += data.totalAmount;
+        await updateDoc(moneyRef, {
+          Income: newIncome,
+          Spended: newSpended,
+        });
+
+        console.log('Cập nhật thành công!');
+      } else {
+        console.error('Không tìm thấy dữ liệu!');
+      }
+    } catch (error) {
+      console.error('Lỗi cập nhật Firestore:', error);
     }
   };
 
@@ -290,8 +351,8 @@ const Receipt = () => {
                         }}
                       >
                         {switchTextCategory
-                          ? `+${formatVND(320)}`
-                          : `-${formatVND(200)}`}
+                          ? `+${formatVND(totalIncome)}`
+                          : `-${formatVND(totalSpended)}`}
                       </Animated.Text>
                       <Animated.Text
                         style={{

@@ -14,7 +14,7 @@ const Index = () => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       setTimeout(() => {
         if (user) {
-          router.push('/(tabs)/Receipt');
+          router.push('/(tabs)/Chat_Speech');
         } else {
           router.push('/api/(authens)/sign-in');
         }
