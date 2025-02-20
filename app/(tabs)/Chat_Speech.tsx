@@ -65,10 +65,8 @@ const Chat_Speech = () => {
         let newIncome = moneyData.Income || 0;
         let newSpended = moneyData.Spended || 0;
 
-        console.log('Thu nhập1:', newIncome);
         if (generatedData.type.toLowerCase() === 'thu nhập') {
           newIncome += generatedData.totalAmount;
-          console.log('Thu nhập2:', newIncome);
         } else if (generatedData.type.toLowerCase() === 'chi tiêu') {
           newSpended += generatedData.totalAmount;
         }
@@ -129,6 +127,17 @@ const Chat_Speech = () => {
       return newState;
     });
   };
+
+  useEffect(() => {
+    setTimeout(() => {
+      setMessages([
+        {
+          sender: 'bot',
+          message: 'Hello, I am OggyBot! 👋. How can I help you?',
+        },
+      ]);
+    }, 1300);
+  }, []);
 
   useFocusEffect(
     React.useCallback(() => {
@@ -274,7 +283,7 @@ const Chat_Speech = () => {
 
     const generatedData = await generateText(transcription);
 
-    if (generatedData) {
+    if (generatedData && generatedData.type != 'undefined') {
       setTimeout(() => {
         setMessages((prev) => [
           ...prev,
@@ -285,6 +294,16 @@ const Chat_Speech = () => {
         ]);
       }, 1500);
       Save(generatedData);
+    } else {
+      setTimeout(() => {
+        setMessages((prev) => [
+          ...prev,
+          {
+            sender: 'bot',
+            message: `Bot: không thể nhận diện được dữ liệu.`,
+          },
+        ]);
+      }, 1500);
     }
   };
 
@@ -298,6 +317,7 @@ const Chat_Speech = () => {
         1Baht(B) =757,76VND
         Type: thu nhập, chi tiêu
         Đảm bảo có phân loại "category" thể loại giao dịch ví dụ như ( đồ ăn , vui chơi , mua sắm, sinh hoạt ,...)
+        Nếu text không có gì hoặc không xác định cho type:underfine
         Bạn chỉ cần viết ra mỗi json không cần giải thích thêm
       `;
 
@@ -312,6 +332,7 @@ const Chat_Speech = () => {
 
       const json = JSON.parse(cleanedResult);
       setData(json);
+      console.log('🔥 Dữ liệu JSON:', json);
       return json;
     } catch (error) {
       console.error('Error generating text:', error);
@@ -394,7 +415,7 @@ const Chat_Speech = () => {
               placeholder="Type a message..."
               value={transcription}
               onChangeText={(e) => setTranscription(e)}
-              className="border w-[85%] pr-10 border-slate-500 p-3  rounded-3xl z-40"
+              className="border w-[85%] pr-10 border-slate-500 p-3 rounded-3xl z-40"
             />
             <TouchableOpacity
               className="absolute w-fit z-50 right-[75px]"

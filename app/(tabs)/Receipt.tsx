@@ -166,11 +166,11 @@ const Receipt = () => {
   const SaveReceipt = async () => {
     try {
       const docRef = await addDoc(collection(FIREBASE_DB, 'History'), {
-        date: data.Date,
+        date: new Date(),
         category: data.category,
         totalAmount: data.totalAmount,
         items: data.items,
-        type: 'spend',
+        type: 'chi tiêu',
       });
       updateMoney();
       setImage('');
@@ -319,10 +319,8 @@ const Receipt = () => {
                   <TouchableWithoutFeedback
                     className="w-[90%]"
                     onPress={() => {
-                      setSwitchCategory(!switchCategory);
-                      handlePress();
+                      setSwitchCategory(!switchCategory), handlePress();
                     }}
-                    accessible={false}
                   >
                     <Animated.View
                       style={[
@@ -434,7 +432,7 @@ const Receipt = () => {
                       data.items.map((item: any, index: number) => (
                         <View
                           key={index}
-                          className="flex-row justify-between items-center"
+                          className="flex-row justify-between items-center my-2"
                         >
                           <Text className="text-xl font-inriaRegular">
                             {item.productName}

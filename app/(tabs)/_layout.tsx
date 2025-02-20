@@ -9,7 +9,6 @@ import CustomHeader from '@/components/header';
 import Octicons from '@expo/vector-icons/Octicons';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 
-// Định nghĩa type cho TabIcon props
 type TabIconProps = {
   icon: any;
   color: string;
