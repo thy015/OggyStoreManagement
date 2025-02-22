@@ -20,7 +20,7 @@ import Entypo from '@expo/vector-icons/Entypo';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { GoogleGenerativeAI } from '@google/generative-ai';
-import { AI_KEY, GOOGLE_VISION_API_KEY } from '../../env.d.ts';
+import { AI_KEY, GOOGLE_VISION_API_KEY } from '../../config/config.json';
 const genAI = new GoogleGenerativeAI(AI_KEY);
 import Feather from '@expo/vector-icons/Feather';
 import AntDesign from '@expo/vector-icons/AntDesign';

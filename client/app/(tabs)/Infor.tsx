@@ -4,7 +4,7 @@ import { Audio } from 'expo-av';
 import axios from 'axios';
 import * as FileSystem from 'expo-file-system';
 
-import { GOOGLE_VISION_API_KEY } from '../../env.d.ts';
+import { AI_KEY, GOOGLE_VISION_API_KEY } from '../../config/config.json';
 
 const Infor = () => {
   const [recording, setRecording] = useState<Audio.Recording | null>(null);

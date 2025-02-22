@@ -19,6 +19,8 @@ expo-env.d.ts
 .metro-health-check*
 .env
 .env.d.ts
+config/config.json
+./config/*
     
 # debug
 npm-debug.*
