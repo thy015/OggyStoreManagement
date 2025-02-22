@@ -1,0 +1,143 @@
+name: Dev
+
+on:
+  push:
+    branches: [staging]
+  pull_request:
+    branches: [staging]
+
+jobs:
+  test:
+    name: Test and Analyze Code
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: "18"
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Verify formatting
+        run: npm run format
+
+      # - name: Run tests for changed files
+      #   run: npm test
+
+      - name: Notify build completion
+        run: |
+          curl -X POST -H 'Content-type: application/json' --data '{"text":"Build version ${GITHUB_REF} completed successfully!"}' ${WEBHOOK_URL}
+        env:
+          WEBHOOK_URL: https://app.slack.com/client/T088E3BU31Q/C088E17JZPV
+
+  staging-build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      # Checkout code
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # Setup Node.js
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18.x
+          cache: npm
+
+      # Setup Expo
+      - name: Setup Expo
+        uses: expo/expo-github-action@v8
+        with:
+          expo-version: latest
+          expo-cache: true
+          eas-version: latest
+          token: 0EFsoWULJj_l6sSGTBXMZJhWrc5DHISKcA2CwhFK
+
+      # Install dependencies
+      - name: Install dependencies
+        run: npm ci
+
+      # Step 4: Install Expo CLI
+      - name: Install Expo CLI
+        run: |
+          npm install -g expo-cli
+
+      # Step 5: Install EAS CLI (Nếu chưa có)
+      - name: Install EAS CLI
+        run: |
+          npm install -g eas-cli
+      # Build APK for staging
+      - name: Build APK
+        run: eas build --profile production --platform android
+
+      # Step 8: Notify build completion (Optional)
+      - name: Notify build completion
+        run: |
+          curl -X POST -H 'Content-type: application/json' --data '{"text":"Expo build completed successfully for version ${GITHUB_REF}!"}' ${WEBHOOK_URL}
+        env:
+          WEBHOOK_URL: https://app.slack.com/client/T088E3BU31Q/C088E17JZPV
+
+  firebase-test-lab:
+    name: Run tests with Firebase Test Lab
+
+    needs: [staging-build]
+    runs-on: ubuntu-22.04
+    permissions:
+      contents: "read"
+      id-token: "write"
+    steps:
+      # Step 1: Checkout the repository
+      - uses: actions/checkout@v3
+
+      # Step 2: Authenticate to Google Cloud
+      - id: auth
+        name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCLOUD_AUTH }}
+
+      # Step 3: Set up Cloud SDK
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+
+      # Step 4: Install beta components
+      - name: Install beta components
+        run: |
+          gcloud components install beta --quiet
+          gcloud components update --quiet
+
+      # Step 5: Download APK artifact
+      - name: Download APK artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: expo-android-build
+          path: ./dist
+
+      # Step 6: Run tests in Firebase Test Lab
+      - name: Run tests in Firebase Test Lab
+        run: |
+          BUCKET_NAME="test-lab"
+          TIMESTAMP=$(date +"%Y%m%d_%H%M%S")
+          gcloud firebase test android run \
+            --type robo \
+            --app ./dist/android-index.json \
+            --device model=Pixel2,version=28,locale=en \
+            --timeout 300s \
+            --results-bucket=gs://$BUCKET_NAME \
+            --results-dir=results-$TIMESTAMP \
+            --robo-directives=text:emailTextField=eve.holt@reqres.in,text:passwordTextField=pistol \
+            --quiet
+
+      # Step 7: Notify test completion
+      - name: Notify test completion
+        run: |
+          curl -X POST -H 'Content-type: application/json' --data '{"text":"Firebase Test Lab run completed successfully for version ${GITHUB_REF}!"}' ${WEBHOOK_URL}
+        env:
+          WEBHOOK_URL: https://app.slack.com/client/T088E3BU31Q/C088E17JZPV

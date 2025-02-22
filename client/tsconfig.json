@@ -1,6 +1,6 @@
 {
+  "extends": "expo/tsconfig.base",
   "compilerOptions": {
-    "jsx": "react-jsx",
     "allowImportingTsExtensions": true,
     "strict": true,
     "paths": {
@@ -13,17 +13,19 @@
       "tailwind.config": [
         "./tailwind.config.js"
       ]
-    },
-    "noImplicitAny": false,
-    "skipLibCheck": true,
-    "noEmit": true,
-    "esModuleInterop": true
+    }
   },
   "include": [
     "**/*.ts",
     "**/*.tsx",
     ".expo/types/**/*.ts",
-    "expo-env.d.ts"
-  ],
-  "extends": "expo/tsconfig.base"
+    "expo-env.d.ts",
+    "nativewind-env.d.ts",
+    "components/customButton.tsx",
+    "app/(tabs)/_layout.tsx",
+    "app/(tabs)/Home.tsx",
+    "app/(tabs)/Infor.tsx",
+    "config/firebaseConfig.ts",
+    "app/+loading.tsx"
+  ]
 }

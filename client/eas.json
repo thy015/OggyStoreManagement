@@ -1,0 +1,14 @@
+{
+  "build": {
+    "production": {
+      "android": {
+        "distribution": "store",
+        "releaseChannel": "production",
+        "buildType": "apk"
+      }
+    }
+  },
+  "cli": {
+    "appVersionSource": "remote"
+  }
+}

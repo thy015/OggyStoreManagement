@@ -1,5 +1,5 @@
 import { Text, Image } from 'react-native';
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
 import '../global.css';
 import { ThemedView } from '@/components/ThemedView';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -14,9 +14,9 @@ const Index = () => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       setTimeout(() => {
         if (user) {
-          router.push('/(tabs)/Home');
+          router.push('/(tabs)/Chat_Speech');
         } else {
-          router.push('/(authens)/sign-in');
+          router.push('/api/(authens)/sign-in');
         }
       }, 2000);
     });
