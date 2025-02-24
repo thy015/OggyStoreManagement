@@ -1,29 +1,25 @@
-import { useState, useEffect } from 'react';
-import {
-  Image,
-  View,
-  Text,
-  TouchableOpacity,
-  ActivityIndicator,
-} from 'react-native';
+import { useState } from 'react';
+import { View, Text, ActivityIndicator, Dimensions } from 'react-native';
 import {
   GestureHandlerRootView,
   ScrollView,
 } from 'react-native-gesture-handler';
 import { PanGestureHandler } from 'react-native-gesture-handler';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { BarChart } from 'react-native-gifted-charts';
+import { BarChart } from 'react-native-chart-kit';
 import { Button, ButtonText } from '@/components/ui/button/index.tsx';
 import ReceiptList from '@/components/receiptCard.tsx';
 const Home = () => {
-  const data = [
-    { value: 50, label: 'Jan' },
-    { value: 10, label: 'Feb' },
-    { value: 90, label: 'Mar' },
-    { value: 60, label: 'Apr' },
-    { value: 80, label: 'May' },
-    { value: 75, label: 'Jun' },
-  ];
+  const screenWidth = Dimensions.get('window').width;
+
+  const data = {
+    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'], // X-axis labels
+    datasets: [
+      {
+        data: [50, 70, -80, 90, 60, 100], // Y-axis values
+      },
+    ],
+  };
   const [loading, setLoading] = useState(false);
 
   return (
@@ -38,18 +34,28 @@ const Home = () => {
                   <Text className="font-inriaBold text-2xl mb-3 text-center">
                     Monthly Paying - Year 2024
                   </Text>
-                  {/* <BarChart
+               
+                  <BarChart
                     data={data}
-                    barWidth={20} // Độ rộng của mỗi cột
-                    height={200} // Chiều cao của biểu đồ
-                    width={300} // Chiều rộng của biểu đồ
-                    barBorderRadius={5} // Bo tròn góc cột
-                    showGradient={true} // Hiệu ứng gradient
-                    xAxisLabelTextStyle={{ color: 'gray' }} // Màu chữ trục X
-                    yAxisTextStyle={{ color: 'gray' }} // Màu chữ trục Y
-                    isAnimated={true} // Animation khi hiển thị
-                    animationDuration={500} // Thời gian animation
-                  /> */}
+                    width={screenWidth - 50} // Responsive width
+                    height={250}
+                    yAxisLabel=""
+                    yAxisSuffix=" VND"
+                    chartConfig={{
+                      backgroundGradientFrom: '#ffffff',
+                      backgroundGradientTo: '#ffffff',
+                      decimalPlaces: 0,
+                      color: (opacity = 0.8) => `rgba(180, 141, 255, ${opacity})`,
+                      labelColor:  (opacity = 1) =>
+                        `rgba(128, 128, 128, ${opacity})`,
+                    }}
+                    style={{
+                      marginVertical: 10,
+                      borderRadius: 5,
+                    }}
+                    fromZero
+                    showValuesOnTopOfBars // Shows values on top
+                  />
                 </ScrollView>
               </View>
 
