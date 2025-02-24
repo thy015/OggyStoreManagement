@@ -155,21 +155,21 @@ const TabLayout: React.FC = () => {
             }}
           />
 
-          <Tabs.Screen
-            name="Infor"
+          {/* <Tabs.Screen
+            name="Profile"
             options={{
-              title: 'Infor',
+              title: 'Profile',
               header: () => false,
               tabBarIcon: ({ color, focused }) => (
                 <TabIcon
                   icon={require('@/assets/icons/profile.png')}
                   color={color}
-                  name="Infor"
+                  name="Profile"
                   focused={focused}
                 />
               ),
             }}
-          />
+          /> */}
         </Tabs>
         <StatusBar backgroundColor="#161622" style="light" />
       </GestureHandlerRootView>

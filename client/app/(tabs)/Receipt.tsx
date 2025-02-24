@@ -8,6 +8,7 @@ import {
   TouchableWithoutFeedback,
   Animated,
 } from 'react-native';
+import { ThemedView } from '@/components/ThemedView';
 import * as ImagePicker from 'expo-image-picker';
 import { ScrollView } from 'react-native-gesture-handler';
 import AntDesign from '@expo/vector-icons/AntDesign';
@@ -23,11 +24,9 @@ import {
 } from 'firebase/firestore';
 import axios from 'axios';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
+import { white } from 'tailwindcss/colors';
 import { GoogleGenerativeAI } from '@google/generative-ai';
-import { AI_KEY, GOOGLE_VISION_API_KEY } from '@env';
-import { ArrowDown, ArrowDownCircle } from 'lucide-react-native';
-import { black } from 'tailwindcss/colors';
-
+import { AI_KEY, GOOGLE_VISION_API_KEY } from '../../config/config.json';
 const genAI = new GoogleGenerativeAI(AI_KEY);
 
 interface MoneyDB {
@@ -309,7 +308,12 @@ const Receipt = () => {
         {!image ? (
           <View>
             <View className="w-full bg-[#907fff8d] h-fit  px-2 py-4 mb-3 rounded-b-lg">
-              
+              <Text className="text-5xl font-inriaRegular mt-6 text-white">
+                Welcome back,
+              </Text>
+              <Text className="text-3xl font-inriaRegular mt-2 text-white">
+                Oggy Financial Management!
+              </Text>
               <View className="w-full mt-3">
                 <View className="w-full flex-row justify-center items-center">
                   <TouchableWithoutFeedback
@@ -375,10 +379,13 @@ const Receipt = () => {
                 {textImage ? (
                   <View className="h-full w-full"></View>
                 ) : (
-                  <View className="h-fit flex flex-row items-center w-full justify-center">
-                    <Text className='text-lg text-purpleDark mr-2'>Up load your receipt picture below
+                  <View className="h-fit flex items-center w-full justify-center">
+                    <Text className="text-6xl font-inriaRegular mt-6 text-purpleDark">
+                      Oggy
                     </Text>
-                    <ArrowDownCircle color={'#cfcfcf'}/>
+                    <Text className="text-3xl font-inriaRegular mt-2 text-purpleDark">
+                      Financial Management
+                    </Text>
                     {loading && (
                       <View className="w-full h-screen mt-20 items-center absolute flex-1">
                         <ActivityIndicator size="large" color="#8477d8" />
@@ -405,7 +412,14 @@ const Receipt = () => {
                     Category
                   </Text>
                   <Text className="text-xl ml-2 font-inriaRegular">
-                    {data.category}
+                    {Array.isArray(data.category)
+                      ? data.category.map((item: any, index: number) => (
+                          <Text key={index}>
+                            {item}
+                            {index < data.category.length - 1 ? ', ' : ''}
+                          </Text>
+                        ))
+                      : data.category}
                   </Text>
                 </View>
                 <View className="border-b p-2  border-gray-300">
