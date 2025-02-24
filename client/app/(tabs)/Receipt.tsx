@@ -8,7 +8,6 @@ import {
   TouchableWithoutFeedback,
   Animated,
 } from 'react-native';
-import { ThemedView } from '@/components/ThemedView';
 import * as ImagePicker from 'expo-image-picker';
 import { ScrollView } from 'react-native-gesture-handler';
 import AntDesign from '@expo/vector-icons/AntDesign';
@@ -24,9 +23,9 @@ import {
 } from 'firebase/firestore';
 import axios from 'axios';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
-import { white } from 'tailwindcss/colors';
 import { GoogleGenerativeAI } from '@google/generative-ai';
-import { AI_KEY, GOOGLE_VISION_API_KEY } from '../../config/config.json';
+import { AI_KEY, GOOGLE_VISION_API_KEY } from '@env';
+
 const genAI = new GoogleGenerativeAI(AI_KEY);
 
 interface MoneyDB {

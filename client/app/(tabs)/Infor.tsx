@@ -3,9 +3,7 @@ import { View, Text, Button, Alert } from 'react-native';
 import { Audio } from 'expo-av';
 import axios from 'axios';
 import * as FileSystem from 'expo-file-system';
-
-import { AI_KEY, GOOGLE_VISION_API_KEY } from '../../config/config.json';
-
+import {GOOGLE_VISION_API_KEY} from '@env';
 const Infor = () => {
   const [recording, setRecording] = useState<Audio.Recording | null>(null);
   const [transcription, setTranscription] = useState<string>('');
