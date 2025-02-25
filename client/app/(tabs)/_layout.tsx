@@ -102,22 +102,6 @@ const TabLayout: React.FC = () => {
           />
 
           <Tabs.Screen
-            name="History"
-            options={{
-              title: 'History',
-              header: () => <CustomHeader />,
-              tabBarIcon: ({ color, focused }) => (
-                <TabIcon
-                  icon={require('@/assets/icons/clock.png')}
-                  color={color}
-                  name="History"
-                  focused={focused}
-                />
-              ),
-            }}
-          />
-
-          <Tabs.Screen
             name="Receipt"
             options={{
               title: 'Receipt',
@@ -149,6 +133,22 @@ const TabLayout: React.FC = () => {
                   }
                   color={color}
                   name="Chat"
+                  focused={focused}
+                />
+              ),
+            }}
+          />
+
+          <Tabs.Screen
+            name="History"
+            options={{
+              title: 'History',
+              header: () => <CustomHeader />,
+              tabBarIcon: ({ color, focused }) => (
+                <TabIcon
+                  icon={require('@/assets/icons/clock.png')}
+                  color={color}
+                  name="History"
                   focused={focused}
                 />
               ),

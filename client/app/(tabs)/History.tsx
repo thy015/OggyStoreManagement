@@ -1,8 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
 import {
+  Image,
   View,
   Text,
   TouchableOpacity,
+  ActivityIndicator,
   TouchableWithoutFeedback,
   Animated,
 } from 'react-native';
@@ -10,10 +12,16 @@ import { ScrollView } from 'react-native-gesture-handler';
 import { FIREBASE_DB } from '../../config/firebaseConfig.ts';
 import {
   collection,
+  addDoc,
+  getDocs,
+  getDoc,
+  doc,
   onSnapshot,
   Timestamp,
 } from 'firebase/firestore';
+
 import AntDesign from '@expo/vector-icons/AntDesign';
+import Ionicons from '@expo/vector-icons/Ionicons';
 import DetailHis from '../(page)/detailHis.tsx';
 import { ArrowLeftIcon, ArrowRightIcon } from 'lucide-react-native';
 import { black } from 'tailwindcss/colors';
@@ -43,6 +51,7 @@ const History = () => {
   const [totalSpended, setTotalSpended] = useState(0);
   const [totalIncome, setTotalIncome] = useState(0);
   const [detail, setDetail] = useState<boolean>(false);
+  const [id, setId] = useState<number>();
 
   useEffect(() => {
     const unsubscribe = onSnapshot(
@@ -87,7 +96,6 @@ const History = () => {
         );
         setSpend(spendedTransactions);
         setIncome(incomeTransactions);
-        console.log(spend);
       }
     );
 
@@ -153,24 +161,30 @@ const History = () => {
   return (
     <View style={{ flex: 1, backgroundColor: '#e9e9e9' }}>
       {detail ? (
-        <View>
+        <View className="bg-white ">
           <TouchableOpacity onPress={togleDetail}>
-            <Text>aaaa</Text>
+            <Text className="text-xl my-2 ml-4 flex-row items-center h-fit text-purpleDark">
+              <AntDesign name="arrowleft" size={18} color="#7468b6" /> Quay lại
+            </Text>
           </TouchableOpacity>
-          <DetailHis />
+          {id !== undefined && (
+            <DetailHis
+              data={!switchCategory ? spend[id] : income[id]}
+              type={!switchCategory ? 'spend' : 'income'}
+            />
+          )}
         </View>
       ) : (
         <View style={{ flex: 1, backgroundColor: '#e9e9e9' }}>
-          <View className='w-full bg-purpleLight rounded-b-md h-64 p-4'
-          >
+          <View className="w-full bg-purpleLight rounded-b-md h-64 p-4">
             {/* Toolbar */}
-            <View className='w-full flex flex-row justify-between color-white my-2'>
-              <ArrowLeftIcon color={black}/>
+            <View className="w-full flex flex-row justify-between color-white my-2">
+              <ArrowLeftIcon color={black} />
               <View>
-                <Text className='text-lg font-semibold '>Feb 2025</Text>
-                <View className='w-full border-black border-b'></View>
+                <Text className="text-lg font-semibold ">Feb 2025</Text>
+                <View className="w-full border-black border-b"></View>
               </View>
-              <ArrowRightIcon color={black}/>
+              <ArrowRightIcon color={black} />
             </View>
             {/* Toggle Button */}
             <View
@@ -238,7 +252,13 @@ const History = () => {
                 keyboardShouldPersistTaps="handled"
               >
                 {income.map((item, index) => (
-                  <TouchableOpacity onPress={togleDetail} key={index}>
+                  <TouchableOpacity
+                    onPress={() => {
+                      togleDetail();
+                      setId(index);
+                    }}
+                    key={index}
+                  >
                     <Animated.Text
                       style={{
                         fontSize: 20,
@@ -351,7 +371,13 @@ const History = () => {
                 keyboardShouldPersistTaps="handled"
               >
                 {spend.map((item, index) => (
-                  <View key={index}>
+                  <TouchableOpacity
+                    onPress={() => {
+                      togleDetail();
+                      setId(index);
+                    }}
+                    key={index}
+                  >
                     <Animated.Text
                       style={{
                         fontSize: 20,
@@ -453,7 +479,7 @@ const History = () => {
                         </View>
                       </View>
                     </View>
-                  </View>
+                  </TouchableOpacity>
                 ))}
               </ScrollView>
             )}
