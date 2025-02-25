@@ -12,18 +12,18 @@ const admin = require('firebase-admin');
 const serviceAccount = require('./serviceAccount.json');
 const authenRouter = require('./apis/authens/authen.controller');
 
+// middleware always put first
+app.use(bodyParser.json());
+app.use(cookieParser());
+app.use(morgan('combined'));
+
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
   databaseURL: 'https://lab09-23f9e-default-rtdb.firebaseio.com',
 });
 
-//always put first
+//route
 app.use('/api/v1/authens/', authenRouter);
-
-// middleware
-app.use(bodyParser.json());
-app.use(cookieParser());
-app.use(morgan('combined'));
 
 const allowedOrigins = ['http://localhost:8081'];
 
@@ -57,5 +57,5 @@ app.use((err, req, res, next) => {
 const server = http.createServer(app);
 
 server.listen(PORT, () => {
-  console.log(`Now streaming on ${PORT}`);
+  console.log(`Now streaming on http://localhost:${PORT}`);
 });
