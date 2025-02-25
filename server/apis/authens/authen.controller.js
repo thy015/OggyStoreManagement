@@ -2,25 +2,21 @@ const express = require('express');
 const authenRouter = express.Router();
 const admin = require('firebase-admin');
 
-authenRouter.post('/sign-in', async (req, res) => {
-  const { email, password } = req.body;
-
-  if (!email || !password) {
-    return res.status(400).json({ error: 'Please fill in all fields' });
+authenRouter.get('/user', async (req, res) => {
+  const { email } = req.body;
+  if (!email) {
+    return res.status(403).json({ error: 'Please provide an email' });
   }
-
   try {
-    const user = await admin.auth().getUserByEmail(email);
     const auth = admin.auth();
-    const userCredential = await auth.signInWithEmailAndPassword(
-      email,
-      password
-    );
-
-    res.status(200).json({ user: userCredential.user });
+    const user = await auth.getUserByEmail(email);
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+    console.log(user);
+    res.status(200).json({ user });
   } catch (error) {
-    res.status(400).json({ error: error.message });
+    res.status(500).json({ error: error.message });
   }
 });
-
 module.exports = authenRouter;

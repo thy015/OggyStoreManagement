@@ -25,8 +25,7 @@ import axios from 'axios';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { AI_KEY, GOOGLE_VISION_API_KEY } from '@env';
-import { ArrowDown, ArrowDownCircle } from 'lucide-react-native';
-import { black } from 'tailwindcss/colors';
+import { ArrowDownCircle } from 'lucide-react-native';
 
 const genAI = new GoogleGenerativeAI(AI_KEY);
 
@@ -50,6 +49,7 @@ const Receipt = () => {
   const [totalSpended, setTotalSpended] = useState(0);
   const [totalIncome, setTotalIncome] = useState(0);
 
+  // TODO: write API transfer money func for others price
   const generateText = async (text: string) => {
     try {
       const prompt = `
@@ -57,7 +57,6 @@ const Receipt = () => {
         ghi là 'json {....}'
          ${text} Đảm bảo JSON chỉ bao gồm các trường:  'items' (mỗi item có 'productName', 'quantity', 'price'), 'totalAmount', 'Date','category'.
         nếu price là giá tiền nước khác thì chuyển thành định dạng số tiền price của các nước khác thành VND.
-        1Baht(B) =757,76VND
         Đảm bảo có phân loại "category" thể loại giao dịch ví dụ như ( đồ ăn , vui chơi , mua sắm, sinh hoạt ,...)
         Bạn chỉ cần viết ra mỗi json không cần giải thích thêm.
       `;
