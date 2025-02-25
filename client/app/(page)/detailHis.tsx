@@ -1,7 +1,5 @@
-import { View, Text, Button } from 'react-native';
-import { router } from 'expo-router';
+import { View, Text } from 'react-native';
 import { Timestamp } from 'firebase/firestore';
-import { useEffect } from 'react';
 import { ScrollView } from 'react-native-gesture-handler';
 
 interface Transaction {

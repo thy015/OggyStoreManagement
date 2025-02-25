@@ -1,10 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import {
-  Image,
   View,
   Text,
   TouchableOpacity,
-  ActivityIndicator,
   TouchableWithoutFeedback,
   Animated,
 } from 'react-native';
@@ -12,17 +10,13 @@ import { ScrollView } from 'react-native-gesture-handler';
 import { FIREBASE_DB } from '../../config/firebaseConfig.ts';
 import {
   collection,
-  addDoc,
-  getDocs,
-  getDoc,
-  doc,
   onSnapshot,
   Timestamp,
 } from 'firebase/firestore';
-
 import AntDesign from '@expo/vector-icons/AntDesign';
-import Ionicons from '@expo/vector-icons/Ionicons';
 import DetailHis from '../(page)/detailHis.tsx';
+import { ArrowLeftIcon, ArrowRightIcon } from 'lucide-react-native';
+import { black } from 'tailwindcss/colors';
 
 interface Transaction {
   category: string;
@@ -49,7 +43,6 @@ const History = () => {
   const [totalSpended, setTotalSpended] = useState(0);
   const [totalIncome, setTotalIncome] = useState(0);
   const [detail, setDetail] = useState<boolean>(false);
-  const [id, setId] = useState<number>();
 
   useEffect(() => {
     const unsubscribe = onSnapshot(
@@ -94,6 +87,7 @@ const History = () => {
         );
         setSpend(spendedTransactions);
         setIncome(incomeTransactions);
+        console.log(spend);
       }
     );
 
@@ -159,53 +153,26 @@ const History = () => {
   return (
     <View style={{ flex: 1, backgroundColor: '#e9e9e9' }}>
       {detail ? (
-        <View className="bg-white ">
+        <View>
           <TouchableOpacity onPress={togleDetail}>
-            <Text className="text-xl my-2 ml-4 flex-row items-center h-fit text-purpleDark">
-              <AntDesign name="arrowleft" size={18} color="#7468b6" /> Quay lại
-            </Text>
+            <Text>aaaa</Text>
           </TouchableOpacity>
-          {id !== undefined && (
-            <DetailHis
-              data={!switchCategory ? spend[id] : income[id]}
-              type={!switchCategory ? 'spend' : 'income'}
-            />
-          )}
+          <DetailHis />
         </View>
       ) : (
         <View style={{ flex: 1, backgroundColor: '#e9e9e9' }}>
-          <View
-            style={{
-              width: '100%',
-              backgroundColor: '#907fff8d',
-              paddingVertical: 16,
-              paddingHorizontal: 8,
-              marginBottom: 12,
-              borderBottomLeftRadius: 10,
-              borderBottomRightRadius: 10,
-            }}
+          <View className='w-full bg-purpleLight rounded-b-md h-64 p-4'
           >
-            <Text
-              style={{
-                fontSize: 40,
-                fontFamily: 'InriaSerif-Regular',
-                marginTop: 24,
-                color: 'white',
-              }}
-            >
-              Welcome back,
-            </Text>
-            <Text
-              style={{
-                fontSize: 24,
-                fontFamily: 'InriaSerif-Regular',
-                marginTop: 8,
-                color: 'white',
-              }}
-            >
-              Oggy Financial Management!
-            </Text>
-
+            {/* Toolbar */}
+            <View className='w-full flex flex-row justify-between color-white my-2'>
+              <ArrowLeftIcon color={black}/>
+              <View>
+                <Text className='text-lg font-semibold '>Feb 2025</Text>
+                <View className='w-full border-black border-b'></View>
+              </View>
+              <ArrowRightIcon color={black}/>
+            </View>
+            {/* Toggle Button */}
             <View
               style={{ width: '100%', marginTop: 12, alignItems: 'center' }}
             >
@@ -259,9 +226,6 @@ const History = () => {
                   </Animated.Text>
                 </Animated.View>
               </TouchableWithoutFeedback>
-              <View className="flex-row justify-center items-center">
-                <View className="bg-[#907fff8d] p-2 rounded-b-lg w-[80%]"></View>
-              </View>
             </View>
           </View>
 
@@ -274,13 +238,7 @@ const History = () => {
                 keyboardShouldPersistTaps="handled"
               >
                 {income.map((item, index) => (
-                  <TouchableOpacity
-                    onPress={() => {
-                      togleDetail();
-                      setId(index);
-                    }}
-                    key={index}
-                  >
+                  <TouchableOpacity onPress={togleDetail} key={index}>
                     <Animated.Text
                       style={{
                         fontSize: 20,
@@ -393,13 +351,7 @@ const History = () => {
                 keyboardShouldPersistTaps="handled"
               >
                 {spend.map((item, index) => (
-                  <TouchableOpacity
-                    onPress={() => {
-                      togleDetail();
-                      setId(index);
-                    }}
-                    key={index}
-                  >
+                  <View key={index}>
                     <Animated.Text
                       style={{
                         fontSize: 20,
@@ -501,7 +453,7 @@ const History = () => {
                         </View>
                       </View>
                     </View>
-                  </TouchableOpacity>
+                  </View>
                 ))}
               </ScrollView>
             )}

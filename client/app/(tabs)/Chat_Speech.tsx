@@ -14,13 +14,11 @@ import {
 import { Audio } from 'expo-av';
 import axios from 'axios';
 import * as FileSystem from 'expo-file-system';
-import { SafeAreaView } from 'react-native-safe-area-context';
 import FontAwesome5 from '@expo/vector-icons/FontAwesome5';
 import Entypo from '@expo/vector-icons/Entypo';
 import Ionicons from '@expo/vector-icons/Ionicons';
-import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { GoogleGenerativeAI } from '@google/generative-ai';
-import { AI_KEY, GOOGLE_VISION_API_KEY } from '../../config/config.json';
+import { AI_KEY, GOOGLE_VISION_API_KEY } from '@env';
 const genAI = new GoogleGenerativeAI(AI_KEY);
 import Feather from '@expo/vector-icons/Feather';
 import AntDesign from '@expo/vector-icons/AntDesign';
