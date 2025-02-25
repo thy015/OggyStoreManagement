@@ -24,7 +24,7 @@ import {
 import axios from 'axios';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { GoogleGenerativeAI } from '@google/generative-ai';
-import { AI_KEY, GOOGLE_VISION_API_KEY } from '@env';
+import { AI_KEY, GOOGLE_VISION_API_KEY, AI_KEY_MONNEY } from '@env';
 import { ArrowDownCircle } from 'lucide-react-native';
 
 const genAI = new GoogleGenerativeAI(AI_KEY);
@@ -38,7 +38,21 @@ const Receipt = () => {
   const [image, setImage] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(false);
   const [textImage, setTextImage] = useState<string>(``);
-  const [data, setData] = useState<any>({});
+  interface ReceiptData {
+    category: string;
+    Date: string;
+    items: { productName: string; quantity: number; price: number }[];
+    totalAmount: number;
+    currency_code: string;
+  }
+
+  const [data, setData] = useState<ReceiptData>({
+    category: '',
+    Date: '',
+    items: [],
+    totalAmount: 0,
+    currency_code: '',
+  });
   const [isImageFullScreen, setIsImageFullScreen] = useState<Boolean>(false);
   const [switchCategory, setSwitchCategory] = useState(false);
   const [switchTextCategory, setSwitchTextCategory] = useState(false);
@@ -48,18 +62,18 @@ const Receipt = () => {
   const [generatedText, setGeneratedText] = useState('');
   const [totalSpended, setTotalSpended] = useState(0);
   const [totalIncome, setTotalIncome] = useState(0);
+  const [moneyConverted, setMoneyConverted] = useState(0);
 
   // TODO: write API transfer money func for others price
   const generateText = async (text: string) => {
     try {
       const prompt = `
-        Chuyển đổi đoạn văn bản sau thành định dạng JSON của hóa đơn thanh toán.
-        ghi là 'json {....}'
-         ${text} Đảm bảo JSON chỉ bao gồm các trường:  'items' (mỗi item có 'productName', 'quantity', 'price'), 'totalAmount', 'Date','category'.
-        nếu price là giá tiền nước khác thì chuyển thành định dạng số tiền price của các nước khác thành VND.
-        Đảm bảo có phân loại "category" thể loại giao dịch ví dụ như ( đồ ăn , vui chơi , mua sắm, sinh hoạt ,...)
-        Bạn chỉ cần viết ra mỗi json không cần giải thích thêm.
-      `;
+      Chuyển đổi đoạn văn bản sau thành định dạng JSON của hóa đơn thanh toán.
+      ghi là 'json {....}'
+       ${text} Đảm bảo JSON chỉ bao gồm các trường:  'items' (mỗi item có 'productName', 'quantity', 'price'), 'totalAmount', 'Date','category','currency_code' currency_code là mã tiền tệ của nước đó .
+      Đảm bảo có phân loại "category" thể loại giao dịch ví dụ như ( đồ ăn , vui chơi , mua sắm, sinh hoạt ,...)
+      Bạn chỉ cần viết ra mỗi json không cần giải thích thêm.
+    `;
 
       const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
 
@@ -70,11 +84,9 @@ const Receipt = () => {
 
       setGeneratedText(result || '');
       setTextImage(result || '');
-      console.log('Generated text:', result);
       const Json = 'text:' + result;
       const cleanedResult = Json.replace(/text:\s*```json|```/g, '').trim();
 
-      // Chuyển đổi thành object
       const json = JSON.parse(cleanedResult);
       console.log('Json:', json);
       setData(json);
@@ -123,6 +135,24 @@ const Receipt = () => {
     });
   };
 
+  useEffect(() => {
+    const MoneyConverted = async () => {
+      console.log('Converting money:', data.currency_code);
+
+      try {
+        const response = await axios.get(
+          `https://api.fastforex.io/fetch-multi?from=${data.currency_code}&to=VND&api_key=${AI_KEY_MONNEY}`
+        );
+
+        const vndValue = response.data.results.VND;
+        setMoneyConverted(vndValue);
+      } catch (error) {
+        console.error('Error converting money:', error);
+      }
+    };
+    MoneyConverted();
+  }, [data.currency_code]);
+
   const backgroundColor = colorAnim.interpolate({
     inputRange: [0, 1],
     outputRange: ['white', '#8d7fdb'],
@@ -168,7 +198,10 @@ const Receipt = () => {
       const docRef = await addDoc(collection(FIREBASE_DB, 'History'), {
         date: new Date(),
         category: data.category,
-        totalAmount: data.totalAmount,
+        totalAmount:
+          data.currency_code === 'VND'
+            ? data.totalAmount
+            : data.totalAmount * moneyConverted,
         items: data.items,
         type: 'chi tiêu',
       });
@@ -228,7 +261,6 @@ const Receipt = () => {
 
     if (!result.canceled) {
       setImage(result.assets[0].uri);
-      console.log('Image:', result.assets[0].uri);
     }
   };
 
@@ -266,7 +298,6 @@ const Receipt = () => {
 
   const recognizeText = async () => {
     try {
-      console.log('Recognizing text from image:', image);
       if (!image) {
         throw new Error('Image is not defined');
       }
@@ -286,7 +317,6 @@ const Receipt = () => {
 
       const textAnnotations = response.data.responses[0].textAnnotations;
       if (textAnnotations && textAnnotations.length > 0) {
-        console.log('Text:', textAnnotations[0].description);
         generateText(textAnnotations[0].description);
       } else {
         setTextImage('Không tìm thấy văn bản nào!');
@@ -308,7 +338,6 @@ const Receipt = () => {
         {!image ? (
           <View>
             <View className="w-full bg-[#907fff8d] h-fit  px-2 py-4 mb-3 rounded-b-lg">
-              
               <View className="w-full mt-3">
                 <View className="w-full flex-row justify-center items-center">
                   <TouchableWithoutFeedback
@@ -375,9 +404,10 @@ const Receipt = () => {
                   <View className="h-full w-full"></View>
                 ) : (
                   <View className="h-fit flex flex-row items-center w-full justify-center">
-                    <Text className='text-lg text-purpleDark mr-2'>Up load your receipt picture below
+                    <Text className="text-lg text-purpleDark mr-2">
+                      Up load your receipt picture below
                     </Text>
-                    <ArrowDownCircle color={'#cfcfcf'}/>
+                    <ArrowDownCircle color={'#cfcfcf'} />
                     {loading && (
                       <View className="w-full h-screen mt-20 items-center absolute flex-1">
                         <ActivityIndicator size="large" color="#8477d8" />
@@ -430,7 +460,9 @@ const Receipt = () => {
                             {item.productName}
                             {'   '}SL: {item.quantity}
                             {'   '}
-                            {formatVND(item.price)}
+                            {data.currency_code === 'VND'
+                              ? formatVND(item.price)
+                              : formatVND(item.price * moneyConverted)}
                           </Text>
                         </View>
                       ))}
@@ -441,7 +473,9 @@ const Receipt = () => {
                     Total Amount
                   </Text>
                   <Text className="text-xl ml-2 font-inriaRegular font-bold text-red-600">
-                    {formatVND(data.totalAmount)}
+                    {data.currency_code === 'VND'
+                      ? formatVND(data.totalAmount)
+                      : formatVND(data.totalAmount * moneyConverted)}
                   </Text>
                 </View>
                 <View className="flex-row mt-8  w-full  justify-between h-fit items-end ">
