@@ -102,22 +102,6 @@ const TabLayout: React.FC = () => {
           />
 
           <Tabs.Screen
-            name="History"
-            options={{
-              title: 'History',
-              header: () => <CustomHeader />,
-              tabBarIcon: ({ color, focused }) => (
-                <TabIcon
-                  icon={require('@/assets/icons/clock.png')}
-                  color={color}
-                  name="History"
-                  focused={focused}
-                />
-              ),
-            }}
-          />
-
-          <Tabs.Screen
             name="Receipt"
             options={{
               title: 'Receipt',
@@ -156,20 +140,36 @@ const TabLayout: React.FC = () => {
           />
 
           <Tabs.Screen
-            name="Infor"
+            name="History"
             options={{
-              title: 'Infor',
-              header: () => false,
+              title: 'History',
+              header: () => <CustomHeader />,
               tabBarIcon: ({ color, focused }) => (
                 <TabIcon
-                  icon={require('@/assets/icons/profile.png')}
+                  icon={require('@/assets/icons/clock.png')}
                   color={color}
-                  name="Infor"
+                  name="History"
                   focused={focused}
                 />
               ),
             }}
           />
+
+          {/* <Tabs.Screen
+            name="Profile"
+            options={{
+              title: 'Profile',
+              header: () => false,
+              tabBarIcon: ({ color, focused }) => (
+                <TabIcon
+                  icon={require('@/assets/icons/profile.png')}
+                  color={color}
+                  name="Profile"
+                  focused={focused}
+                />
+              ),
+            }}
+          /> */}
         </Tabs>
         <StatusBar backgroundColor="#161622" style="light" />
       </GestureHandlerRootView>

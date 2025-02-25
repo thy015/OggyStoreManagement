@@ -18,16 +18,15 @@ import FontAwesome5 from '@expo/vector-icons/FontAwesome5';
 import Entypo from '@expo/vector-icons/Entypo';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { GoogleGenerativeAI } from '@google/generative-ai';
+import { AI_KEY, GOOGLE_VISION_API_KEY } from '@env';
+const genAI = new GoogleGenerativeAI(AI_KEY);
 import Feather from '@expo/vector-icons/Feather';
+import AntDesign from '@expo/vector-icons/AntDesign';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { useFocusEffect } from '@react-navigation/native';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import { FIREBASE_DB } from '../../config/firebaseConfig.ts';
 import { collection, addDoc, getDoc, updateDoc, doc } from 'firebase/firestore';
-import { AI_KEY, GOOGLE_VISION_API_KEY } from '@env';
-
-const genAI = new GoogleGenerativeAI(AI_KEY);
-
-
 interface MoneyDB {
   Spended: number;
   Income: number;
@@ -106,6 +105,7 @@ const Chat_Speech = () => {
     const hideSubscription = Keyboard.addListener('keyboardDidHide', () =>
       setInput(false)
     );
+
     return () => {
       showSubscription.remove();
       hideSubscription.remove();
@@ -287,7 +287,16 @@ const Chat_Speech = () => {
           ...prev,
           {
             sender: 'bot',
-            message: `Bot: bạn đã ${generatedData.type} ${formatVND(generatedData.totalAmount)} thuộc danh mục ${generatedData.category}`,
+            message: `Bot: bạn đã ${generatedData.type} ${formatVND(generatedData.totalAmount)} thuộc danh mục ${generatedData.category}${
+              Array.isArray(generatedData.category)
+                ? generatedData.category.map((item: any, index: number) => (
+                    <Text key={index}>
+                      {item}
+                      {index < generatedData.category.length - 1 ? ', ' : ''}
+                    </Text>
+                  ))
+                : generatedData.category
+            }`,
           },
         ]);
       }, 1500);
@@ -406,7 +415,7 @@ const Chat_Speech = () => {
           </ScrollView>
           <View
             className={`w-full  bg-white p-2 h-fit flex-row items-center justify-between ${
-              input ? 'absolute bottom-20 mb-5 ' : ''
+              input ? 'absolute bottom-20 mb-5' : ''
             }`}
           >
             <TextInput

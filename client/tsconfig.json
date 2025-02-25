@@ -4,15 +4,9 @@
     "allowImportingTsExtensions": true,
     "strict": true,
     "paths": {
-      "@firebase/auth": [
-        "./node_modules/@firebase/auth/dist/index.rn.d.ts"
-      ],
-      "@/*": [
-        "./*"
-      ],
-      "tailwind.config": [
-        "./tailwind.config.js"
-      ]
+      "@firebase/auth": ["./node_modules/@firebase/auth/dist/index.rn.d.ts"],
+      "@/*": ["./*"],
+      "tailwind.config": ["./tailwind.config.js"]
     }
   },
   "include": [
@@ -24,7 +18,7 @@
     "components/customButton.tsx",
     "app/(tabs)/_layout.tsx",
     "app/(tabs)/Home.tsx",
-    "app/(tabs)/Infor.tsx",
+    "app/(page)/Profile.tsx",
     "config/firebaseConfig.ts",
     "app/+loading.tsx"
   ]
