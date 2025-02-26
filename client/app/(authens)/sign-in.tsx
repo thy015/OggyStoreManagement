@@ -24,6 +24,9 @@ const SignIn = () => {
   });
   
   const submit = async () => {
+    if (!formField.Email || !formField.Password) {
+      return Alert.alert('Error', 'Please fill in all fields');
+    }
     try {
       // Validate input
       SignInSchema.parse(formField);

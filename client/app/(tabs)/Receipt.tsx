@@ -24,10 +24,9 @@ import {
 import axios from 'axios';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { GoogleGenerativeAI } from '@google/generative-ai';
-import { AI_KEY, GOOGLE_VISION_API_KEY } from '@env';
 import { ArrowDownCircle } from 'lucide-react-native';
 
-const genAI = new GoogleGenerativeAI(AI_KEY);
+const genAI = new GoogleGenerativeAI(process.env.AI_KEY);
 
 interface MoneyDB {
   Spended: number;
@@ -273,7 +272,7 @@ const Receipt = () => {
       const base64Image = await convertImageToBase64(image);
 
       const response = await axios.post(
-        `https://vision.googleapis.com/v1/images:annotate?key=${GOOGLE_VISION_API_KEY}`,
+        `https://vision.googleapis.com/v1/images:annotate?key=${process.env.GOOGLE_VISION_API_KEY}`,
         {
           requests: [
             {
