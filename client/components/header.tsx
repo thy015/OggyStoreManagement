@@ -5,7 +5,6 @@ import { LogOut } from 'lucide-react-native';
 import { getAuth, signOut } from '@firebase/auth';
 
 const CustomHeader: React.FC = () => {
-
   const handleSignOut = async () => {
     try {
       await signOut(getAuth());
@@ -14,7 +13,6 @@ const CustomHeader: React.FC = () => {
       console.error("Error signing out:", error);
     }
   };
-  
   return (
     <View style={styles.header}>
       <View className='flex justify-between flex-row py-3 px-12 items-center mt-4'>
