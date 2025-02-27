@@ -9,8 +9,9 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { BarChart } from 'react-native-chart-kit';
 import { Button, ButtonText } from '@/components/ui/button/index.tsx';
 import ReceiptList from '@/components/receiptCard.tsx';
+import { screenWidth } from '@/utils';
 const Home = () => {
-  const screenWidth = Dimensions.get('window').width;
+
 
   const data = {
     labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'], // X-axis labels
@@ -31,8 +32,8 @@ const Home = () => {
               {/* chart */}
               <View className="h-[310px] ml-4">
                 <ScrollView>
-                  <Text className="font-inriaBold text-2xl mb-3 text-center">
-                    Monthly Paying - Year 2024
+                  <Text className="text-2xl mb-3 text-center text-[#e7e4e4bab]">
+                   [ Monthly Paying - Year 2024 ]
                   </Text>
                
                   <BarChart

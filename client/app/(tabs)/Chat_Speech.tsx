@@ -18,13 +18,11 @@ import FontAwesome5 from '@expo/vector-icons/FontAwesome5';
 import Entypo from '@expo/vector-icons/Entypo';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { GoogleGenerativeAI } from '@google/generative-ai';
-import { AI_KEY, GOOGLE_VISION_API_KEY } from '@env';
-const genAI = new GoogleGenerativeAI(AI_KEY);
+
+const genAI = new GoogleGenerativeAI(process.env.AI_KEY);
 import Feather from '@expo/vector-icons/Feather';
-import AntDesign from '@expo/vector-icons/AntDesign';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { useFocusEffect } from '@react-navigation/native';
-import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import { FIREBASE_DB } from '../../config/firebaseConfig.ts';
 import { collection, addDoc, getDoc, updateDoc, doc } from 'firebase/firestore';
 interface MoneyDB {
@@ -245,7 +243,7 @@ const Chat_Speech = () => {
       );
 
       const response = await axios.post(
-        `https://speech.googleapis.com/v1/speech:recognize?key=${GOOGLE_VISION_API_KEY}`,
+        `https://speech.googleapis.com/v1/speech:recognize?key=${process.env.GOOGLE_VISION_API_KEY}`,
         requestBody
       );
 

@@ -3,10 +3,8 @@ import { Tabs } from 'expo-router';
 import { Image, Text, View } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import React from 'react';
-import { Receipt } from 'lucide-react-native';
 import AntDesign from '@expo/vector-icons/AntDesign';
 import CustomHeader from '@/components/header';
-import Octicons from '@expo/vector-icons/Octicons';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 
 type TabIconProps = {
