@@ -16,6 +16,7 @@ import { getAuth, createUserWithEmailAndPassword } from 'firebase/auth';
 import { UserIcon } from 'lucide-react-native';
 import { Button, ButtonText } from '@/components/ui/button';
 import Spinner from '@/components/spinner';
+import { z } from 'zod';
 
 const SignUp = () => {
   const auth = getAuth();
@@ -24,30 +25,45 @@ const SignUp = () => {
   const [focusPassword, setFocusPassword] = useState(false);
   const [loading, setLoading] = useState<boolean>(false);
 
-  const submit = async () => {
-    if (!formField.Email || !formField.Password) {
-      return Alert.alert('Error', 'Please fill in all fields');
-    }
-    setLoading(true);
-    try {
-      const userCredential = await createUserWithEmailAndPassword(
-        auth,
-        formField.Email,
-        formField.Password
-      );
-      const user = userCredential.user;
+    //validate
+    const SignUpSchema = z.object({
+      Email: z.string().email("Invalid email"),
+      Password: z.string().min(6, "Password must be at least 6 characters"),
+    });
+    
+    const submit = async () => {
+      if (!formField.Email || !formField.Password) {
+        return Alert.alert('Error', 'Please fill in all fields');
+      }
+      try {
+        // Validate input
+        SignUpSchema.parse(formField);
+        setLoading(true);
+        const user = await createUserWithEmailAndPassword(
+          auth,
+          formField.Email,
+          formField.Password
+        )
+          .then((user) => {
+            console.log(user);
+            router.replace('/Home');
+          })
+          .catch((error) => {
+            const errorMessage = error.message;
+            Alert.alert('Please check your email and password ' + errorMessage);
+          });
+      } catch (error: any) {
+        if (error instanceof z.ZodError) {
+          // Show validation errors
+          Alert.alert('Validation Error', error.errors[0].message);
+        } else {
+          Alert.alert('Login Error', 'Please check your email and password');
+        }
+      } finally {
+        setLoading(false);
+      }
+    };
 
-      Alert.alert('sign-up success');
-      router.replace(
-        `/api/(authens)/sign-in?email=${formField.Email}&password=${formField.Password}`
-      );
-    } catch (e) {
-      const error = e as Error;
-      console.error('Error during signup:', error.message || e);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   return (
     <SafeAreaView className="flex-1 bg-white">
@@ -137,7 +153,7 @@ const SignUp = () => {
               </Button>
 
               <Link
-                href="/api/(authens)/sign-up"
+                href="/(authens)/sign-up"
                 className="text-[#8a8a91] text-md mt-6 font-semibold"
               >
                 {' '}
@@ -150,7 +166,7 @@ const SignUp = () => {
                 Already have an account?
               </Text>
               <Link
-                href="/api/(authens)/sign-in"
+                href="/(authens)/sign-in"
                 className="text-[#a294f9] text-md font-semibold underline"
               >
                 {' '}
