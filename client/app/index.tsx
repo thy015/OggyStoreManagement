@@ -6,12 +6,16 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 import { onAuthStateChanged } from 'firebase/auth';
 import { FIREBASE_AUTH } from '@/config/firebaseConfig';
+import { useDispatch } from 'react-redux';
+import React from 'react';
+import { fetchAIKey } from '@/redux/slices/aiKey.slice';
 
 const Index = () => {
   const auth = FIREBASE_AUTH;
-
+  const dispatch = useDispatch();
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
+
       setTimeout(() => {
         if (user) {
           router.push('/(tabs)/Receipt');
@@ -24,7 +28,14 @@ const Index = () => {
     return () => unsubscribe();
   }, []);
 
+  //fetch AI key from server
+    useEffect(() => {
+      dispatch(fetchAIKey());
+    }, [dispatch]);
+
+
   return (
+  
     <SafeAreaView className="w-full h-screen overflow-auto px-4 bg-white">
       <ThemedView className="flex-row items-center justify-center w-full h-fit mt-32 ml-4">
         <Image
@@ -48,6 +59,7 @@ const Index = () => {
         </Text>
       </ThemedView>
     </SafeAreaView>
+
   );
 };
 

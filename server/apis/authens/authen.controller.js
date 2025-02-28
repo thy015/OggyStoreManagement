@@ -19,4 +19,8 @@ authenRouter.get('/user', async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
+
+authenRouter.get('/get-ai-key', async (req, res) => {
+  res.json({ apiKey: process.env.AI_KEY });
+});
 module.exports = authenRouter;

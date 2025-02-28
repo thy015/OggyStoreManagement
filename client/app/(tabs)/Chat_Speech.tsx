@@ -12,25 +12,32 @@ import {
   Alert,
 } from 'react-native';
 import { Audio } from 'expo-av';
-import axios from 'axios';
 import * as FileSystem from 'expo-file-system';
 import FontAwesome5 from '@expo/vector-icons/FontAwesome5';
 import Entypo from '@expo/vector-icons/Entypo';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { GoogleGenerativeAI } from '@google/generative-ai';
-
-const genAI = new GoogleGenerativeAI(process.env.AI_KEY);
 import Feather from '@expo/vector-icons/Feather';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { useFocusEffect } from '@react-navigation/native';
 import { FIREBASE_DB } from '../../config/firebaseConfig.ts';
 import { collection, addDoc, getDoc, updateDoc, doc } from 'firebase/firestore';
+import { receiptsAPI } from '@/apis/receipts/index.ts';
+import { useSelector } from 'react-redux';
+import { RootState } from '@/redux/store/store.ts';
 interface MoneyDB {
   Spended: number;
   Income: number;
 }
 
 const Chat_Speech = () => {
+
+  const aiKey = useSelector((state: RootState) => state.aiKey.key);
+    if (!aiKey) {
+      return <Text>Loading AI Key...</Text>;
+    }
+  const genAI = new GoogleGenerativeAI(aiKey);
+
   const [data, setData] = useState<any>({});
   const [recording, setRecording] = useState<Audio.Recording | null>(null);
   const [transcription, setTranscription] = useState<string>('');
@@ -242,10 +249,9 @@ const Chat_Speech = () => {
         JSON.stringify(requestBody, null, 2)
       );
 
-      const response = await axios.post(
-        `https://speech.googleapis.com/v1/speech:recognize?key=${process.env.GOOGLE_VISION_API_KEY}`,
-        requestBody
-      );
+      //send to server to store env
+
+      const response:any=await receiptsAPI.sendPrompt(requestBody)
 
       console.log('📩 Phản hồi từ Google:', response.data);
 

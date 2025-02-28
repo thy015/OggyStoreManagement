@@ -25,14 +25,24 @@ import axios from 'axios';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { ArrowDownCircle } from 'lucide-react-native';
-
-const genAI = new GoogleGenerativeAI(process.env.AI_KEY);
-
+import { useSelector } from 'react-redux';
+import { RootState } from '@/redux/store/store.ts';
+import { receiptsAPI } from '@/apis/receipts/index.ts';
 interface MoneyDB {
   Spended: number;
   Income: number;
 }
 const Receipt = () => {
+  const aiKey = useSelector((state: RootState) => state.aiKey.key);
+  if (!aiKey) {
+    return (
+      <View className="w-full h-full bg-white flex-row items-center justify-center">
+        <Text className="text-2xl text-purpleDark">Loading...</Text>
+      </View>
+    );
+  }
+  const genAI = new GoogleGenerativeAI(aiKey);
+
   const [MoneyDB, setMoneyDB] = useState<MoneyDB[]>([]);
   const [image, setImage] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(false);
@@ -271,17 +281,14 @@ const Receipt = () => {
       }
       const base64Image = await convertImageToBase64(image);
 
-      const response = await axios.post(
-        `https://vision.googleapis.com/v1/images:annotate?key=${process.env.GOOGLE_VISION_API_KEY}`,
-        {
+      const response:any=await receiptsAPI.sendImage({
           requests: [
             {
               image: { content: base64Image },
               features: [{ type: 'TEXT_DETECTION' }],
             },
           ],
-        }
-      );
+        })
 
       const textAnnotations = response.data.responses[0].textAnnotations;
       if (textAnnotations && textAnnotations.length > 0) {
@@ -307,7 +314,6 @@ const Receipt = () => {
         {!image ? (
           <View>
             <View className="w-full bg-[#907fff8d] h-fit  px-2 py-4 mb-3 rounded-b-lg">
-              
               <View className="w-full mt-3">
                 <View className="w-full flex-row justify-center items-center">
                   <TouchableWithoutFeedback
@@ -374,9 +380,10 @@ const Receipt = () => {
                   <View className="h-full w-full"></View>
                 ) : (
                   <View className="h-fit flex flex-row items-center w-full justify-center">
-                    <Text className='text-lg text-purpleDark mr-2'>Up load your receipt picture below
+                    <Text className="text-lg text-purpleDark mr-2">
+                      Up load your receipt picture below
                     </Text>
-                    <ArrowDownCircle color={'#cfcfcf'}/>
+                    <ArrowDownCircle color={'#cfcfcf'} />
                     {loading && (
                       <View className="w-full h-screen mt-20 items-center absolute flex-1">
                         <ActivityIndicator size="large" color="#8477d8" />
