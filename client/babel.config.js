@@ -6,6 +6,7 @@ module.exports = function (api) {
       'nativewind/babel',
     ],
     // plugins: [[require.resolve('expo-router/babel')], 'inline-dotenv'],
+     
   };
 };
  
