@@ -12,6 +12,8 @@ import "react-native-reanimated";
 import "../global.css";
 import { useColorScheme } from "@/hooks/useColorScheme";
 import { CustomDarkTheme, CustomDefaultTheme } from "@/config/themeConfig";
+import { Provider } from "react-redux";
+import { reduxStore } from "@/redux/store/store";
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
@@ -38,6 +40,7 @@ export default function RootLayout() {
   }
 
   return (
+ <Provider store={reduxStore}>
     <GluestackUIProvider mode="light"><ThemeProvider value={colorScheme === "dark" ? CustomDarkTheme : CustomDefaultTheme}>
         <Stack
           screenOptions={{
@@ -54,5 +57,6 @@ export default function RootLayout() {
         </Stack>
         <StatusBar style="auto" />
       </ThemeProvider></GluestackUIProvider>
+</Provider>
   );
 }

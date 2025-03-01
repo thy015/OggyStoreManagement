@@ -11,19 +11,7 @@ const http = require('http');
 const admin = require('firebase-admin');
 const serviceAccount = require('./serviceAccount.json');
 const authenRouter = require('./apis/authens/authen.controller');
-
-// middleware always put first
-app.use(bodyParser.json());
-app.use(cookieParser());
-app.use(morgan('combined'));
-
-admin.initializeApp({
-  credential: admin.credential.cert(serviceAccount),
-  databaseURL: 'https://lab09-23f9e-default-rtdb.firebaseio.com',
-});
-
-//route
-app.use('/api/v1/authens/', authenRouter);
+const receiptRouter = require('./apis/receipts/receipt.controller');
 
 const allowedOrigins = ['http://localhost:8081'];
 
@@ -44,9 +32,29 @@ app.use(
     credentials: true,
   })
 );
-// swagger config
+// middleware always put first
+app.use(bodyParser.json());
+app.use(cookieParser());
+app.use(morgan('combined'));
 
+admin.initializeApp({
+  credential: admin.credential.cert(serviceAccount),
+  databaseURL: 'https://lab09-23f9e-default-rtdb.firebaseio.com',
+});
+
+//route
+app.use('/api/v1/authens', authenRouter);
+app.use('/api/v1/receipts', receiptRouter);
 app.use(express.static('public'));
+
+// 🔥 Add CORS headers manually in case middleware fails
+app.use((req, res, next) => {
+  res.header('Access-Control-Allow-Origin', 'http://localhost:8081');
+  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  res.header('Access-Control-Allow-Credentials', 'true');
+  next();
+});
 
 // Xử lý lỗi
 app.use((err, req, res, next) => {
