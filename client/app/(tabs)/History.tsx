@@ -1,30 +1,19 @@
 import React, { useState, useEffect, useRef } from 'react';
 import {
-  Image,
   View,
   Text,
   TouchableOpacity,
-  ActivityIndicator,
   TouchableWithoutFeedback,
   Animated,
 } from 'react-native';
 import { ScrollView } from 'react-native-gesture-handler';
 import { FIREBASE_DB } from '../../config/firebaseConfig.ts';
-import {
-  collection,
-  addDoc,
-  getDocs,
-  getDoc,
-  doc,
-  onSnapshot,
-  Timestamp,
-} from 'firebase/firestore';
-
+import { collection, onSnapshot, Timestamp } from 'firebase/firestore';
 import AntDesign from '@expo/vector-icons/AntDesign';
-import Ionicons from '@expo/vector-icons/Ionicons';
 import DetailHis from '../(page)/detailHis.tsx';
 import { ArrowLeftIcon, ArrowRightIcon } from 'lucide-react-native';
 import { black } from 'tailwindcss/colors';
+import { Button } from '@/components/ui/button/index.tsx';
 
 interface Transaction {
   category: string;
@@ -135,6 +124,7 @@ const History = () => {
       }).start();
     });
   };
+ 
 
   const backgroundColor = colorAnim.interpolate({
     inputRange: [0, 1],
@@ -481,6 +471,7 @@ const History = () => {
                     </View>
                   </TouchableOpacity>
                 ))}
+                <Button onPress={getUser}>Fetch User</Button>
               </ScrollView>
             )}
           </View>
