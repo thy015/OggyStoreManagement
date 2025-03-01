@@ -6,13 +6,10 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 import { onAuthStateChanged } from 'firebase/auth';
 import { FIREBASE_AUTH } from '@/config/firebaseConfig';
-import { useDispatch } from 'react-redux';
 import React from 'react';
-import { fetchAIKey } from '@/redux/slices/aiKey.slice';
 
 const Index = () => {
   const auth = FIREBASE_AUTH;
-  const dispatch = useDispatch();
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
 
@@ -27,12 +24,6 @@ const Index = () => {
 
     return () => unsubscribe();
   }, []);
-
-  //fetch AI key from server
-    useEffect(() => {
-      dispatch(fetchAIKey());
-    }, [dispatch]);
-
 
   return (
   

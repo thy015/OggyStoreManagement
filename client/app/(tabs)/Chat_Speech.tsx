@@ -14,6 +14,7 @@ import {
 import { Audio } from 'expo-av';
 import * as FileSystem from 'expo-file-system';
 import FontAwesome5 from '@expo/vector-icons/FontAwesome5';
+import * as SecureStore from 'expo-secure-store';
 import Entypo from '@expo/vector-icons/Entypo';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { GoogleGenerativeAI } from '@google/generative-ai';
@@ -23,21 +24,37 @@ import { useFocusEffect } from '@react-navigation/native';
 import { FIREBASE_DB } from '../../config/firebaseConfig.ts';
 import { collection, addDoc, getDoc, updateDoc, doc } from 'firebase/firestore';
 import { receiptsAPI } from '@/apis/receipts/index.ts';
-import { useSelector } from 'react-redux';
-import { RootState } from '@/redux/store/store.ts';
+import axios from 'axios';
 interface MoneyDB {
   Spended: number;
   Income: number;
 }
 
+const AI_KEY_STORAGE = 'ai_key_storage';
+
 const Chat_Speech = () => {
 
-  const aiKey = useSelector((state: RootState) => state.aiKey.key);
-    if (!aiKey) {
-      return <Text>Loading AI Key...</Text>;
+  useEffect(() => {
+    const fetchAIKey=async()=>{
+    try {
+      const key = await axios.get(
+        `${process.env.EXPO_PUBLIC_SERVER_URL}/api/v1/authens/get-ai-key`
+      );
+      if (key) {
+          //save key in expo secure store
+          await SecureStore.setItemAsync(AI_KEY_STORAGE, key.data.apiKey);
+          console.log('AI key:', key.data.apiKey);
+      }
+    } catch (error) {
+      console.error('Failed to fetch AI KEY:', error);
     }
-  const genAI = new GoogleGenerativeAI(aiKey);
+    }
 
+    fetchAIKey();
+  
+  }, []);
+
+  const genAI = new GoogleGenerativeAI(AI_KEY_STORAGE)
   const [data, setData] = useState<any>({});
   const [recording, setRecording] = useState<Audio.Recording | null>(null);
   const [transcription, setTranscription] = useState<string>('');

@@ -1,6 +1,4 @@
-import { ReceiptProps } from '../types';
-
-const avatar = require('@/assets/images/avatar.png');
+import { ReceiptProps } from "@/share/types/receipts";
 
 export const localReceipts: ReceiptProps[] = [
   {

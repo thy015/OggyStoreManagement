@@ -21,27 +21,42 @@ import {
   doc,
   onSnapshot,
 } from 'firebase/firestore';
-import axios from 'axios';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { ArrowDownCircle } from 'lucide-react-native';
 import { useSelector } from 'react-redux';
 import { RootState } from '@/redux/store/store.ts';
 import { receiptsAPI } from '@/apis/receipts/index.ts';
+import axios from "axios";
+import * as SecureStore from "expo-secure-store";
+
+const AI_KEY_STORAGE = 'AI_KEY_STORAGE';
 interface MoneyDB {
   Spended: number;
   Income: number;
 }
 const Receipt = () => {
-  const aiKey = useSelector((state: RootState) => state.aiKey.key);
-  if (!aiKey) {
-    return (
-      <View className="w-full h-full bg-white flex-row items-center justify-center">
-        <Text className="text-2xl text-purpleDark">Loading...</Text>
-      </View>
-    );
-  }
-  const genAI = new GoogleGenerativeAI(aiKey);
+
+  useEffect(() => {
+    const fetchAIKey=async()=>{
+      try {
+        const key = await axios.get(
+            `${process.env.EXPO_PUBLIC_SERVER_URL}/api/v1/authens/get-ai-key`
+        );
+        if (key) {
+          //save key in expo secure store
+          await SecureStore.setItemAsync(AI_KEY_STORAGE, key.data.apiKey);
+          console.log('AI key:', key.data.apiKey);
+        }
+      } catch (error) {
+        console.error('Failed to fetch AI KEY:', error);
+      }
+    }
+
+    fetchAIKey();
+
+  }, []);
+  const genAI = new GoogleGenerativeAI(AI_KEY_STORAGE);
 
   const [MoneyDB, setMoneyDB] = useState<MoneyDB[]>([]);
   const [image, setImage] = useState<string>('');
