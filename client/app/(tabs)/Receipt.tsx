@@ -21,7 +21,6 @@ import {
   doc,
   onSnapshot,
 } from 'firebase/firestore';
-import axios from 'axios';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 <<<<<<< HEAD
@@ -29,14 +28,40 @@ import { AI_KEY, GOOGLE_VISION_API_KEY, AI_KEY_MONNEY } from '@env';
 =======
 >>>>>>> b9bbca9 (Merge branch feat/unit-test to main  (#23))
 import { ArrowDownCircle } from 'lucide-react-native';
+import { useSelector } from 'react-redux';
+import { RootState } from '@/redux/store/store.ts';
+import { receiptsAPI } from '@/apis/receipts/index.ts';
+import axios from "axios";
+import * as SecureStore from "expo-secure-store";
 
-const genAI = new GoogleGenerativeAI(process.env.AI_KEY);
-
+const AI_KEY_STORAGE = 'AI_KEY_STORAGE';
 interface MoneyDB {
   Spended: number;
   Income: number;
 }
 const Receipt = () => {
+
+  useEffect(() => {
+    const fetchAIKey=async()=>{
+      try {
+        const key = await axios.get(
+            `${process.env.EXPO_PUBLIC_SERVER_URL}/api/v1/authens/get-ai-key`
+        );
+        if (key) {
+          //save key in expo secure store
+          await SecureStore.setItemAsync(AI_KEY_STORAGE, key.data.apiKey);
+          console.log('AI key:', key.data.apiKey);
+        }
+      } catch (error) {
+        console.error('Failed to fetch AI KEY:', error);
+      }
+    }
+
+    fetchAIKey();
+
+  }, []);
+  const genAI = new GoogleGenerativeAI(AI_KEY_STORAGE);
+
   const [MoneyDB, setMoneyDB] = useState<MoneyDB[]>([]);
   const [image, setImage] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(false);
@@ -306,17 +331,14 @@ const Receipt = () => {
       }
       const base64Image = await convertImageToBase64(image);
 
-      const response = await axios.post(
-        `https://vision.googleapis.com/v1/images:annotate?key=${process.env.GOOGLE_VISION_API_KEY}`,
-        {
+      const response:any=await receiptsAPI.sendImage({
           requests: [
             {
               image: { content: base64Image },
               features: [{ type: 'TEXT_DETECTION' }],
             },
           ],
-        }
-      );
+        })
 
       const textAnnotations = response.data.responses[0].textAnnotations;
       if (textAnnotations && textAnnotations.length > 0) {

@@ -30,7 +30,7 @@ export interface ApiQueryParams {
 // Create and configure axios instance
 const createAxiosInstance = (): AxiosInstance => {
   const instance = axios.create({
-    baseURL: process.env.EXPO_PUBLIC_SERVER_API_URL,
+    baseURL: process.env.EXPO_PUBLIC_SERVER_URL,
     timeout: 30000,
   });
   return instance;
