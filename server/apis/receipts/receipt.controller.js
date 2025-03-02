@@ -3,28 +3,30 @@ const axios = require('axios');
 const receiptRouter = express.Router();
 
 /** GET */
-receiptRouter.get('', async (req, res) => {});
+receiptRouter.get('/get-vision-key', async (req, res) => {
+  return res.status(200).json({ visionKey: process.env.GOOGLE_VISION_API_KEY });
+});
 
 /** POST */
 receiptRouter.post('/prompts', async (req, res) => {
-  const requestBody = req.body;
+  console.log('🔹 Received request body:', JSON.stringify(req.body, null, 2));
 
-  if (!requestBody) {
+  if (!req.body) {
     return res.status(403).json({ message: 'Missing request body' });
   }
 
   try {
     const promptData = await axios.post(
       `https://speech.googleapis.com/v1/speech:recognize?key=${process.env.GOOGLE_VISION_API_KEY}`,
-      requestBody,
+      req.body,
       { headers: { 'Content-Type': 'application/json' } }
     );
 
     return res
       .status(200)
-      .json({ message: 'Transfer success', data: promptData.data });
+      .json({ message: 'Transfer success', promptData: promptData.data });
   } catch (e) {
-    console.error('❌ API Error:', e.message);
+    console.error('❌ API Error:', e.message, e.response?.data);
 
     if (e.response) {
       return res.status(e.response.status).json({

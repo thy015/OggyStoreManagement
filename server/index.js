@@ -10,73 +10,82 @@ const morgan = require('morgan');
 const http = require('http');
 const admin = require('firebase-admin');
 const authenRouter = require('./apis/authens/authen.controller');
-const receiptRouter = require ('./apis/receipts/receipt.controller');
+const receiptRouter = require('./apis/receipts/receipt.controller');
+const exp = require('constants');
 
 const allowedOrigins = [
   'http://localhost:8081',
-  'https://oggy-store-management-be.vercel.app'
+  'https://oggy-store-management-be.vercel.app',
 ];
 
 app.use(
-    cors ({
-      origin: (origin, callback) => {
-        if (!origin) {
-          return callback (null, true);
-        }
-        if (
-            allowedOrigins.some ((allowedOrigin) => origin.startsWith (allowedOrigin))
-        ) {
-          return callback (null, true);
-        }
-        console.error ('Blocked by CORS:', origin);
-        callback (new Error ('Not allowed by CORS'));
-      },
-      credentials: true,
-    })
+  cors({
+    origin: (origin, callback) => {
+      if (!origin) {
+        return callback(null, true);
+      }
+      if (
+        allowedOrigins.some((allowedOrigin) => origin.startsWith(allowedOrigin))
+      ) {
+        return callback(null, true);
+      }
+      console.error('Blocked by CORS:', origin);
+      callback(new Error('Not allowed by CORS'));
+    },
+    credentials: true,
+  })
 );
 // middleware always put first
-app.use (bodyParser.json ());
-app.use (cookieParser ());
-app.use (morgan ('combined'));
+app.use(express.json());
+app.use(bodyParser.json());
+app.use(cookieParser());
+app.use(morgan('combined'));
 //service account config
 const serviceAccountBase64 = process.env.SERVICE_ACCOUNT_BASE64;
-const serviceAccount = JSON.parse (
-    Buffer.from (serviceAccountBase64, 'base64').toString ('utf8')
+const serviceAccount = JSON.parse(
+  Buffer.from(serviceAccountBase64, 'base64').toString('utf8')
 );
 if (!serviceAccountBase64) {
-  console.error ("❌ SERVICE_ACCOUNT_BASE64 is missing!");
-  throw new Error ("Missing SERVICE_ACCOUNT_BASE64 environment variable");
+  console.error('❌ SERVICE_ACCOUNT_BASE64 is missing!');
+  throw new Error('Missing SERVICE_ACCOUNT_BASE64 environment variable');
 }
-console.log ("✅ Firebase service account loaded.");
-
+console.log('✅ Firebase service account loaded.');
 
 //initialize firebase admin
-admin.initializeApp ({
-  credential: admin.credential.cert (serviceAccount),
+admin.initializeApp({
+  credential: admin.credential.cert(serviceAccount),
   databaseURL: 'https://lab09-23f9e-default-rtdb.firebaseio.com',
 });
 
 //route
-app.use ('/api/v1/authens', (req, res, next) => {
-  console.log ('Authen route hit');
-  next ();
-}, authenRouter);
+app.use(
+  '/api/v1/authens',
+  (req, res, next) => {
+    console.log('Authen route hit');
+    next();
+  },
+  authenRouter
+);
 
-app.use ('/api/v1/receipts', (req, res, next) => {
-  console.log ('Receipt route hit');
-  next ();
-}, receiptRouter);
+app.use(
+  '/api/v1/receipts',
+  (req, res, next) => {
+    console.log('Receipt route hit');
+    next();
+  },
+  receiptRouter
+);
 
 // 🔥 Add CORS headers manually in case middleware fails
-app.use ((req, res, next) => {
-  res.header ('Access-Control-Allow-Origin', 'http://localhost:8081');
-  res.header ('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-  res.header ('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-  res.header ('Access-Control-Allow-Credentials', 'true');
-  next ();
+app.use((req, res, next) => {
+  res.header('Access-Control-Allow-Origin', 'http://localhost:8081');
+  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  res.header('Access-Control-Allow-Credentials', 'true');
+  next();
 });
 
-app.get ("/", (req, res) => res.send ("Express on Vercel"));
+app.get('/', (req, res) => res.send('Express on Vercel'));
 
 // Xử lý lỗi
 app.use((err, req, res, next) => {
