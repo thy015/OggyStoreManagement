@@ -14,14 +14,13 @@ import {
 import { Audio } from 'expo-av';
 import * as FileSystem from 'expo-file-system';
 import FontAwesome5 from '@expo/vector-icons/FontAwesome5';
-import * as SecureStore from 'expo-secure-store';
 import Entypo from '@expo/vector-icons/Entypo';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import Feather from '@expo/vector-icons/Feather';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { useFocusEffect } from '@react-navigation/native';
-import { FIREBASE_DB } from '../../config/firebaseConfig.ts';
+import { FIREBASE_DB } from '@/config/firebaseConfig.ts';
 import { collection, addDoc, getDoc, updateDoc, doc } from 'firebase/firestore';
 import axios from 'axios';
 import { receiptsAPI } from '@/apis/receipts/index.ts';
@@ -48,9 +47,8 @@ const Chat_Speech = () => {
     };
 
     const loadAIKey = async () => {
-      const storedKey = await SecureStore.getItemAsync('AI_KEY_STORAGE');
-      if (storedKey) {
-        setApiKey(storedKey);
+      if (apiKey) {
+        setApiKey(apiKey);
       } else {
         fetchAIKey();
       }
@@ -73,9 +71,8 @@ const Chat_Speech = () => {
     };
 
     const loadVisionKey = async () => {
-      const storedKey = await SecureStore.getItemAsync('VISION_KEY_STORAGE');
-      if (storedKey) {
-        setVisionKey(storedKey);
+      if (visionKey) {
+        setVisionKey(visionKey);
       } else {
         fetchVisionKey();
       }

@@ -28,12 +28,8 @@ export interface ImageRequestProps {
 }
 
 export interface GetAIKeyResponse {
-  data: {
     apiKey: string;
-  };
 }
 export interface GetVisionKeyResponse {
-  data: {
-    visionKey: string;
-  };
+  visionKey: string;
 }
