@@ -6,6 +6,9 @@ const receiptRouter = express.Router();
 receiptRouter.get('/get-vision-key', async (req, res) => {
   return res.status(200).json({ visionKey: process.env.GOOGLE_VISION_API_KEY });
 });
+receiptRouter.get('/get-ai-key', async (req, res) => {
+  res.json({ apiKey: process.env.AI_KEY });
+});
 
 /** POST */
 receiptRouter.post('/prompts', async (req, res) => {

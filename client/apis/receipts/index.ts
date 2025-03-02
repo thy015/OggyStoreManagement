@@ -1,5 +1,6 @@
 import {
   GetAIKeyResponse,
+  GetVisionKeyResponse,
   ImageRequestProps,
   PromptRequestProps,
 } from '@/share/types/receipts';
@@ -20,11 +21,11 @@ class ReceiptsAPI {
     const options: ApiRequestOptions = { data: requestBody };
     return await api.post('/api/v1/receipts/images-convert', options);
   }
-  //SET
+  //GET
   async setAIKey(options?: ApiRequestOptions) {
     try {
       const response = await api.get<GetAIKeyResponse>(
-        '/api/v1/authens/get-ai-key',
+        '/api/v1/receipts/get-ai-key',
         { ...options }
       );
 
@@ -38,12 +39,12 @@ class ReceiptsAPI {
 
   async setVisionKey(options?: ApiRequestOptions) {
     try {
-      const response = await api.get<GetAIKeyResponse>(
-        '/api/v1/authens/get-vision-key',
+      const response = await api.get<GetVisionKeyResponse>(
+        '/api/v1/receipts/get-vision-key',
         { ...options }
       );
-      await SecureStore.setItemAsync(VISION_API_KEY, response.data.apiKey);
-      return response.data.apiKey;
+      await SecureStore.setItemAsync(VISION_API_KEY, response.data.visionKey);
+      return response.data.visionKey;
     } catch (error) {
       console.error('Failed to fetch Vision Key:', error);
       return null;

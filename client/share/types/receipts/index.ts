@@ -32,3 +32,8 @@ export interface GetAIKeyResponse {
     apiKey: string;
   };
 }
+export interface GetVisionKeyResponse {
+  data: {
+    visionKey: string;
+  };
+}
