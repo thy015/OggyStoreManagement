@@ -26,3 +26,9 @@ interface ImageRequest {
 export interface ImageRequestProps {
   requests: ImageRequest[];
 }
+
+export interface GetAIKeyResponse {
+  data: {
+    apiKey: string;
+  };
+}

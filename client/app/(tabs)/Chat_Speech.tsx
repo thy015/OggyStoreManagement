@@ -24,37 +24,44 @@ import { useFocusEffect } from '@react-navigation/native';
 import { FIREBASE_DB } from '../../config/firebaseConfig.ts';
 import { collection, addDoc, getDoc, updateDoc, doc } from 'firebase/firestore';
 import { receiptsAPI } from '@/apis/receipts/index.ts';
-import axios from 'axios';
+import { authensAPI } from '@/apis/authens/index.ts';
 interface MoneyDB {
   Spended: number;
   Income: number;
 }
 
-const AI_KEY_STORAGE = 'ai_key_storage';
-
 const Chat_Speech = () => {
+  const [apiKey, setApiKey] = useState<string | null>(null);
 
   useEffect(() => {
-    const fetchAIKey=async()=>{
-    try {
-      const key = await axios.get(
-        `${process.env.EXPO_PUBLIC_SERVER_URL}/api/v1/authens/get-ai-key`
-      );
-      if (key) {
-          //save key in expo secure store
-          await SecureStore.setItemAsync(AI_KEY_STORAGE, key.data.apiKey);
-          console.log('AI key:', key.data.apiKey);
+    const fetchAIKey = async () => {
+      try {
+        // Fetch key from API
+        const key=await authensAPI.setAIKey()
+        if (key) {
+          setApiKey(key);
+        }
+      } catch (error) {
+        console.error('Failed to fetch AI KEY:', error);
       }
-    } catch (error) {
-      console.error('Failed to fetch AI KEY:', error);
-    }
-    }
+    };
 
-    fetchAIKey();
-  
+    const loadAIKey = async () => {
+      const storedKey = await SecureStore.getItemAsync('AI_KEY_STORAGE');
+      if (storedKey) {
+        setApiKey(storedKey);
+        console.log('Loaded AI key from storage:', storedKey);
+      } else {
+        fetchAIKey();
+      }
+    };
+
+    loadAIKey();
   }, []);
 
-  const genAI = new GoogleGenerativeAI(AI_KEY_STORAGE)
+  // Initialize GoogleGenerativeAI 
+  const genAI = apiKey ? new GoogleGenerativeAI(apiKey) : null;
+
   const [data, setData] = useState<any>({});
   const [recording, setRecording] = useState<Audio.Recording | null>(null);
   const [transcription, setTranscription] = useState<string>('');
@@ -349,11 +356,11 @@ const Chat_Speech = () => {
         Bạn chỉ cần viết ra mỗi json không cần giải thích thêm
       `;
 
-      const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
-      const response = await model.generateContent([prompt]);
+      const model = genAI?.getGenerativeModel({ model: 'gemini-1.5-flash' });
+      const response = await model?.generateContent([prompt]);
 
       const result =
-        response.response.candidates?.[0]?.content?.parts?.[0]?.text || '';
+        response?.response.candidates?.[0]?.content?.parts?.[0]?.text || '';
 
       const Json = 'text:' + result;
       const cleanedResult = Json.replace(/text:\s*```json|```/g, '').trim();
