@@ -9,7 +9,6 @@ const cookieParser = require('cookie-parser');
 const morgan = require('morgan');
 const http = require('http');
 const admin = require('firebase-admin');
-const serviceAccount = require('./serviceAccount.json');
 const authenRouter = require('./apis/authens/authen.controller');
 const receiptRouter = require('./apis/receipts/receipt.controller');
 
@@ -36,16 +35,41 @@ app.use(
 app.use(bodyParser.json());
 app.use(cookieParser());
 app.use(morgan('combined'));
+//service account config
+const serviceAccountBase64 = process.env.SERVICE_ACCOUNT_BASE64;
+const serviceAccount = JSON.parse(
+  Buffer.from(serviceAccountBase64, 'base64').toString('utf8')
+);
+if (!serviceAccountBase64) {
+  console.error('❌ SERVICE_ACCOUNT_BASE64 is missing!');
+  throw new Error('Missing SERVICE_ACCOUNT_BASE64 environment variable');
+}
+console.log('✅ Firebase service account loaded.');
 
+//initialize firebase admin
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
   databaseURL: 'https://lab09-23f9e-default-rtdb.firebaseio.com',
 });
 
 //route
-app.use('/api/v1/authens', authenRouter);
-app.use('/api/v1/receipts', receiptRouter);
-app.use(express.static('public'));
+app.use(
+  '/api/v1/authens',
+  (req, res, next) => {
+    console.log('Authen route hit');
+    next();
+  },
+  authenRouter
+);
+
+app.use(
+  '/api/v1/receipts',
+  (req, res, next) => {
+    console.log('Receipt route hit');
+    next();
+  },
+  receiptRouter
+);
 
 // 🔥 Add CORS headers manually in case middleware fails
 app.use((req, res, next) => {
