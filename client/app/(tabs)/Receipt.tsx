@@ -30,7 +30,7 @@ import { AI_KEY, GOOGLE_VISION_API_KEY, AI_KEY_MONNEY } from '@env';
 import { ArrowDownCircle } from 'lucide-react-native';
 import { receiptsAPI } from '@/apis/receipts/index.ts';
 import * as SecureStore from "expo-secure-store";
-import { authensAPI } from '@/apis/authens/index.ts';
+import axios from 'axios';
 
 interface MoneyDB {
   Spended: number;
@@ -40,12 +40,13 @@ interface MoneyDB {
 const Receipt = () => {
 
   const [apiKey, setApiKey] = useState<string | null>(null);
+  const [visionKey, setVisionKey] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchAIKey = async () => {
       try {
         // Fetch key from API
-        const key=await authensAPI.setAIKey()
+        const key=await receiptsAPI.setAIKey()
         if (key) {
           setApiKey(key);
         }
@@ -58,7 +59,6 @@ const Receipt = () => {
       const storedKey = await SecureStore.getItemAsync('AI_KEY_STORAGE');
       if (storedKey) {
         setApiKey(storedKey);
-        console.log('Loaded AI key from storage:', storedKey);
       } else {
         fetchAIKey();
       }
@@ -67,6 +67,30 @@ const Receipt = () => {
     loadAIKey();
   }, []);
 
+  useEffect(() => {
+    const fetchVisionKey = async () => {
+      try {
+        // Fetch key from API
+        const key = await receiptsAPI.setVisionKey();
+        if (key) {
+          setVisionKey(key);
+        }
+      } catch (error) {
+        console.error('Failed to fetch Vision KEY:', error);
+      }
+    };
+
+    const loadVisionKey = async () => {
+      const storedKey = await SecureStore.getItemAsync('VISION_KEY_STORAGE');
+      if (storedKey) {
+        setVisionKey(storedKey);
+      } else {
+        fetchVisionKey();
+      }
+    };
+
+    loadVisionKey();
+  }, []);
   // Initialize GoogleGenerativeAI 
   const genAI = apiKey ? new GoogleGenerativeAI(apiKey) : null;
 
@@ -339,15 +363,18 @@ const Receipt = () => {
       }
       const base64Image = await convertImageToBase64(image);
 
-      const response:any=await receiptsAPI.sendImage({
+      const response = await axios.post(
+        `https://vision.googleapis.com/v1/images:annotate?key=${visionKey}`,
+        {
           requests: [
             {
               image: { content: base64Image },
               features: [{ type: 'TEXT_DETECTION' }],
             },
           ],
-        })
-
+        }
+      );
+     
       const textAnnotations = response.data.responses[0].textAnnotations;
       if (textAnnotations && textAnnotations.length > 0) {
         generateText(textAnnotations[0].description);

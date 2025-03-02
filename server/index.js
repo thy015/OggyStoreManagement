@@ -11,8 +11,17 @@ const http = require('http');
 const admin = require('firebase-admin');
 const authenRouter = require('./apis/authens/authen.controller');
 const receiptRouter = require('./apis/receipts/receipt.controller');
+<<<<<<< HEAD
 
 const allowedOrigins = ['http://localhost:8081'];
+=======
+const exp = require('constants');
+
+const allowedOrigins = [
+  'http://localhost:8081',
+  'https://oggy-store-management-be.vercel.app',
+];
+>>>>>>> ee8fb7a (fix: key not recognize in server)
 
 app.use(
   cors({
@@ -32,6 +41,10 @@ app.use(
   })
 );
 // middleware always put first
+<<<<<<< HEAD
+=======
+app.use(express.json());
+>>>>>>> ee8fb7a (fix: key not recognize in server)
 app.use(bodyParser.json());
 app.use(cookieParser());
 app.use(morgan('combined'));
@@ -79,6 +92,8 @@ app.use((req, res, next) => {
   res.header('Access-Control-Allow-Credentials', 'true');
   next();
 });
+
+app.get('/', (req, res) => res.send('Express on Vercel'));
 
 // Xử lý lỗi
 app.use((err, req, res, next) => {

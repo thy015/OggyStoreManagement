@@ -23,8 +23,8 @@ import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { useFocusEffect } from '@react-navigation/native';
 import { FIREBASE_DB } from '../../config/firebaseConfig.ts';
 import { collection, addDoc, getDoc, updateDoc, doc } from 'firebase/firestore';
+import axios from 'axios';
 import { receiptsAPI } from '@/apis/receipts/index.ts';
-import { authensAPI } from '@/apis/authens/index.ts';
 interface MoneyDB {
   Spended: number;
   Income: number;
@@ -32,12 +32,13 @@ interface MoneyDB {
 
 const Chat_Speech = () => {
   const [apiKey, setApiKey] = useState<string | null>(null);
+  const [visionKey, setVisionKey] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchAIKey = async () => {
       try {
         // Fetch key from API
-        const key=await authensAPI.setAIKey()
+        const key = await receiptsAPI.setAIKey();
         if (key) {
           setApiKey(key);
         }
@@ -50,7 +51,6 @@ const Chat_Speech = () => {
       const storedKey = await SecureStore.getItemAsync('AI_KEY_STORAGE');
       if (storedKey) {
         setApiKey(storedKey);
-        console.log('Loaded AI key from storage:', storedKey);
       } else {
         fetchAIKey();
       }
@@ -59,7 +59,31 @@ const Chat_Speech = () => {
     loadAIKey();
   }, []);
 
-  // Initialize GoogleGenerativeAI 
+  useEffect(() => {
+    const fetchVisionKey = async () => {
+      try {
+        // Fetch key from API
+        const key = await receiptsAPI.setVisionKey();
+        if (key) {
+          setVisionKey(key);
+        }
+      } catch (error) {
+        console.error('Failed to fetch Vision KEY:', error);
+      }
+    };
+
+    const loadVisionKey = async () => {
+      const storedKey = await SecureStore.getItemAsync('VISION_KEY_STORAGE');
+      if (storedKey) {
+        setVisionKey(storedKey);
+      } else {
+        fetchVisionKey();
+      }
+    };
+
+    loadVisionKey();
+  }, []);
+  // Initialize GoogleGenerativeAI
   const genAI = apiKey ? new GoogleGenerativeAI(apiKey) : null;
 
   const [data, setData] = useState<any>({});
@@ -273,9 +297,10 @@ const Chat_Speech = () => {
         JSON.stringify(requestBody, null, 2)
       );
 
-      //send to server to store env
-
-      const response:any=await receiptsAPI.sendPrompt(requestBody)
+      const response = await axios.post(
+        `https://speech.googleapis.com/v1/speech:recognize?key=${visionKey}`,
+        requestBody
+      );
 
       console.log('📩 Phản hồi từ Google:', response.data);
 
