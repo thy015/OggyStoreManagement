@@ -24,39 +24,47 @@ import {
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { ArrowDownCircle } from 'lucide-react-native';
-import { useSelector } from 'react-redux';
-import { RootState } from '@/redux/store/store.ts';
 import { receiptsAPI } from '@/apis/receipts/index.ts';
-import axios from "axios";
 import * as SecureStore from "expo-secure-store";
+import { authensAPI } from '@/apis/authens/index.ts';
 
-const AI_KEY_STORAGE = 'AI_KEY_STORAGE';
 interface MoneyDB {
   Spended: number;
   Income: number;
 }
+
 const Receipt = () => {
 
+  const [apiKey, setApiKey] = useState<string | null>(null);
+
   useEffect(() => {
-    const fetchAIKey=async()=>{
+    const fetchAIKey = async () => {
       try {
-        const key = await axios.get(
-            `${process.env.EXPO_PUBLIC_SERVER_URL}/api/v1/authens/get-ai-key`
-        );
+        // Fetch key from API
+        const key=await authensAPI.setAIKey()
         if (key) {
-          //save key in expo secure store
-          await SecureStore.setItemAsync(AI_KEY_STORAGE, key.data.apiKey);
-          console.log('AI key:', key.data.apiKey);
+          setApiKey(key);
         }
       } catch (error) {
         console.error('Failed to fetch AI KEY:', error);
       }
-    }
+    };
 
-    fetchAIKey();
+    const loadAIKey = async () => {
+      const storedKey = await SecureStore.getItemAsync('AI_KEY_STORAGE');
+      if (storedKey) {
+        setApiKey(storedKey);
+        console.log('Loaded AI key from storage:', storedKey);
+      } else {
+        fetchAIKey();
+      }
+    };
 
+    loadAIKey();
   }, []);
-  const genAI = new GoogleGenerativeAI(AI_KEY_STORAGE);
+
+  // Initialize GoogleGenerativeAI 
+  const genAI = apiKey ? new GoogleGenerativeAI(apiKey) : null;
 
   const [MoneyDB, setMoneyDB] = useState<MoneyDB[]>([]);
   const [image, setImage] = useState<string>('');
@@ -85,12 +93,12 @@ const Receipt = () => {
         Bạn chỉ cần viết ra mỗi json không cần giải thích thêm.
       `;
 
-      const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+      const model = genAI?.getGenerativeModel({ model: 'gemini-1.5-flash' });
 
-      const response = await model.generateContent([prompt]);
+      const response = await model?.generateContent([prompt]);
 
       const result =
-        response.response.candidates?.[0]?.content?.parts?.[0]?.text || '';
+        response?.response.candidates?.[0]?.content?.parts?.[0]?.text || '';
 
       setGeneratedText(result || '');
       setTextImage(result || '');
