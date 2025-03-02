@@ -5,10 +5,8 @@ import {
   PromptRequestProps,
 } from '@/share/types/receipts';
 import api, { ApiRequestOptions } from '@/utils/api';
-import * as SecureStore from 'expo-secure-store';
-// declare key in expo
-const AI_KEY_STORAGE = 'AI_SECRET_KEY';
-const VISION_API_KEY = 'VISION_SECRET_KEY';
+import axios from 'axios';
+
 
 class ReceiptsAPI {
   // POST
@@ -22,14 +20,12 @@ class ReceiptsAPI {
     return await api.post('/api/v1/receipts/images-convert', options);
   }
   //GET
-  async setAIKey(options?: ApiRequestOptions) {
+  async setAIKey() {
     try {
-      const response = await api.get<GetAIKeyResponse>(
-        '/api/v1/receipts/get-ai-key',
-        { ...options }
+      const response = await axios.get<GetAIKeyResponse>(
+        `${process.env.EXPO_PUBLIC_SERVER_URL}/api/v1/receipts/get-ai-key`
       );
-
-      await SecureStore.setItemAsync(AI_KEY_STORAGE, response.data.apiKey);
+      console.log('AI key', response.data.apiKey);
       return response.data.apiKey;
     } catch (error) {
       console.error('Failed to fetch AI Key:', error);
@@ -37,13 +33,12 @@ class ReceiptsAPI {
     }
   }
 
-  async setVisionKey(options?: ApiRequestOptions) {
+  async setVisionKey() {
     try {
-      const response = await api.get<GetVisionKeyResponse>(
-        '/api/v1/receipts/get-vision-key',
-        { ...options }
+      const response = await axios.get<GetVisionKeyResponse>(
+        `${process.env.EXPO_PUBLIC_SERVER_URL}/api/v1/receipts/get-vision-key`
       );
-      await SecureStore.setItemAsync(VISION_API_KEY, response.data.visionKey);
+      console.log('Vision key', response.data.visionKey);
       return response.data.visionKey;
     } catch (error) {
       console.error('Failed to fetch Vision Key:', error);
