@@ -12,10 +12,14 @@ const admin = require('firebase-admin');
 const authenRouter = require('./apis/authens/authen.controller');
 const receiptRouter = require('./apis/receipts/receipt.controller');
 <<<<<<< HEAD
+<<<<<<< HEAD
 
 const allowedOrigins = ['http://localhost:8081'];
 =======
 const exp = require('constants');
+=======
+
+>>>>>>> 38b8e36 (test: add receipt test)
 
 const allowedOrigins = [
   'http://localhost:8081',
@@ -106,3 +110,5 @@ const server = http.createServer(app);
 server.listen(PORT, () => {
   console.log(`Now streaming on http://localhost:${PORT}`);
 });
+
+module.exports = app
