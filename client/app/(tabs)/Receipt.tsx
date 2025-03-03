@@ -12,7 +12,7 @@ import * as ImagePicker from 'expo-image-picker';
 import { ScrollView } from 'react-native-gesture-handler';
 import AntDesign from '@expo/vector-icons/AntDesign';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
-import { FIREBASE_DB } from '../../config/firebaseConfig.ts';
+import { FIREBASE_DB } from '@/config/firebaseConfig.ts';
 import {
   collection,
   addDoc,
@@ -29,7 +29,6 @@ import { AI_KEY, GOOGLE_VISION_API_KEY, AI_KEY_MONNEY } from '@env';
 >>>>>>> b9bbca9 (Merge branch feat/unit-test to main  (#23))
 import { ArrowDownCircle } from 'lucide-react-native';
 import { receiptsAPI } from '@/apis/receipts/index.ts';
-import * as SecureStore from "expo-secure-store";
 import axios from 'axios';
 
 interface MoneyDB {
@@ -39,7 +38,7 @@ interface MoneyDB {
 
 const Receipt = () => {
 
-  const [apiKey, setApiKey] = useState<string | null>(null);
+  const [aiKey, setAiKey] = useState<string | null>(null);
   const [visionKey, setVisionKey] = useState<string | null>(null);
 
   useEffect(() => {
@@ -48,7 +47,7 @@ const Receipt = () => {
         // Fetch key from API
         const key=await receiptsAPI.setAIKey()
         if (key) {
-          setApiKey(key);
+          setAiKey(key);
         }
       } catch (error) {
         console.error('Failed to fetch AI KEY:', error);
@@ -56,9 +55,8 @@ const Receipt = () => {
     };
 
     const loadAIKey = async () => {
-      const storedKey = await SecureStore.getItemAsync('AI_KEY_STORAGE');
-      if (storedKey) {
-        setApiKey(storedKey);
+      if (aiKey) {
+        setAiKey(aiKey);
       } else {
         fetchAIKey();
       }
@@ -81,9 +79,8 @@ const Receipt = () => {
     };
 
     const loadVisionKey = async () => {
-      const storedKey = await SecureStore.getItemAsync('VISION_KEY_STORAGE');
-      if (storedKey) {
-        setVisionKey(storedKey);
+      if (visionKey) {
+        setVisionKey(visionKey);
       } else {
         fetchVisionKey();
       }
@@ -92,12 +89,13 @@ const Receipt = () => {
     loadVisionKey();
   }, []);
   // Initialize GoogleGenerativeAI 
-  const genAI = apiKey ? new GoogleGenerativeAI(apiKey) : null;
+  const genAI = aiKey ? new GoogleGenerativeAI(aiKey) : null;
 
   const [MoneyDB, setMoneyDB] = useState<MoneyDB[]>([]);
   const [image, setImage] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(false);
   const [textImage, setTextImage] = useState<string>(``);
+<<<<<<< HEAD
   interface ReceiptData {
     category: string;
     Date: string;
@@ -114,6 +112,9 @@ const Receipt = () => {
     currency_code: '',
   });
   const [isImageFullScreen, setIsImageFullScreen] = useState<Boolean>(false);
+=======
+  const [data, setData] = useState<any>({});
+>>>>>>> 83819c0 (fix: get rid of secure store ( cant use in web ), change type and call API)
   const [switchCategory, setSwitchCategory] = useState(false);
   const [switchTextCategory, setSwitchTextCategory] = useState(false);
   const colorAnim = useRef(new Animated.Value(0)).current;

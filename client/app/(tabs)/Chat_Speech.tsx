@@ -30,7 +30,7 @@ interface MoneyDB {
 }
 
 const Chat_Speech = () => {
-  const [apiKey, setApiKey] = useState<string | null>(null);
+  const [aiKey, setAiKey] = useState<string | null>(null);
   const [visionKey, setVisionKey] = useState<string | null>(null);
 
   useEffect(() => {
@@ -39,7 +39,7 @@ const Chat_Speech = () => {
         // Fetch key from API
         const key = await receiptsAPI.setAIKey();
         if (key) {
-          setApiKey(key);
+          setAiKey(key);
         }
       } catch (error) {
         console.error('Failed to fetch AI KEY:', error);
@@ -47,8 +47,8 @@ const Chat_Speech = () => {
     };
 
     const loadAIKey = async () => {
-      if (apiKey) {
-        setApiKey(apiKey);
+      if (aiKey) {
+        setAiKey(aiKey);
       } else {
         fetchAIKey();
       }
@@ -81,7 +81,7 @@ const Chat_Speech = () => {
     loadVisionKey();
   }, []);
   // Initialize GoogleGenerativeAI
-  const genAI = apiKey ? new GoogleGenerativeAI(apiKey) : null;
+  const genAI = aiKey ? new GoogleGenerativeAI(aiKey) : null;
 
   const [data, setData] = useState<any>({});
   const [recording, setRecording] = useState<Audio.Recording | null>(null);
