@@ -28,8 +28,13 @@ export interface ImageRequestProps {
 }
 
 export interface GetAIKeyResponse {
-    apiKey: string;
+  apiKey: string;
 }
+
+export interface GetMoneyKeyResponse {
+  moneyKey: string;
+}
+
 export interface GetVisionKeyResponse {
   visionKey: string;
 }

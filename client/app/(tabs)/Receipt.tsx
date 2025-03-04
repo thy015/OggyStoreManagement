@@ -36,16 +36,24 @@ interface MoneyDB {
   Income: number;
 }
 
-const Receipt = () => {
+interface ReceiptData {
+  category: string;
+  Date: string;
+  items: { productName: string; quantity: number; price: number }[];
+  totalAmount: number;
+  currency_code: string;
+}
 
+const Receipt = () => {
   const [aiKey, setAiKey] = useState<string | null>(null);
   const [visionKey, setVisionKey] = useState<string | null>(null);
+  const [moneyKey, setMoneyKey] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchAIKey = async () => {
       try {
         // Fetch key from API
-        const key=await receiptsAPI.setAIKey()
+        const key = await receiptsAPI.setAIKey();
         if (key) {
           setAiKey(key);
         }
@@ -63,6 +71,30 @@ const Receipt = () => {
     };
 
     loadAIKey();
+  }, []);
+
+  useEffect(() => {
+    const fetchMoneyKey = async () => {
+      try {
+        // Fetch key from API
+        const key = await receiptsAPI.setMoneyKey();
+        if (key) {
+          setMoneyKey(key);
+        }
+      } catch (error) {
+        console.error('Failed to fetch AI KEY:', error);
+      }
+    };
+
+    const loadMoneyKey = async () => {
+      if (moneyKey) {
+        setMoneyKey(moneyKey);
+      } else {
+        fetchMoneyKey();
+      }
+    };
+
+    loadMoneyKey();
   }, []);
 
   useEffect(() => {
@@ -88,13 +120,14 @@ const Receipt = () => {
 
     loadVisionKey();
   }, []);
-  // Initialize GoogleGenerativeAI 
+  // Initialize GoogleGenerativeAI
   const genAI = aiKey ? new GoogleGenerativeAI(aiKey) : null;
 
   const [MoneyDB, setMoneyDB] = useState<MoneyDB[]>([]);
   const [image, setImage] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(false);
   const [textImage, setTextImage] = useState<string>(``);
+<<<<<<< HEAD
 <<<<<<< HEAD
   interface ReceiptData {
     category: string;
@@ -115,6 +148,8 @@ const Receipt = () => {
 =======
   const [data, setData] = useState<any>({});
 >>>>>>> 83819c0 (fix: get rid of secure store ( cant use in web ), change type and call API)
+=======
+>>>>>>> 1a70ffc (feat: add money key retrieval and conversion functionality in receipts API)
   const [switchCategory, setSwitchCategory] = useState(false);
   const [switchTextCategory, setSwitchTextCategory] = useState(false);
   const colorAnim = useRef(new Animated.Value(0)).current;
@@ -124,17 +159,36 @@ const Receipt = () => {
   const [totalSpended, setTotalSpended] = useState(0);
   const [totalIncome, setTotalIncome] = useState(0);
   const [moneyConverted, setMoneyConverted] = useState(0);
+<<<<<<< HEAD
+=======
+  const [data, setData] = useState<ReceiptData>({
+    category: '',
+    Date: '',
+    items: [],
+    totalAmount: 0,
+    currency_code: '',
+  });
+>>>>>>> 1a70ffc (feat: add money key retrieval and conversion functionality in receipts API)
 
   // TODO: write API transfer money func for others price
   const generateText = async (text: string) => {
     try {
       const prompt = `
+<<<<<<< HEAD
       Chuyển đổi đoạn văn bản sau thành định dạng JSON của hóa đơn thanh toán.
       ghi là 'json {....}'
        ${text} Đảm bảo JSON chỉ bao gồm các trường:  'items' (mỗi item có 'productName', 'quantity', 'price'), 'totalAmount', 'Date','category','currency_code' currency_code là mã tiền tệ của nước đó .
       Đảm bảo có phân loại "category" thể loại giao dịch ví dụ như ( đồ ăn , vui chơi , mua sắm, sinh hoạt ,...)
       Bạn chỉ cần viết ra mỗi json không cần giải thích thêm.
     `;
+=======
+        Chuyển đổi đoạn văn bản sau thành định dạng JSON của hóa đơn thanh toán.
+        ghi là 'json {....}'
+        ${text} Đảm bảo JSON chỉ bao gồm các trường:  'items' (mỗi item có 'productName', 'quantity', 'price'),    'totalAmount', 'Date','category','currency_code' currency_code là mã tiền tệ của nước đó .
+        Đảm bảo có phân loại "category" thể loại giao dịch ví dụ như ( đồ ăn , vui chơi , mua sắm, sinh hoạt ,...)
+        Bạn chỉ cần viết ra mỗi json không cần giải thích thêm.
+      `;
+>>>>>>> 1a70ffc (feat: add money key retrieval and conversion functionality in receipts API)
 
       const model = genAI?.getGenerativeModel({ model: 'gemini-1.5-flash' });
 
@@ -253,6 +307,25 @@ const Receipt = () => {
 
     return () => unsubscribe();
   }, []);
+
+  // covert money
+  useEffect(() => {
+    const MoneyConverted = async () => {
+      console.log('Converting money:', data.currency_code);
+
+      try {
+        const response = await axios.get(
+          `https://api.fastforex.io/fetch-multi?from=${data.currency_code}&to=VND&api_key=${moneyKey}`
+        );
+
+        const vndValue = response.data.results.VND;
+        setMoneyConverted(vndValue);
+      } catch (error) {
+        console.error('Error converting money:', error);
+      }
+    };
+    MoneyConverted();
+  }, [data.currency_code]);
 
   const SaveReceipt = async () => {
     try {
@@ -375,7 +448,7 @@ const Receipt = () => {
           ],
         }
       );
-     
+
       const textAnnotations = response.data.responses[0].textAnnotations;
       if (textAnnotations && textAnnotations.length > 0) {
         generateText(textAnnotations[0].description);
