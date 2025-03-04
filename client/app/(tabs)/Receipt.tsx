@@ -41,84 +41,6 @@ interface ReceiptData {
 }
 
 const Receipt = () => {
-  const [aiKey, setAiKey] = useState<string | null>(null);
-  const [visionKey, setVisionKey] = useState<string | null>(null);
-  const [moneyKey, setMoneyKey] = useState<string | null>(null);
-
-  useEffect(() => {
-    const fetchAIKey = async () => {
-      try {
-        // Fetch key from API
-        const key = await receiptsAPI.setAIKey();
-        if (key) {
-          setAiKey(key);
-        }
-      } catch (error) {
-        console.error('Failed to fetch AI KEY:', error);
-      }
-    };
-
-    const loadAIKey = async () => {
-      if (aiKey) {
-        setAiKey(aiKey);
-      } else {
-        fetchAIKey();
-      }
-    };
-
-    loadAIKey();
-  }, []);
-
-  useEffect(() => {
-    const fetchMoneyKey = async () => {
-      try {
-        // Fetch key from API
-        const key = await receiptsAPI.setMoneyKey();
-        if (key) {
-          setMoneyKey(key);
-        }
-      } catch (error) {
-        console.error('Failed to fetch AI KEY:', error);
-      }
-    };
-
-    const loadMoneyKey = async () => {
-      if (moneyKey) {
-        setMoneyKey(moneyKey);
-      } else {
-        fetchMoneyKey();
-      }
-    };
-
-    loadMoneyKey();
-  }, []);
-
-  useEffect(() => {
-    const fetchVisionKey = async () => {
-      try {
-        // Fetch key from API
-        const key = await receiptsAPI.setVisionKey();
-        if (key) {
-          setVisionKey(key);
-        }
-      } catch (error) {
-        console.error('Failed to fetch Vision KEY:', error);
-      }
-    };
-
-    const loadVisionKey = async () => {
-      if (visionKey) {
-        setVisionKey(visionKey);
-      } else {
-        fetchVisionKey();
-      }
-    };
-
-    loadVisionKey();
-  }, []);
-  // Initialize GoogleGenerativeAI
-  const genAI = aiKey ? new GoogleGenerativeAI(aiKey) : null;
-
   const [MoneyDB, setMoneyDB] = useState<MoneyDB[]>([]);
   const [image, setImage] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(false);
@@ -128,10 +50,8 @@ const Receipt = () => {
   const colorAnim = useRef(new Animated.Value(0)).current;
   const textColorAnim = useRef(new Animated.Value(0)).current;
   const [show, setShow] = useState(false);
-  const [generatedText, setGeneratedText] = useState('');
   const [totalSpended, setTotalSpended] = useState(0);
   const [totalIncome, setTotalIncome] = useState(0);
-  const [moneyConverted, setMoneyConverted] = useState(0);
   const [data, setData] = useState<ReceiptData>({
     category: '',
     Date: '',
@@ -140,37 +60,30 @@ const Receipt = () => {
     currency_code: '',
   });
 
-  // TODO: write API transfer money func for others price
-  const generateText = async (text: string) => {
+  //api
+  const recognizeText = async () => {
     try {
-      const prompt = `
-        Chuyển đổi đoạn văn bản sau thành định dạng JSON của hóa đơn thanh toán.
-        ghi là 'json {....}'
-        ${text} Đảm bảo JSON chỉ bao gồm các trường:  'items' (mỗi item có 'productName', 'quantity', 'price'),    'totalAmount', 'Date','category','currency_code' currency_code là mã tiền tệ của nước đó .
-        Đảm bảo có phân loại "category" thể loại giao dịch ví dụ như ( đồ ăn , vui chơi , mua sắm, sinh hoạt ,...)
-        Bạn chỉ cần viết ra mỗi json không cần giải thích thêm.
-      `;
+      const formData = new FormData();
 
-      const model = genAI?.getGenerativeModel({ model: 'gemini-1.5-flash' });
-
-      const response = await model?.generateContent([prompt]);
-
-      const result =
-        response?.response.candidates?.[0]?.content?.parts?.[0]?.text || '';
-
-      setGeneratedText(result || '');
-      setTextImage(result || '');
-      console.log('Generated text:', result);
-      const Json = 'text:' + result;
-      const cleanedResult = Json.replace(/text:\s*```json|```/g, '').trim();
-
-      // Chuyển đổi thành object
-      const json = JSON.parse(cleanedResult);
-      console.log('Json:', json);
-      setData(json);
+      if (image) {
+        formData.append('file', {
+          uri: image,
+          name: 'uploaded_image.jpg',
+          type: 'image/jpeg',
+        } as any);
+      }
+      const response = await fetch(
+        'https://oggy-store-management-be.vercel.app/api/v1/receipts/upload-and-convert',
+        {
+          method: 'POST',
+          body: formData,
+        }
+      );
+      const data = await response.json();
+      setData(data.result);
+      setTextImage(data.result);
     } catch (error) {
-      console.error('Error generating text:', error);
-      setGeneratedText('Lỗi khi gọi API!');
+      console.log(error);
     }
   };
 
@@ -253,34 +166,12 @@ const Receipt = () => {
     return () => unsubscribe();
   }, []);
 
-  // covert money
-  useEffect(() => {
-    const MoneyConverted = async () => {
-      console.log('Converting money:', data.currency_code);
-
-      try {
-        const response = await axios.get(
-          `https://api.fastforex.io/fetch-multi?from=${data.currency_code}&to=VND&api_key=${moneyKey}`
-        );
-
-        const vndValue = response.data.results.VND;
-        setMoneyConverted(vndValue);
-      } catch (error) {
-        console.error('Error converting money:', error);
-      }
-    };
-    MoneyConverted();
-  }, [data.currency_code]);
-
   const SaveReceipt = async () => {
     try {
       const docRef = await addDoc(collection(FIREBASE_DB, 'History'), {
         date: new Date(),
         category: data.category,
-        totalAmount:
-          data.currency_code === 'VND'
-            ? data.totalAmount
-            : data.totalAmount * moneyConverted,
+        totalAmount: data.totalAmount,
         items: data.items,
         type: 'chi tiêu',
       });
@@ -358,53 +249,6 @@ const Receipt = () => {
 
     if (!result.canceled) {
       setImage(result.assets[0].uri);
-    }
-  };
-
-  const convertImageToBase64 = async (imageUri: string): Promise<string> => {
-    const response = await fetch(imageUri);
-    const blob = await response.blob();
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        const base64data = reader.result?.toString().split(',')[1];
-        resolve(base64data || '');
-      };
-      reader.onerror = reject;
-      reader.readAsDataURL(blob);
-    });
-  };
-
-  const recognizeText = async () => {
-    try {
-      if (!image) {
-        throw new Error('Image is not defined');
-      }
-      const base64Image = await convertImageToBase64(image);
-
-      const response = await axios.post(
-        `https://vision.googleapis.com/v1/images:annotate?key=${visionKey}`,
-        {
-          requests: [
-            {
-              image: { content: base64Image },
-              features: [{ type: 'TEXT_DETECTION' }],
-            },
-          ],
-        }
-      );
-
-      const textAnnotations = response.data.responses[0].textAnnotations;
-      if (textAnnotations && textAnnotations.length > 0) {
-        generateText(textAnnotations[0].description);
-      } else {
-        setTextImage('Không tìm thấy văn bản nào!');
-      }
-    } catch (error) {
-      console.error('Lỗi OCR:', error);
-      setTextImage('Lỗi khi nhận diện văn bản.');
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -539,9 +383,7 @@ const Receipt = () => {
                             {item.productName}
                             {'   '}SL: {item.quantity}
                             {'   '}
-                            {data.currency_code === 'VND'
-                              ? formatVND(item.price)
-                              : formatVND(item.price * moneyConverted)}
+                            {formatVND(item.price)}
                           </Text>
                         </View>
                       ))}
@@ -552,9 +394,7 @@ const Receipt = () => {
                     Total Amount
                   </Text>
                   <Text className="text-xl ml-2 font-inriaRegular font-bold text-red-600">
-                    {data.currency_code === 'VND'
-                      ? formatVND(data.totalAmount)
-                      : formatVND(data.totalAmount * moneyConverted)}
+                    {formatVND(data.totalAmount)}
                   </Text>
                 </View>
                 <View className="flex-row mt-8  w-full  justify-between h-fit items-end ">
