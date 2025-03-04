@@ -20,11 +20,10 @@ export interface PromptRequestProps {
 }
 
 interface ImageRequest {
-  image: { content: string };
-  features: { type: 'TEXT_DETECTION' }[];
+  image: { image: string };
 }
 export interface ImageRequestProps {
-  requests: ImageRequest[];
+  requests: ImageRequest;
 }
 
 export interface GetAIKeyResponse {
