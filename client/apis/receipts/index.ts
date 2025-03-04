@@ -1,12 +1,12 @@
 import {
   GetAIKeyResponse,
+  GetMoneyKeyResponse,
   GetVisionKeyResponse,
   ImageRequestProps,
   PromptRequestProps,
 } from '@/share/types/receipts';
 import api, { ApiRequestOptions } from '@/utils/api';
 import axios from 'axios';
-
 
 class ReceiptsAPI {
   // POST
@@ -19,6 +19,7 @@ class ReceiptsAPI {
     const options: ApiRequestOptions = { data: requestBody };
     return await api.post('/api/v1/receipts/images-convert', options);
   }
+
   //GET
   async setAIKey() {
     try {
@@ -27,6 +28,19 @@ class ReceiptsAPI {
       );
       console.log('AI key', response.data.apiKey);
       return response.data.apiKey;
+    } catch (error) {
+      console.error('Failed to fetch AI Key:', error);
+      return null;
+    }
+  }
+  //GET
+  async setMoneyKey() {
+    try {
+      const response = await axios.get<GetMoneyKeyResponse>(
+        `${process.env.EXPO_PUBLIC_SERVER_URL}/api/v1/receipts/get-money-key`
+      );
+      console.log('Money key', response.data.moneyKey);
+      return response.data.moneyKey;
     } catch (error) {
       console.error('Failed to fetch AI Key:', error);
       return null;
