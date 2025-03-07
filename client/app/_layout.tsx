@@ -21,12 +21,14 @@ SplashScreen.preventAutoHideAsync();
 export default function RootLayout() {
   const colorScheme = useColorScheme();
   const [loaded] = useFonts({
-    "SpaceMono": require("../assets/fonts/SpaceMono-Regular.ttf"),
-    "Inria-Bold": require("@/assets/fonts/InriaSerif-Bold.ttf"),
-    "Inria-Light": require("@/assets/fonts/InriaSerif-Light.ttf"),
-    "Inria-Regular": require("@/assets/fonts/InriaSerif-Regular.ttf"),
-    "Oswald-Regular": require("@/assets/fonts/Oswald-Regular.ttf"),
-    "Oswald-Light": require("@/assets/fonts/Oswald-Light.ttf"),
+    SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
+    'Inria-Bold': require('@/assets/fonts/InriaSerif-Bold.ttf'),
+    'Inria-Light': require('@/assets/fonts/InriaSerif-Light.ttf'),
+    'Inria-Regular': require('@/assets/fonts/InriaSerif-Regular.ttf'),
+    'Oswald-Regular': require('@/assets/fonts/Oswald-Regular.ttf'),
+    'Oswald-Light': require('@/assets/fonts/Oswald-Light.ttf'),
+    Poppins: require('@/assets/fonts/Poppins-Regular.ttf'),
+    'Poppins-Light': require('@/assets/fonts/Poppins-Light.ttf'),
   });
 
   useEffect(() => {

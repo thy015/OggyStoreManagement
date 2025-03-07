@@ -8,12 +8,13 @@ import {
 } from 'react-native';
 import { ScrollView } from 'react-native-gesture-handler';
 import { FIREBASE_DB } from '../../config/firebaseConfig.ts';
-import { collection, onSnapshot, Timestamp } from 'firebase/firestore';
+import { collection, onSnapshot, Query, Timestamp } from 'firebase/firestore';
 import AntDesign from '@expo/vector-icons/AntDesign';
 import DetailHis from '../(page)/detailHis.tsx';
 import { ArrowLeftIcon, ArrowRightIcon } from 'lucide-react-native';
 import { black } from 'tailwindcss/colors';
 import { Button } from '@/components/ui/button/index.tsx';
+import QueryDateMonthBox from '@/components/queryDateMonthBox.tsx';
 
 interface Transaction {
   category: string;
@@ -149,7 +150,7 @@ const History = () => {
   };
 
   return (
-    <View style={{ flex: 1, backgroundColor: '#e9e9e9' }}>
+    <View style={{ flex: 1, backgroundColor: '#d51e1e' }}>
       {detail ? (
         <View className="bg-white ">
           <TouchableOpacity onPress={togleDetail}>
@@ -165,16 +166,19 @@ const History = () => {
           )}
         </View>
       ) : (
-        <View style={{ flex: 1, backgroundColor: '#e9e9e9' }}>
-          <View className="w-full bg-purpleLight rounded-b-md h-64 p-4">
+        // Main View
+        <View className="bg-purpleLight flex-1">
+          <View className="w-full bg-purpleDark rounded-b-md h-64 p-4">
             {/* Toolbar */}
             <View className="w-full flex flex-row justify-between color-white my-2">
-              <ArrowLeftIcon color={black} />
+              <ArrowLeftIcon color={'#ffff'} />
               <View>
-                <Text className="text-lg font-semibold ">Feb 2025</Text>
-                <View className="w-full border-black border-b"></View>
+                <Text className="text-lg font-semibold text-white">
+                  Y. 2025
+                </Text>
+                <View className="w-full border-white border-b"></View>
               </View>
-              <ArrowRightIcon color={black} />
+              <ArrowRightIcon color={'#ffff'} />
             </View>
             {/* Toggle Button */}
             <View
@@ -232,7 +236,8 @@ const History = () => {
               </TouchableWithoutFeedback>
             </View>
           </View>
-
+          {/* query date tool box */}
+          <QueryDateMonthBox></QueryDateMonthBox>
           <View style={{ flex: 1, padding: 8, paddingHorizontal: 16 }}>
             {switchTextCategory ? (
               <ScrollView
@@ -471,7 +476,6 @@ const History = () => {
                     </View>
                   </TouchableOpacity>
                 ))}
-                <Button onPress={getUser}>Fetch User</Button>
               </ScrollView>
             )}
           </View>

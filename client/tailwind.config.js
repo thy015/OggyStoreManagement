@@ -174,7 +174,9 @@ module.exports = {
         heading: undefined,
         body: undefined,
         mono: undefined,
-        roboto: ['Roboto_Condensed-Regular', 'sans-serif'],
+
+        poppins: ['Poppins-Regular', 'sans-serif'],
+        poppinsLight: ['Poppins-Light', 'sans-serif'],
         inriaBold: ['Inria-Bold', 'serif'],
         inriaRegular: ['Inria-Regular', 'serif'],
         inriaItalic: ['Inria-Italic', 'serif'],

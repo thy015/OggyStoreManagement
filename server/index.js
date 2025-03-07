@@ -60,19 +60,11 @@ admin.initializeApp({
 //route
 app.use(
   '/api/v1/authens',
-  (req, res, next) => {
-    console.log('Authen route hit');
-    next();
-  },
   authenRouter
 );
 
 app.use(
   '/api/v1/receipts',
-  (req, res, next) => {
-    console.log('Receipt route hit');
-    next();
-  },
   receiptRouter
 );
 

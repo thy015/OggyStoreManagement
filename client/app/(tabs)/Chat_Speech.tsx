@@ -24,6 +24,7 @@ import { FIREBASE_DB } from '@/config/firebaseConfig.ts';
 import { collection, addDoc, getDoc, updateDoc, doc } from 'firebase/firestore';
 import axios from 'axios';
 import { receiptsAPI } from '@/apis/receipts/index.ts';
+import { formatAmount } from '@/utils';
 interface MoneyDB {
   Spended: number;
   Income: number;
@@ -249,6 +250,7 @@ const Chat_Speech = () => {
       });
 
       await newRecording.startAsync();
+      console.log(newRecording);
       setRecording(newRecording);
     } catch (error) {
       console.error('Lỗi khi ghi âm:', error);
@@ -313,12 +315,6 @@ const Chat_Speech = () => {
       setIsLoading(false);
     }
   };
-  const formatVND = (amount: number): string => {
-    return new Intl.NumberFormat('vi-VN', {
-      style: 'currency',
-      currency: 'VND',
-    }).format(amount);
-  };
 
   const handleSendMessage = async () => {
     if (!transcription.trim()) return;
@@ -337,7 +333,7 @@ const Chat_Speech = () => {
           ...prev,
           {
             sender: 'bot',
-            message: `Bot: bạn đã ${generatedData.type} ${formatVND(generatedData.totalAmount)} thuộc danh mục ${generatedData.category}${
+            message: `Bot: bạn đã ${generatedData.type} ${formatAmount(generatedData.totalAmount)} thuộc danh mục ${generatedData.category}${
               Array.isArray(generatedData.category)
                 ? generatedData.category.map((item: any, index: number) => (
                     <Text key={index}>

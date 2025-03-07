@@ -8,18 +8,20 @@ import {
   Platform,
   Image,
 } from 'react-native';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link, router } from 'expo-router';
 import { ThemedView } from '@/components/ThemedView';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { getAuth, createUserWithEmailAndPassword } from 'firebase/auth';
 import { UserIcon } from 'lucide-react-native';
 import { Button, ButtonText } from '@/components/ui/button';
 import Spinner from '@/components/spinner';
 import { z } from 'zod';
+import { authensAPI } from '@/apis/authens';
 
 const SignUp = () => {
-  const auth = getAuth();
+  useEffect(() => {
+    Alert.alert('Test', 'This is a test alert');
+  }, []);
   const [formField, setFormField] = useState({ Email: '', Password: '' });
   const [focusEmail, setFocusEmail] = useState(false);
   const [focusPassword, setFocusPassword] = useState(false);
@@ -39,19 +41,16 @@ const SignUp = () => {
         // Validate input
         SignUpSchema.parse(formField);
         setLoading(true);
-        const user = await createUserWithEmailAndPassword(
-          auth,
+        const user = await authensAPI.signUp(
           formField.Email,
           formField.Password
-        )
-          .then((user) => {
-            console.log(user);
-            router.replace('/Home');
-          })
-          .catch((error) => {
-            const errorMessage = error.message;
-            Alert.alert('Please check your email and password ' + errorMessage);
-          });
+        );
+        console.log('Sign-up response:', user);
+        if (!user) {
+          return;
+        }
+        Alert.alert('Sign-up successful');
+        router.replace('/Home');
       } catch (error: any) {
         if (error instanceof z.ZodError) {
           // Show validation errors
