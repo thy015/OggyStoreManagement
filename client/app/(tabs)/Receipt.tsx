@@ -34,28 +34,6 @@ interface MoneyDB {
 }
 
 const Receipt = () => {
-
-  useEffect(() => {
-    const fetchAIKey=async()=>{
-      try {
-        const key = await axios.get(
-            `${process.env.EXPO_PUBLIC_SERVER_URL}/api/v1/authens/get-ai-key`
-        );
-        if (key) {
-          //save key in expo secure store
-          await SecureStore.setItemAsync(AI_KEY_STORAGE, key.data.apiKey);
-          console.log('AI key:', key.data.apiKey);
-        }
-      } catch (error) {
-        console.error('Failed to fetch AI KEY:', error);
-      }
-    }
-
-    fetchAIKey();
-
-  }, []);
-  const genAI = new GoogleGenerativeAI(AI_KEY_STORAGE);
-
   const [MoneyDB, setMoneyDB] = useState<MoneyDB[]>([]);
   const [image, setImage] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(false);

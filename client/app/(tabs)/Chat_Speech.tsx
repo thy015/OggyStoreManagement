@@ -25,8 +25,6 @@ import { FIREBASE_DB } from '@/config/firebaseConfig.ts';
 import { collection, addDoc, getDoc, updateDoc, doc } from 'firebase/firestore';
 import { receiptsAPI } from '@/apis/receipts/index.ts';
 import axios from 'axios';
-import axios from 'axios';
-import { receiptsAPI } from '@/apis/receipts/index.ts';
 interface MoneyDB {
   Spended: number;
   Income: number;
