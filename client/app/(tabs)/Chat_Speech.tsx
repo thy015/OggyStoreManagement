@@ -21,10 +21,12 @@ import { GoogleGenerativeAI } from '@google/generative-ai';
 import Feather from '@expo/vector-icons/Feather';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { useFocusEffect } from '@react-navigation/native';
-import { FIREBASE_DB } from '../../config/firebaseConfig.ts';
+import { FIREBASE_DB } from '@/config/firebaseConfig.ts';
 import { collection, addDoc, getDoc, updateDoc, doc } from 'firebase/firestore';
 import { receiptsAPI } from '@/apis/receipts/index.ts';
 import axios from 'axios';
+import axios from 'axios';
+import { receiptsAPI } from '@/apis/receipts/index.ts';
 interface MoneyDB {
   Spended: number;
   Income: number;
@@ -33,28 +35,58 @@ interface MoneyDB {
 const AI_KEY_STORAGE = 'ai_key_storage';
 
 const Chat_Speech = () => {
+  const [aiKey, setAiKey] = useState<string | null>(null);
+  const [visionKey, setVisionKey] = useState<string | null>(null);
 
   useEffect(() => {
-    const fetchAIKey=async()=>{
-    try {
-      const key = await axios.get(
-        `${process.env.EXPO_PUBLIC_SERVER_URL}/api/v1/authens/get-ai-key`
-      );
-      if (key) {
-          //save key in expo secure store
-          await SecureStore.setItemAsync(AI_KEY_STORAGE, key.data.apiKey);
-          console.log('AI key:', key.data.apiKey);
+    const fetchAIKey = async () => {
+      try {
+        // Fetch key from API
+        const key = await receiptsAPI.setAIKey();
+        if (key) {
+          setAiKey(key);
+        }
+      } catch (error) {
+        console.error('Failed to fetch AI KEY:', error);
       }
-    } catch (error) {
-      console.error('Failed to fetch AI KEY:', error);
-    }
-    }
+    };
 
-    fetchAIKey();
-  
+    const loadAIKey = async () => {
+      if (aiKey) {
+        setAiKey(aiKey);
+      } else {
+        fetchAIKey();
+      }
+    };
+
+    loadAIKey();
   }, []);
 
-  const genAI = new GoogleGenerativeAI(AI_KEY_STORAGE)
+  useEffect(() => {
+    const fetchVisionKey = async () => {
+      try {
+        // Fetch key from API
+        const key = await receiptsAPI.setVisionKey();
+        if (key) {
+          setVisionKey(key);
+        }
+      } catch (error) {
+        console.error('Failed to fetch Vision KEY:', error);
+      }
+    };
+
+    const loadVisionKey = async () => {
+      if (visionKey) {
+        setVisionKey(visionKey);
+      } else {
+        fetchVisionKey();
+      }
+    };
+
+    loadVisionKey();
+  }, []);
+  // Initialize GoogleGenerativeAI
+  const genAI = aiKey ? new GoogleGenerativeAI(aiKey) : null;
   const [data, setData] = useState<any>({});
   const [recording, setRecording] = useState<Audio.Recording | null>(null);
   const [transcription, setTranscription] = useState<string>('');
@@ -266,10 +298,10 @@ const Chat_Speech = () => {
         JSON.stringify(requestBody, null, 2)
       );
 
-      //send to server to store env
-
-      const response:any=await receiptsAPI.sendPrompt(requestBody)
-
+      const response = await axios.post(
+        `https://speech.googleapis.com/v1/speech:recognize?key=${visionKey}`,
+        requestBody
+      );
       console.log('📩 Phản hồi từ Google:', response.data);
 
       if (response.data.results) {
@@ -284,6 +316,7 @@ const Chat_Speech = () => {
       setIsLoading(false);
     }
   };
+
   const formatVND = (amount: number): string => {
     return new Intl.NumberFormat('vi-VN', {
       style: 'currency',
@@ -349,11 +382,11 @@ const Chat_Speech = () => {
         Bạn chỉ cần viết ra mỗi json không cần giải thích thêm
       `;
 
-      const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
-      const response = await model.generateContent([prompt]);
+      const model = genAI?.getGenerativeModel({ model: 'gemini-1.5-flash' });
+      const response = await model?.generateContent([prompt]);
 
       const result =
-        response.response.candidates?.[0]?.content?.parts?.[0]?.text || '';
+        response?.response.candidates?.[0]?.content?.parts?.[0]?.text || '';
 
       const Json = 'text:' + result;
       const cleanedResult = Json.replace(/text:\s*```json|```/g, '').trim();

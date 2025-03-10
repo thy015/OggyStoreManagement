@@ -7,7 +7,7 @@ const AI_KEY_STORAGE = 'ai_key';
 export const fetchAIKey = createAsyncThunk('aiKey/fetchAIKey', async () => {
   let key = await SecureStore.getItemAsync(AI_KEY_STORAGE);
   if (!key) {
-    key = await authensAPI.saveAIKey();
+    key = await authensAPI.setAIKey();
     if (key) {
       await SecureStore.setItemAsync(AI_KEY_STORAGE, key);
     }

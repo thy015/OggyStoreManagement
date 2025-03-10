@@ -34,7 +34,6 @@ class AuthensAPI {
   }
 }
 
-
   //POST
   async signIn(email: string, password: string) {
     return await api.post('/api/v1/authens/sign-in', {
