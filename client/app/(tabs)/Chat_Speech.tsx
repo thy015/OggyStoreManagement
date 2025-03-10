@@ -315,6 +315,12 @@ const Chat_Speech = () => {
       setIsLoading(false);
     }
   };
+  const formatVND = (amount: number): string => {
+    return new Intl.NumberFormat('vi-VN', {
+      style: 'currency',
+      currency: 'VND',
+    }).format(amount);
+  };
 
   const handleSendMessage = async () => {
     if (!transcription.trim()) return;

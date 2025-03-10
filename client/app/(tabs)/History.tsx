@@ -476,6 +476,7 @@ const History = () => {
                     </View>
                   </TouchableOpacity>
                 ))}
+                <Button onPress={getUser}>Fetch User</Button>
               </ScrollView>
             )}
           </View>

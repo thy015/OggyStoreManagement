@@ -26,6 +26,7 @@ import { GoogleGenerativeAI } from '@google/generative-ai';
 import { ArrowDownCircle } from 'lucide-react-native';
 import { receiptsAPI } from '@/apis/receipts/index.ts';
 import axios from 'axios';
+import { ReceiptData } from '@/share/types/receipts/index.ts';
 
 interface MoneyDB {
   Spended: number;
@@ -34,106 +35,52 @@ interface MoneyDB {
 
 const Receipt = () => {
 
-  const [aiKey, setAiKey] = useState<string | null>(null);
-  const [visionKey, setVisionKey] = useState<string | null>(null);
-
   useEffect(() => {
-    const fetchAIKey = async () => {
+    const fetchAIKey=async()=>{
       try {
-        // Fetch key from API
-        const key=await receiptsAPI.setAIKey()
+        const key = await axios.get(
+            `${process.env.EXPO_PUBLIC_SERVER_URL}/api/v1/authens/get-ai-key`
+        );
         if (key) {
-          setAiKey(key);
+          //save key in expo secure store
+          await SecureStore.setItemAsync(AI_KEY_STORAGE, key.data.apiKey);
+          console.log('AI key:', key.data.apiKey);
         }
       } catch (error) {
         console.error('Failed to fetch AI KEY:', error);
       }
-    };
+    }
 
-    const loadAIKey = async () => {
-      if (aiKey) {
-        setAiKey(aiKey);
-      } else {
-        fetchAIKey();
-      }
-    };
+    fetchAIKey();
 
-    loadAIKey();
   }, []);
-
-  useEffect(() => {
-    const fetchVisionKey = async () => {
-      try {
-        // Fetch key from API
-        const key = await receiptsAPI.setVisionKey();
-        if (key) {
-          setVisionKey(key);
-        }
-      } catch (error) {
-        console.error('Failed to fetch Vision KEY:', error);
-      }
-    };
-
-    const loadVisionKey = async () => {
-      if (visionKey) {
-        setVisionKey(visionKey);
-      } else {
-        fetchVisionKey();
-      }
-    };
-
-    loadVisionKey();
-  }, []);
-  // Initialize GoogleGenerativeAI 
-  const genAI = aiKey ? new GoogleGenerativeAI(aiKey) : null;
+  const genAI = new GoogleGenerativeAI(AI_KEY_STORAGE);
 
   const [MoneyDB, setMoneyDB] = useState<MoneyDB[]>([]);
   const [image, setImage] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(false);
   const [textImage, setTextImage] = useState<string>(``);
-  const [data, setData] = useState<any>({});
   const [switchCategory, setSwitchCategory] = useState(false);
   const [switchTextCategory, setSwitchTextCategory] = useState(false);
   const colorAnim = useRef(new Animated.Value(0)).current;
   const textColorAnim = useRef(new Animated.Value(0)).current;
   const [show, setShow] = useState(false);
-  const [generatedText, setGeneratedText] = useState('');
   const [totalSpended, setTotalSpended] = useState(0);
   const [totalIncome, setTotalIncome] = useState(0);
+  const [data, setData] = useState<ReceiptData>({
+    category: '',
+    Date: '',
+    items: [],
+    totalAmount: 0,
+    currency_code: '',
+  });
 
-  // TODO: write API transfer money func for others price
-  const generateText = async (text: string) => {
-    try {
-      const prompt = `
-        Chuyển đổi đoạn văn bản sau thành định dạng JSON của hóa đơn thanh toán.
-        ghi là 'json {....}'
-         ${text} Đảm bảo JSON chỉ bao gồm các trường:  'items' (mỗi item có 'productName', 'quantity', 'price'), 'totalAmount', 'Date','category'.
-        nếu price là giá tiền nước khác thì chuyển thành định dạng số tiền price của các nước khác thành VND.
-        Đảm bảo có phân loại "category" thể loại giao dịch ví dụ như ( đồ ăn , vui chơi , mua sắm, sinh hoạt ,...)
-        Bạn chỉ cần viết ra mỗi json không cần giải thích thêm.
-      `;
-
-      const model = genAI?.getGenerativeModel({ model: 'gemini-1.5-flash' });
-
-      const response = await model?.generateContent([prompt]);
-
-      const result =
-        response?.response.candidates?.[0]?.content?.parts?.[0]?.text || '';
-
-      setGeneratedText(result || '');
-      setTextImage(result || '');
-      console.log('Generated text:', result);
-      const Json = 'text:' + result;
-      const cleanedResult = Json.replace(/text:\s*```json|```/g, '').trim();
-
-      // Chuyển đổi thành object
-      const json = JSON.parse(cleanedResult);
-      console.log('Json:', json);
-      setData(json);
-    } catch (error) {
-      console.error('Error generating text:', error);
-      setGeneratedText('Lỗi khi gọi API!');
-    }
+  const recognizeText = async () => {
+    setLoading(true);
+    const response = await receiptsAPI.recognizeText(image);
+    setTextImage(response.result);
+    setData(response.result);
+    setLoading(false);
   };
 
   const toggleShow = () => {
@@ -280,7 +227,6 @@ const Receipt = () => {
 
     if (!result.canceled) {
       setImage(result.assets[0].uri);
-      console.log('Image:', result.assets[0].uri);
     }
   };
 
@@ -299,55 +245,6 @@ const Receipt = () => {
 
     if (!result.canceled) {
       setImage(result.assets[0].uri);
-    }
-  };
-
-  const convertImageToBase64 = async (imageUri: string): Promise<string> => {
-    const response = await fetch(imageUri);
-    const blob = await response.blob();
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        const base64data = reader.result?.toString().split(',')[1];
-        resolve(base64data || '');
-      };
-      reader.onerror = reject;
-      reader.readAsDataURL(blob);
-    });
-  };
-
-  const recognizeText = async () => {
-    try {
-      console.log('Recognizing text from image:', image);
-      if (!image) {
-        throw new Error('Image is not defined');
-      }
-      const base64Image = await convertImageToBase64(image);
-
-      const response = await axios.post(
-        `https://vision.googleapis.com/v1/images:annotate?key=${visionKey}`,
-        {
-          requests: [
-            {
-              image: { content: base64Image },
-              features: [{ type: 'TEXT_DETECTION' }],
-            },
-          ],
-        }
-      );
-     
-      const textAnnotations = response.data.responses[0].textAnnotations;
-      if (textAnnotations && textAnnotations.length > 0) {
-        console.log('Text:', textAnnotations[0].description);
-        generateText(textAnnotations[0].description);
-      } else {
-        setTextImage('Không tìm thấy văn bản nào!');
-      }
-    } catch (error) {
-      console.error('Lỗi OCR:', error);
-      setTextImage('Lỗi khi nhận diện văn bản.');
-    } finally {
-      setLoading(false);
     }
   };
 

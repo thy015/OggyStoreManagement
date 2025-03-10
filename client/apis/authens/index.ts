@@ -1,12 +1,10 @@
-import api from '@/utils/api';
-import { Alert } from 'react-native';
-import axios from 'axios';
+import api from "@/utils/api";
+
 
 class AuthensAPI {
   setAIKey() {
     throw new Error('Method not implemented.');
   }
-
   //POST
   async signUp(email: string, password: string) {
     try {
