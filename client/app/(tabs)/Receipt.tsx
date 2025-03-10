@@ -100,39 +100,13 @@ const Receipt = () => {
   const [totalSpended, setTotalSpended] = useState(0);
   const [totalIncome, setTotalIncome] = useState(0);
 
-  // TODO: write API transfer money func for others price
-  const generateText = async (text: string) => {
-    try {
-      const prompt = `
-        Chuyển đổi đoạn văn bản sau thành định dạng JSON của hóa đơn thanh toán.
-        ghi là 'json {....}'
-         ${text} Đảm bảo JSON chỉ bao gồm các trường:  'items' (mỗi item có 'productName', 'quantity', 'price'), 'totalAmount', 'Date','category'.
-        nếu price là giá tiền nước khác thì chuyển thành định dạng số tiền price của các nước khác thành VND.
-        Đảm bảo có phân loại "category" thể loại giao dịch ví dụ như ( đồ ăn , vui chơi , mua sắm, sinh hoạt ,...)
-        Bạn chỉ cần viết ra mỗi json không cần giải thích thêm.
-      `;
-
-      const model = genAI?.getGenerativeModel({ model: 'gemini-1.5-flash' });
-
-      const response = await model?.generateContent([prompt]);
-
-      const result =
-        response?.response.candidates?.[0]?.content?.parts?.[0]?.text || '';
-
-      setGeneratedText(result || '');
-      setTextImage(result || '');
-      console.log('Generated text:', result);
-      const Json = 'text:' + result;
-      const cleanedResult = Json.replace(/text:\s*```json|```/g, '').trim();
-
-      // Chuyển đổi thành object
-      const json = JSON.parse(cleanedResult);
-      console.log('Json:', json);
-      setData(json);
-    } catch (error) {
-      console.error('Error generating text:', error);
-      setGeneratedText('Lỗi khi gọi API!');
-    }
+  const recognizeText = async () => {
+    setLoading(true);
+    console.log('Start recognize text');
+    const response = await receiptsAPI.recognizeText(image);
+    setTextImage(response);
+    setData(response);
+    setLoading(false);
   };
 
   const toggleShow = () => {
@@ -313,41 +287,6 @@ const Receipt = () => {
       reader.onerror = reject;
       reader.readAsDataURL(blob);
     });
-  };
-
-  const recognizeText = async () => {
-    try {
-      console.log('Recognizing text from image:', image);
-      if (!image) {
-        throw new Error('Image is not defined');
-      }
-      const base64Image = await convertImageToBase64(image);
-
-      const response = await axios.post(
-        `https://vision.googleapis.com/v1/images:annotate?key=${visionKey}`,
-        {
-          requests: [
-            {
-              image: { content: base64Image },
-              features: [{ type: 'TEXT_DETECTION' }],
-            },
-          ],
-        }
-      );
-
-      const textAnnotations = response.data.responses[0].textAnnotations;
-      if (textAnnotations && textAnnotations.length > 0) {
-        console.log('Text:', textAnnotations[0].description);
-        generateText(textAnnotations[0].description);
-      } else {
-        setTextImage('Không tìm thấy văn bản nào!');
-      }
-    } catch (error) {
-      console.error('Lỗi OCR:', error);
-      setTextImage('Lỗi khi nhận diện văn bản.');
-    } finally {
-      setLoading(false);
-    }
   };
 
   return (

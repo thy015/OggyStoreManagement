@@ -1,4 +1,3 @@
-
 import {
   GetAIKeyResponse,
   GetMoneyKeyResponse,
@@ -51,6 +50,7 @@ class ReceiptsAPI {
   //recongize text
   async recognizeText(image: string) {
     try {
+      console.log('Start recognize text');
       const formData = new FormData();
 
       if (image) {
@@ -67,6 +67,7 @@ class ReceiptsAPI {
           body: formData,
         }
       );
+      console.log('response', response);
       return await response.json();
     } catch (error) {
       console.log(error);
