@@ -14,6 +14,7 @@ import {
 import { Audio } from 'expo-av';
 import * as FileSystem from 'expo-file-system';
 import FontAwesome5 from '@expo/vector-icons/FontAwesome5';
+import * as SecureStore from 'expo-secure-store';
 import Entypo from '@expo/vector-icons/Entypo';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { GoogleGenerativeAI } from '@google/generative-ai';
@@ -22,12 +23,16 @@ import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { useFocusEffect } from '@react-navigation/native';
 import { FIREBASE_DB } from '@/config/firebaseConfig.ts';
 import { collection, addDoc, getDoc, updateDoc, doc } from 'firebase/firestore';
+import { receiptsAPI } from '@/apis/receipts/index.ts';
+import axios from 'axios';
 import axios from 'axios';
 import { receiptsAPI } from '@/apis/receipts/index.ts';
 interface MoneyDB {
   Spended: number;
   Income: number;
 }
+
+const AI_KEY_STORAGE = 'ai_key_storage';
 
 const Chat_Speech = () => {
   const [aiKey, setAiKey] = useState<string | null>(null);
@@ -82,7 +87,6 @@ const Chat_Speech = () => {
   }, []);
   // Initialize GoogleGenerativeAI
   const genAI = aiKey ? new GoogleGenerativeAI(aiKey) : null;
-
   const [data, setData] = useState<any>({});
   const [recording, setRecording] = useState<Audio.Recording | null>(null);
   const [transcription, setTranscription] = useState<string>('');
@@ -298,7 +302,6 @@ const Chat_Speech = () => {
         `https://speech.googleapis.com/v1/speech:recognize?key=${visionKey}`,
         requestBody
       );
-
       console.log('📩 Phản hồi từ Google:', response.data);
 
       if (response.data.results) {

@@ -1,3 +1,4 @@
+
 import {
   GetAIKeyResponse,
   GetMoneyKeyResponse,
@@ -60,7 +61,7 @@ class ReceiptsAPI {
         } as any);
       }
       const response = await fetch(
-        'https://oggy-store-management-be.vercel.app/api/v1/receipts/upload-and-convert',
+        `${process.env.EXPO_PUBLIC_SERVER_URL}/api/v1/receipts/upload-and-convert`,
         {
           method: 'POST',
           body: formData,

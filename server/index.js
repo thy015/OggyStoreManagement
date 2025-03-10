@@ -12,7 +12,6 @@ const admin = require('firebase-admin');
 const authenRouter = require('./apis/authens/authen.controller');
 const receiptRouter = require('./apis/receipts/receipt.controller');
 
-
 const allowedOrigins = [
   'http://localhost:8081',
   'https://oggy-store-management-be.vercel.app',
@@ -86,6 +85,15 @@ app.use((req, res, next) => {
 });
 
 app.get('/', (req, res) => res.send('Express on Vercel'));
+
+// 🔥 Add CORS headers manually in case middleware fails
+app.use((req, res, next) => {
+  res.header('Access-Control-Allow-Origin', 'http://localhost:8081');
+  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  res.header('Access-Control-Allow-Credentials', 'true');
+  next();
+});
 
 // Xử lý lỗi
 app.use((err, req, res, next) => {
