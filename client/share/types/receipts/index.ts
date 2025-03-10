@@ -20,16 +20,28 @@ export interface PromptRequestProps {
 }
 
 interface ImageRequest {
-  image: { content: string };
-  features: { type: 'TEXT_DETECTION' }[];
+  image: { image: string };
 }
 export interface ImageRequestProps {
-  requests: ImageRequest[];
+  requests: ImageRequest;
 }
 
 export interface GetAIKeyResponse {
-    apiKey: string;
+  apiKey: string;
 }
+
+export interface GetMoneyKeyResponse {
+  moneyKey: string;
+}
+
 export interface GetVisionKeyResponse {
   visionKey: string;
+}
+
+export interface ReceiptData {
+  category: string;
+  Date: string;
+  items: { productName: string; quantity: number; price: number }[];
+  totalAmount: number;
+  currency_code: string;
 }

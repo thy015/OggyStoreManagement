@@ -12,7 +12,6 @@ import ReceiptList from '@/components/receiptCard.tsx';
 import { screenWidth } from '@/utils';
 const Home = () => {
 
-
   const data = {
     labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'], // X-axis labels
     datasets: [
