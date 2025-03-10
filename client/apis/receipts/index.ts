@@ -47,6 +47,31 @@ class ReceiptsAPI {
     }
   }
 
+  //recongize text
+  async recognizeText(image: string) {
+    try {
+      const formData = new FormData();
+
+      if (image) {
+        formData.append('file', {
+          uri: image,
+          name: 'uploaded_image.jpg',
+          type: 'image/jpeg',
+        } as any);
+      }
+      const response = await fetch(
+        'https://oggy-store-management-be.vercel.app/api/v1/receipts/upload-and-convert',
+        {
+          method: 'POST',
+          body: formData,
+        }
+      );
+      return await response.json();
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
   async setVisionKey() {
     try {
       const response = await axios.get<GetVisionKeyResponse>(

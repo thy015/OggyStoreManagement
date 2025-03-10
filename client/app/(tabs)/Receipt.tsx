@@ -30,18 +30,11 @@ import { AI_KEY, GOOGLE_VISION_API_KEY, AI_KEY_MONNEY } from '@env';
 import { ArrowDownCircle } from 'lucide-react-native';
 import { receiptsAPI } from '@/apis/receipts/index.ts';
 import axios from 'axios';
+import { ReceiptData } from '@/share/types/receipts/index.ts';
 
 interface MoneyDB {
   Spended: number;
   Income: number;
-}
-
-interface ReceiptData {
-  category: string;
-  Date: string;
-  items: { productName: string; quantity: number; price: number }[];
-  totalAmount: number;
-  currency_code: string;
 }
 
 const Receipt = () => {
@@ -94,8 +87,8 @@ const Receipt = () => {
   });
 >>>>>>> 1a70ffc (feat: add money key retrieval and conversion functionality in receipts API)
 
-  //api
   const recognizeText = async () => {
+<<<<<<< HEAD
     try {
 <<<<<<< HEAD
       const prompt = `
@@ -154,6 +147,13 @@ const Receipt = () => {
     } catch (error) {
       console.log(error);
     }
+=======
+    setLoading(true);
+    const response = await receiptsAPI.recognizeText(image);
+    setTextImage(response.result);
+    setData(response.result);
+    setLoading(false);
+>>>>>>> 2ecd3bd (`feat: add recognizeText method to ReceiptsAPI and update Receipt component to use it`)
   };
 
   const toggleShow = () => {
