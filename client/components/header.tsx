@@ -46,7 +46,7 @@ const CustomHeader: React.FC = () => {
 
 const styles = StyleSheet.create({
   header: {
-    height : isIOS ? 100 : 110,
+    height: isIOS ? 120 : 110,
     borderBottomWidth: 1,
     borderBottomColor: '#D8D8D8',
   },
