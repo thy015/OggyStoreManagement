@@ -37,3 +37,11 @@ export interface GetMoneyKeyResponse {
 export interface GetVisionKeyResponse {
   visionKey: string;
 }
+
+export interface ReceiptData {
+  category: string;
+  Date: string;
+  items: { productName: string; quantity: number; price: number }[];
+  totalAmount: number;
+  currency_code: string;
+}

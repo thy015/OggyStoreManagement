@@ -26,18 +26,11 @@ import { GoogleGenerativeAI } from '@google/generative-ai';
 import { ArrowDownCircle } from 'lucide-react-native';
 import { receiptsAPI } from '@/apis/receipts/index.ts';
 import axios from 'axios';
+import { ReceiptData } from '@/share/types/receipts/index.ts';
 
 interface MoneyDB {
   Spended: number;
   Income: number;
-}
-
-interface ReceiptData {
-  category: string;
-  Date: string;
-  items: { productName: string; quantity: number; price: number }[];
-  totalAmount: number;
-  currency_code: string;
 }
 
 const Receipt = () => {
@@ -60,31 +53,12 @@ const Receipt = () => {
     currency_code: '',
   });
 
-  //api
   const recognizeText = async () => {
-    try {
-      const formData = new FormData();
-
-      if (image) {
-        formData.append('file', {
-          uri: image,
-          name: 'uploaded_image.jpg',
-          type: 'image/jpeg',
-        } as any);
-      }
-      const response = await fetch(
-        'https://oggy-store-management-be.vercel.app/api/v1/receipts/upload-and-convert',
-        {
-          method: 'POST',
-          body: formData,
-        }
-      );
-      const data = await response.json();
-      setData(data.result);
-      setTextImage(data.result);
-    } catch (error) {
-      console.log(error);
-    }
+    setLoading(true);
+    const response = await receiptsAPI.recognizeText(image);
+    setTextImage(response.result);
+    setData(response.result);
+    setLoading(false);
   };
 
   const toggleShow = () => {
