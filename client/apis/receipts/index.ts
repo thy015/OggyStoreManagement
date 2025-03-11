@@ -50,7 +50,6 @@ class ReceiptsAPI {
   //recongize text
   async recognizeText(image: string) {
     try {
-      console.log('Start recognize text');
       const formData = new FormData();
 
       if (image) {
