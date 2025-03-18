@@ -50,26 +50,45 @@ class ReceiptsAPI {
   //recongize text
   async recognizeText(image: string) {
     try {
-      const formData = new FormData();
-
-      if (image) {
-        formData.append('file', {
-          uri: image,
-          name: 'uploaded_image.jpg',
-          type: 'image/jpeg',
-        } as any);
+      if (!image) {
+        throw new Error('⚠️ No image provided');
       }
+
+      console.log('🖼️ Image URI:', image);
+
+      const formData = new FormData();
+      formData.append('file', {
+        uri: image,
+        name: 'image.jpg',
+        type: 'image/jpeg',
+      });
+
+      // Gửi request
       const response = await fetch(
-        `${process.env.EXPO_PUBLIC_SERVER_URL}/api/v1/receipts/upload-and-convert`,
+        `${process.env.EXPO_PRIVATE_SERVER_URL}/api/v1/receipts/upload-and-convert`,
         {
           method: 'POST',
           body: formData,
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
         }
       );
-      console.log('response', response);
-      return await response.json();
+
+      console.log('📡 Response status:', response.status);
+
+      if (!response.ok) {
+        throw new Error(
+          `🚨 Server error: ${response.status} ${response.statusText}`
+        );
+      }
+
+      const data = await response.json();
+      console.log('✅ Success:', data);
+      return data.result;
     } catch (error) {
-      console.log(error);
+      console.error('❌ Error in recognizeText:', error);
+      return null;
     }
   }
 

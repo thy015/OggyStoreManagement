@@ -75,6 +75,7 @@ const convertImageToBase64 = async (imageUri) => {
 };
 
 const generateTextImage = async (text) => {
+  console.log('🔥 Text:', text);
   try {
     const prompt = `
       Chuyển đổi đoạn văn bản sau thành định dạng JSON của hóa đơn thanh toán.

@@ -101,12 +101,17 @@ const Receipt = () => {
   const [totalIncome, setTotalIncome] = useState(0);
 
   const recognizeText = async () => {
-    setLoading(true);
-    console.log('Start recognize text');
-    const response = await receiptsAPI.recognizeText(image);
-    setTextImage(response);
-    setData(response);
-    setLoading(false);
+    try {
+      setLoading(true);
+      console.log('Start recognize text');
+      const response = await receiptsAPI.recognizeText(image);
+      setTextImage(response);
+      setData(response);
+      setLoading(false);
+    } catch (error) {
+      console.error('Failed to recognize text:', error);
+      setLoading(false);
+    }
   };
 
   const toggleShow = () => {
