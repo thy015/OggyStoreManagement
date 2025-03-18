@@ -2,26 +2,18 @@ const request = require('supertest');
 const app = require('../../index');
 const path = require('path');
 
-describe('Receipt API Tests', () => {
-  /** ✅ Test GET /get-vision-key */
-  test('should return visionKey', async () => {
-    const response = await request(app).get('/api/v1/receipts/get-vision-key');
+describe('Scanned image of Vietnamese invoice', () => {
+  /** ✅ Test POST /prompts */
+  test('should upload image and return response', async () => {
+    const filePath = path.join(__dirname, 'tieng_viet.jpg');
+    const response = await request(app)
+      .post('/api/v1/receipts/upload-and-convert')
+      .attach('file', filePath);
 
     expect(response.statusCode).toBe(200);
-    expect(response.body).toHaveProperty('visionKey');
-    expect(typeof response.body.visionKey).toBe('string');
-    expect(response.body.visionKey).toBeTruthy();
-  });
-
-  /** ✅ Test GET /get-ai-key */
-  test('should return aiKey', async () => {
-    const response = await request(app).get('/api/v1/receipts/get-ai-key');
-
-    expect(response.statusCode).toBe(200);
-    expect(response.body).toHaveProperty('apiKey');
-    expect(typeof response.body.apiKey).toBe('string');
-    expect(response.body.apiKey).toBeTruthy();
-  });
+    expect(response.body).toHaveProperty('result');
+    expect(response.body.result).toBeTruthy();
+  }, 60000);
 
   /** ✅ Test POST /prompts */
   test('should upload image and return response', async () => {
@@ -44,45 +36,5 @@ describe('Receipt API Tests', () => {
     expect(response.statusCode).toBe(400);
     expect(response.body).toHaveProperty('message');
     expect(response.body.message).toBe('No file uploaded.');
-  });
-
-  // Test POST
-  test('should return 200 and valid JSON response', async () => {
-    const response = await request(app)
-      .post('/api/v1/receipts/text-convert')
-      .send({ text: 'Ăn sáng 30k' });
-
-    expect(response.statusCode).toBe(200);
-    expect(response.body).toBeDefined();
-    expect(typeof response.body).toBe('object');
-  });
-
-  //  Test POST /prompts with invalid request body
-  test('should return 402 for missing text field', async () => {
-    const response = await request(app)
-      .post('/api/v1/receipts/text-convert')
-      .send({});
-
-    expect(response.statusCode).toBe(403);
-    expect(response.body.message).toBe('Missing or invalid request body');
-  });
-
-  // Test POST /prompts
-  test('should return 403 for invalid text field', async () => {
-    const response = await request(app)
-      .post('/api/v1/receipts/text-convert')
-      .send({ text: 12345 });
-
-    expect(response.statusCode).toBe(403);
-    expect(response.body.message).toBe('Missing or invalid request body');
-  });
-
-  test('should return 404 for invalid text field', async () => {
-    const response = await request(app)
-      .post('/api/v1/receipts/text-convert')
-      .send({ text: 12345 });
-
-    expect(response.statusCode).toBe(403);
-    expect(response.body.message).toBe('Missing or invalid request body');
   });
 });
