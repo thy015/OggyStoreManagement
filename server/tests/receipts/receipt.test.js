@@ -35,6 +35,7 @@ describe('Receipt API Tests', () => {
     expect(response.body.result).toBeTruthy();
   }, 60000);
 
+  // Test POST /prompts with invalid request body
   test('should return error when no image is uploaded', async () => {
     const response = await request(app)
       .post('/api/v1/receipts/upload-and-convert')
@@ -45,6 +46,7 @@ describe('Receipt API Tests', () => {
     expect(response.body.message).toBe('No file uploaded.');
   });
 
+  // Test POST
   test('should return 200 and valid JSON response', async () => {
     const response = await request(app)
       .post('/api/v1/receipts/text-convert')
@@ -55,7 +57,8 @@ describe('Receipt API Tests', () => {
     expect(typeof response.body).toBe('object');
   });
 
-  test('should return 403 for missing text field', async () => {
+  //  Test POST /prompts with invalid request body
+  test('should return 402 for missing text field', async () => {
     const response = await request(app)
       .post('/api/v1/receipts/text-convert')
       .send({});
@@ -64,7 +67,17 @@ describe('Receipt API Tests', () => {
     expect(response.body.message).toBe('Missing or invalid request body');
   });
 
-  test('should return 403 for invalid text type', async () => {
+  // Test POST /prompts
+  test('should return 403 for invalid text field', async () => {
+    const response = await request(app)
+      .post('/api/v1/receipts/text-convert')
+      .send({ text: 12345 });
+
+    expect(response.statusCode).toBe(403);
+    expect(response.body.message).toBe('Missing or invalid request body');
+  });
+
+  test('should return 404 for invalid text field', async () => {
     const response = await request(app)
       .post('/api/v1/receipts/text-convert')
       .send({ text: 12345 });
