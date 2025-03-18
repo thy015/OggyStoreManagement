@@ -89,8 +89,9 @@ app.use((req, res, next) => {
 
 // Xử lý lỗi
 app.use((err, req, res, next) => {
-  console.error(err.stack);
+  console.log (err);
   res.status(500).send('Something broke!');
+  next ();
 });
 
 const server = http.createServer(app);

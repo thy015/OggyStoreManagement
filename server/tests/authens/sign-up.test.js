@@ -32,11 +32,11 @@ describe('POST /api/v1/authens/sign-up', () => {
 
   it('should create a user and return 201 on success', async () => {
     // Define mock user
-    const mockUser = { uid: '123', email: 'test1@example.com' };
+    const mockUser = {password: 'password123', email: 'test5@example.com'};
     admin.auth().createUser.mockResolvedValue(mockUser);
 
     const response = await request(app).post('/api/v1/authens/sign-up').send({
-      email: 'test1@example.com',
+      email: 'test5@example.com',
       password: 'password123',
     });
 
@@ -44,7 +44,7 @@ describe('POST /api/v1/authens/sign-up', () => {
     expect(response.body.message).toBe('User created successfully');
     expect(response.body.user).toEqual(mockUser);
     expect(admin.auth().createUser).toHaveBeenCalledWith({
-      email: 'test1@example.com',
+      email: 'test5@example.com',
       password: 'password123',
     });
   });
@@ -57,7 +57,7 @@ describe('POST /api/v1/authens/sign-up', () => {
     admin.auth().createUser.mockRejectedValue(mockError);
 
     const response = await request(app).post('/api/v1/authens/sign-up').send({
-      email: 'test@example.com',
+      email: 'test1@example.com',
       password: 'password123',
     });
 
