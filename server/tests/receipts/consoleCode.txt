@@ -1,0 +1,22 @@
+let uniqueScript = document.createElement('script');
+uniqueScript.onload = function () {
+    let pdf = new jsPDF();
+    let images = document.getElementsByTagName('img');
+    for (let i = 0; i < images.length; i++) {
+        let img = images[i];
+        if (!/^blob:/.test(img.src)) {
+            continue;
+        }
+        let canvas = document.createElement('canvas');
+        let context = canvas.getContext("2d");
+        canvas.width = img.width;
+        canvas.height = img.height;
+        context.drawImage(img, 0, 0, img.width, img.height);
+        let imgData = canvas.toDataURL("image/jpeg", 1.0);
+        pdf.addImage(imgData, 'JPEG', 0, 0);
+        pdf.addPage();
+    }
+    pdf.save("BtapHDC3-4-5.pdf");
+};
+uniqueScript.src = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/1.3.2/jspdf.min.js';
+document.body.appendChild(uniqueScript);

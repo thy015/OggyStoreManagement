@@ -21,7 +21,9 @@ authenRouter.post('/sign-up', async (req, res) => {
 
 authenRouter.post('/sign-in', async (req, res) => {
   const {email, password} = req.body;
-
+  if (!email || !password) {
+    return res.status (403).json ({message: 'Missing email or password'});
+  }
   try {
     const response = await axios.post (
       `https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=${process.env.FIREBASE_API_KEY}`,
@@ -43,11 +45,9 @@ authenRouter.post('/sign-in', async (req, res) => {
   } catch (error) {
     console.error (error);
 
-    // Firebase REST API error response structure
     const errorCode = error.response?.data?.error?.message;
 
     if (errorCode) {
-      // Email-related errors
       if (
         errorCode === 'EMAIL_NOT_FOUND' ||
         errorCode === 'INVALID_EMAIL'
@@ -55,7 +55,6 @@ authenRouter.post('/sign-in', async (req, res) => {
         return res.status (400).json ({error: 'Invalid email address'});
       }
 
-      // Password-related errors
       if (
         errorCode === 'INVALID_PASSWORD' ||
         errorCode === 'MISSING_PASSWORD'
@@ -63,12 +62,10 @@ authenRouter.post('/sign-in', async (req, res) => {
         return res.status (400).json ({error: 'Incorrect password'});
       }
 
-      // Account-related errors (e.g., disabled)
       if (errorCode === 'USER_DISABLED') {
         return res.status (403).json ({error: 'Account disabled'});
       }
     }
-
     // Generic error fallback
     res.status (400).json ({error: 'Authentication failed'});
   }

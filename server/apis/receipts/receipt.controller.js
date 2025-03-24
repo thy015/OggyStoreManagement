@@ -47,11 +47,18 @@ receiptRouter.post('/prompts', async (req, res) => {
     });
   }
 });
-
-const MoneyConverted = async (currency_code) => {
+// Converting money
+receiptRouter.post ('/converted', async (req, res) => {
+  const currency_code = req.body;
+  if (!currency_code) {
+    return res.status (403).json ({message: 'Missing currency code'});
+  }
+  if (!process.env.KEY_MONEY) {
+    return res.status (403).json ({message: 'Missing money converting key'});
+  }
   try {
     const response = await axios.get(
-      `https://api.fastforex.io/fetch-multi?from=${currency_code}&to=VND&api_key=${process.env.KEY_MONNEY}`
+      `https://api.fastforex.io/fetch-multi?from=${currency_code}&to=VND&api_key=${process.env.KEY_MONEY}`
     );
 
     const vndValue = response.data.results.VND;
@@ -59,7 +66,7 @@ const MoneyConverted = async (currency_code) => {
   } catch (error) {
     console.error('Error converting money:', error);
   }
-};
+});
 
 const convertImageToBase64 = async (imageUri) => {
   try {
@@ -98,20 +105,36 @@ const generateTextImage = async (text) => {
     console.error('Error generating text:', error);
   }
 };
-
+const SUPPORTED_MIME_TYPES = ['image/jpeg', 'image/png', 'image/gif', 'image/jpg'];
 //API conver image to text
 receiptRouter.post(
   '/upload-and-convert',
   uploadCloud.single('file'),
   async (req, res) => {
-    console.log('🔹 Received request body:' + req.file);
+    console.log ('🔹 Received request body:', req.file);
+
+    // Validate file exists
     if (!req.file) {
       return res.status(400).json({ message: 'No file uploaded.' });
     }
 
+    // Validate file type
+    if (!SUPPORTED_MIME_TYPES.includes (req.file.mimetype)) {
+      return res.status (400).json ({message: 'Invalid file format'});
+    }
+
+    // Validate API key
+    if (!process.env.GOOGLE_VISION_API_KEY ||
+      process.env.GOOGLE_VISION_API_KEY.trim () === '') {
+      console.error ('API Key validation failed - key is missing or empty');
+      return res.status (500).json ({
+        message: 'Must supply API key',
+        details: 'GOOGLE_VISION_API_KEY is missing or empty'
+      });
+    }
+
     try {
       const imageUrl = req.file.path;
-
       const base64Image = await convertImageToBase64(imageUrl);
 
       const imageConvert = await axios.post(
@@ -126,23 +149,50 @@ receiptRouter.post(
         }
       );
 
+      // Handle API errors
+      if (imageConvert.data.error) {
+        if (imageConvert.data.error.message.includes ('API key')) {
+          return res.status (500).json ({message: 'API key is invalid'});
+        }
+        throw new Error (imageConvert.data.error.message);
+      }
+
       const extractedText =
         imageConvert.data.responses[0]?.textAnnotations?.[0]?.description || '';
-      let result = await generateTextImage(extractedText);
-      if (result.currency_code !== 'VND') {
-        result.totalAmount *= await MoneyConverted(result.currency_code);
 
+      let result = await generateTextImage(extractedText);
+
+      // Currency conversion if needed
+      if (result.currency_code !== 'VND') {
+        const conversionRate = await axios.post (`/api/v1/receipts/converted`, result.currency_code);
+        result.totalAmount *= conversionRate;
         result.items = await Promise.all(
           result.items.map(async (item) => {
-            item.price *= await MoneyConverted(result.currency_code);
+            item.price *= conversionRate;
             return item;
           })
         );
       }
+
       return res.status(200).json({ result });
+
     } catch (error) {
       console.error('🔥 Error:', error);
-      return res.status(500).json({ message: 'Internal server error', error });
+
+      // Handle specific errors
+      if (error.response) {
+        if (error.response.status === 400) {
+          return res.status (400).json ({message: 'Invalid request payload'});
+        }
+        if (error.response.data?.error?.message.includes ('API key')) {
+          return res.status (500).json ({message: 'API key is invalid'});
+        }
+      }
+
+      return res.status (500).json ({
+        message: 'Internal server error',
+        error: process.env.NODE_ENV === 'development' ? error.message : undefined
+      });
     }
   }
 );
