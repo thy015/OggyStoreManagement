@@ -1,4 +1,6 @@
 import api from "@/utils/api";
+import axios from 'axios';
+import { Alert } from 'react-native';
 
 
 class AuthensAPI {
@@ -32,12 +34,18 @@ class AuthensAPI {
   }
 
   async signIn(email: string, password: string) {
-    return await api.post('/api/v1/authens/sign-in', {
-      data: {
+    const response = await axios.post(
+      `${process.env.EXPO_PUBLIC_SERVER_URL}/api/v1/authens/sign-in`,
+      {
         email,
         password,
-      },
-    });
+      }
+    );
+    if (response && response.data) {
+      return response.data;
+    } else {
+      Alert.alert('Sign-up failed. Please check your email and password.');
+    }
   }
 }
 export const authensAPI = new AuthensAPI();

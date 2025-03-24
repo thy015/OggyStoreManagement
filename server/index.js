@@ -11,6 +11,11 @@ const http = require('http');
 const admin = require('firebase-admin');
 const authenRouter = require('./apis/authens/authen.controller');
 const receiptRouter = require('./apis/receipts/receipt.controller');
+// middleware always put first
+app.use (express.json ());
+app.use (bodyParser.json ());
+app.use (cookieParser ());
+app.use (morgan ('combined'));
 
 const allowedOrigins = [
   'http://localhost:8081',
@@ -34,11 +39,7 @@ app.use(
     credentials: true,
   })
 );
-// middleware always put first
-app.use(express.json());
-app.use(bodyParser.json());
-app.use(cookieParser());
-app.use(morgan('combined'));
+
 //service account config
 const serviceAccountBase64 = process.env.SERVICE_ACCOUNT_BASE64;
 const serviceAccount = JSON.parse(

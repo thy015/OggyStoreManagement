@@ -9,10 +9,10 @@ import { useRouter, Link } from 'expo-router';
 import { ThemedView } from '@/components/ThemedView';
 import { SignInForm } from '@/share/types/authens';
 import { getAuth, signInWithEmailAndPassword } from '@firebase/auth';
+import { authensAPI } from '@/apis/authens';
 
 const SignIn = () => {
   const router = useRouter();
-  const auth=getAuth()
   const [formField, setFormField] = useState<SignInForm>({ Email: '', Password: '' });
   const [focusEmail, setFocusEmail] = useState(false);
   const [focusPassword, setFocusPassword] = useState(false);
@@ -31,19 +31,15 @@ const SignIn = () => {
       // Validate input
       SignInSchema.parse(formField);
       setLoading(true);
-      await signInWithEmailAndPassword(
-        auth,
+      const response = await authensAPI.signIn(
         formField.Email,
         formField.Password
-      )
-        .then((user) => {
-          console.log(user);
-          router.replace('/Home');
-        })
-        .catch((error) => {
-          const errorMessage = error.message;
-          Alert.alert('Please check your email and password ' + errorMessage);
-        });
+      );
+      if (response.ok) {
+        router.replace('/Home');
+      } else {
+        Alert.alert('Error', 'Invalid credentials');
+      }
     } catch (error: any) {
       if (error instanceof z.ZodError) {
         // Show validation errors
