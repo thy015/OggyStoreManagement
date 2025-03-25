@@ -339,7 +339,7 @@ const Chat_Speech = () => {
           ...prev,
           {
             sender: 'bot',
-            message: `Bot: bạn đã ${generatedData.type} ${formatAmount(generatedData.totalAmount)} thuộc danh mục ${generatedData.category}${
+            message: `Bot: bạn đã ${generatedData.type} ${formatAmount(generatedData.totalAmount)} thuộc danh mục ${
               Array.isArray(generatedData.category)
                 ? generatedData.category.map((item: any, index: number) => (
                     <Text key={index}>
