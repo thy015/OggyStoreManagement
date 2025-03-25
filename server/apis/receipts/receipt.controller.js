@@ -157,7 +157,7 @@ receiptRouter.post(
 
     try {
       const imageUrl = req.file.path;
-      const base64Image = await axios.post ('/convert-image-to-base64', imageUrl);
+      const base64Image = await axios.post ('api/v1/receipts/convert-image-to-base64', imageUrl);
 
       const imageConvert = await axios.post(
         `https://vision.googleapis.com/v1/images:annotate?key=${process.env.GOOGLE_VISION_API_KEY}`,
