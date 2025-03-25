@@ -52,10 +52,10 @@ receiptRouter.post ('/converted', async (req, res) => {
   const {currency_code} = req.body;
 
   if (!currency_code) {
-    return res.status (400).json ({message: 'Missing currency code'});
+    return res.status (403).json ({message: 'Missing currency code'});
   }
   if (!process.env.KEY_MONEY) {
-    return res.status (500).json ({message: 'Missing money converting key'});
+    return res.status (403).json ({message: 'Missing money converting key'});
   }
 
   console.log ('🔹 Received request for currency:', currency_code);
@@ -76,13 +76,16 @@ receiptRouter.post ('/converted', async (req, res) => {
     const vndValue = response.data.results.VND;
     return res.json ({currency: currency_code, converted_value: vndValue});
   } catch (error) {
-    console.error ('Error converting money:', error.message);
+    console.log ('Error converting money:', error.message);
     return res.status (500).json ({message: 'Error converting currency', error: error.message});
   }
 });
 
 receiptRouter.post ('/convert-image-to-base64', async (req, res) => {
   const {imageUri} = req.body
+  if (!imageUri) {
+    return res.status (403).json ({message: 'Missing image uri'});
+  }
   try {
     console.log(`Fetching image from: ${imageUri}`);
     const response = await axios.get(imageUri, { responseType: 'arraybuffer' });
@@ -90,7 +93,7 @@ receiptRouter.post ('/convert-image-to-base64', async (req, res) => {
     console.log('Image fetched successfully!');
     return Buffer.from(response.data).toString('base64');
   } catch (error) {
-    console.error('Error fetching image:', error.message);
+    console.log ('Error fetching image:', error.message);
     throw new Error('Failed to fetch image');
   }
 })
@@ -117,7 +120,7 @@ const generateTextImage = async (text) => {
     const json = JSON.parse(result);
     return json;
   } catch (error) {
-    console.error('Error generating text:', error);
+    console.log ('Error generating text:', error);
   }
 };
 const SUPPORTED_MIME_TYPES = [
@@ -148,7 +151,7 @@ receiptRouter.post(
       !process.env.GOOGLE_VISION_API_KEY ||
       process.env.GOOGLE_VISION_API_KEY.trim () === ''
     ) {
-      console.error ('API Key validation failed - key is missing or empty');
+      console.log ('API Key validation failed - key is missing or empty');
       return res.status (500).json ({
         message: 'Must supply API key',
         details: 'GOOGLE_VISION_API_KEY is missing or empty',
@@ -201,7 +204,7 @@ receiptRouter.post(
 
       return res.status(200).json({ result });
     } catch (error) {
-      console.error('🔥 Error:', error);
+      console.log ('🔥 Error:', error);
 
       // Handle specific errors
       if (error.response) {
@@ -255,7 +258,7 @@ const generateTextChat = async (text) => {
     console.log('🔥 Dữ liệu JSON:', json);
     return json;
   } catch (error) {
-    console.error('Error generating text:', error);
+    console.log ('Error generating text:', error);
     return null;
   }
 };
@@ -274,7 +277,7 @@ receiptRouter.post('/text-convert', async (req, res) => {
       return res.status(500).json({ message: 'Failed to generate JSON' });
     }
   } catch (e) {
-    console.error('Error in /text-convert:', e);
+    console.log ('Error in /text-convert:', e);
     return res.status(500).json({ message: 'Internal server error' });
   }
 });
