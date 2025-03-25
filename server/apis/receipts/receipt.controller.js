@@ -151,20 +151,74 @@ receiptRouter.post ('/converted', async (req, res) => {
   }
 });
 
+function isValidUrl (string) {
+  try {
+    new URL (string);
+    return true;
+  } catch (_) {
+    return false;
+  }
+}
 receiptRouter.post ('/convert-image-to-base64', async (req, res) => {
   const {imageUri} = req.body
   if (!imageUri) {
     return res.status (403).json ({message: 'Missing image uri'});
   }
+  if (!isValidUrl (imageUri)) {
+    return res.status (400).json ({
+      success: false,
+      message: 'Invalid image URL format',
+      error: 'Validation error'
+    });
+  }
   try {
     console.log(`Fetching image from: ${imageUri}`);
-    const response = await axios.get(imageUri, { responseType: 'arraybuffer' });
+    const response = await axios.get (imageUri, {
+      responseType: 'arraybuffer',
+      timeout: 10000 // 10 second timeout
+    });
+
+    if (!response.data || response.data.length === 0) {
+      return res.status (400).json ({
+        success: false,
+        message: 'Received empty image data',
+        error: 'Invalid image'
+      });
+    }
 
     console.log('Image fetched successfully!');
-    return Buffer.from(response.data).toString('base64');
+    const base64Data = Buffer.from (response.data).toString ('base64');
+
+    return res.status (200).json ({
+      success: true,
+      message: 'Image converted successfully',
+      data: {
+        base64: base64Data,
+        mimeType: response.headers['content-type'] || 'application/octet-stream',
+        sizeBytes: response.data.length
+      }
+    });
   } catch (error) {
-    console.log ('Error fetching image:', error.message);
-    throw new Error('Failed to fetch image');
+    console.error ('Error fetching image:', error.message);
+
+    let statusCode = 500;
+    let errorMessage = 'Failed to fetch and convert image';
+
+    if (error.response) {
+      // Handle HTTP errors from the image server
+      statusCode = error.response.status;
+      errorMessage = `Image server responded with ${statusCode}`;
+    } else if (error.code === 'ECONNABORTED') {
+      statusCode = 504;
+      errorMessage = 'Image server request timeout';
+    }
+
+    return res.status (statusCode).json ({
+      success: false,
+      message: errorMessage,
+      error: error.message,
+      details: process.env.NODE_ENV === 'development' ? error.stack : undefined
+    });
   }
 })
 

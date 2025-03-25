@@ -87,9 +87,11 @@ describe ('Convert money to VND - POST /api/v1/receipts/converted', () => {
   });
 
 });
+const mockImageUrl1 = 'https://www.google.com/url?sa=i&url=https%3A%2F%2Fwww.britannica.com%2Fanimal%2FSphynx-cat&psig=AOvVaw1dsAyfdkObXpBbP8SBgDaB&ust=1742963576312000&source=images&cd=vfe&opi=89978449&ved=0CBQQjRxqFwoTCMjoyrizpIwDFQAAAAAdAAAAABAK';
+const mockBase64Data = Buffer.from ('test-image-data').toString ('base64');
+const mockImageBuffer = Buffer.from ('test-image-data');
 
 describe ('Convert image to base 64 (POST /api/v1/receipts/convert-image-to-base64)', () => {
-  const mockImageUrl = (__dirname, 'tieng_viet.jpg');
   const mockBase64Data = Buffer.from ('test-image-data').toString ('base64');
 
   beforeEach (() => {
@@ -98,25 +100,36 @@ describe ('Convert image to base 64 (POST /api/v1/receipts/convert-image-to-base
 
   it ('should successfully convert image to base64', async () => {
     axios.get.mockResolvedValue ({
-      data: Buffer.from ('test-image-data')
+      data: mockImageBuffer,
+      headers: {
+        'content-type': 'image/jpeg'
+      }
     });
 
-    const response = await request (app).post ('/api/v1/receipts/convert-image-to-base64').send ({imageUri: mockImageUrl});
+    const response = await request (app).post ('/api/v1/receipts/convert-image-to-base64').send ({imageUri: mockImageUrl1});
 
     expect (response.status).toBe (200);
-    expect (response.text).toBe (mockBase64Data);
-    expect (axios.get).toHaveBeenCalledWith (mockImageUrl, {
-      responseType: 'arraybuffer'
+    expect (response.body).toEqual ({
+      success: true,
+      message: 'Image converted successfully',
+      data: {
+        base64: mockBase64Data,
+        mimeType: 'image/jpeg',
+        sizeBytes: mockImageBuffer.length
+      }
+    });
+    expect (axios.get).toHaveBeenCalledWith (mockImageUrl1, {
+      responseType: 'arraybuffer',
+      timeout: 10000
     });
   });
 
-  it ('should return 400 if imageUri is missing', async () => {
+  it ('should return 403 if imageUri is missing', async () => {
     const response = await request (app).post ('/api/v1/receipts/convert-image-to-base64').send ({});
 
-    expect (response.status).toBe (400);
+    expect (response.status).toBe (403);
     expect (response.body).toEqual ({
-      message: 'Missing image URI',
-      error: 'Failed to fetch image'
+      message: 'Missing image uri'
     });
   });
 
@@ -124,19 +137,18 @@ describe ('Convert image to base 64 (POST /api/v1/receipts/convert-image-to-base
     const mockError = new Error ('Network error');
     axios.get.mockRejectedValue (mockError);
 
-    const response = await request (app).post ('/api/v1/receipts/convert-image-to-base64').send ({imageUri: mockImageUrl});
+    const response = await request (app).post ('/api/v1/receipts/convert-image-to-base64').send ({imageUri: mockImageUrl1});
 
     expect (response.status).toBe (500);
     expect (response.body).toEqual ({
-      message: 'Image conversion failed',
-      error: 'Failed to fetch image'
+      message: 'Failed to fetch image and convert image'
     });
   });
 
-  it ('should return 500 for invalid URLs', async () => {
+  it ('should return 400 for invalid URLs', async () => {
     const response = await request (app).post ('/api/v1/receipts/convert-image-to-base64').send ({imageUri: 'invalid-url'});
 
-    expect (response.status).toBe (500);
+    expect (response.status).toBe (400);
   });
 
   it ('should log the image URI and success message', async () => {
@@ -144,9 +156,9 @@ describe ('Convert image to base 64 (POST /api/v1/receipts/convert-image-to-base
       data: Buffer.from ('test-image-data')
     });
 
-    await request (app).post ('/api/v1/receipts/convert-image-to-base64').send ({imageUri: mockImageUrl});
+    await request (app).post ('/api/v1/receipts/convert-image-to-base64').send ({imageUri: mockImageUrl1});
 
-    expect (console.log).toHaveBeenCalledWith (`Fetching image from: ${mockImageUrl}`);
+    expect (console.log).toHaveBeenCalledWith (`Fetching image from: ${mockImageUrl1}`);
     expect (console.log).toHaveBeenCalledWith ('Image fetched successfully!');
   });
 });
