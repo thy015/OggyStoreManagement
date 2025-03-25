@@ -7,6 +7,7 @@ const authenRouter = require('../../apis/authens/authen.controller');
 jest.mock('firebase-admin', () => ({
   auth: jest.fn(() => ({
     createUser: jest.fn(),
+    getUserByEmail: jest.fn (),
   })),
 }));
 
@@ -44,12 +45,12 @@ describe('POST /api/v1/authens/sign-up', () => {
     expect(response.body.message).toBe('User created successfully');
     expect(response.body.user).toEqual(mockUser);
     expect(admin.auth().createUser).toHaveBeenCalledWith({
-      email: 'test5@example.com',
-      password: 'password123',
+      email: 'test12@example.com',
+      password: '123456',
     });
   });
 
-  it('should return 500 if Firebase createUser fails because the user already exists', async () => {
+  it ('should return 400 if Firebase createUser fails because the user already exists', async () => {
     // Mock a specific Firebase error for existing user
     const mockError = new Error(
       'The email address is already in use by another account.'
@@ -57,11 +58,11 @@ describe('POST /api/v1/authens/sign-up', () => {
     admin.auth().createUser.mockRejectedValue(mockError);
 
     const response = await request(app).post('/api/v1/authens/sign-up').send({
-      email: 'test1@example.com',
-      password: 'password123',
+      email: 'test6@gmail.com',
+      password: '123456',
     });
 
-    expect(response.status).toBe(500);
+    expect (response.status).toBe (400);
     expect(response.body.message).toBe(
       'The email address is already in use by another account.'
     );

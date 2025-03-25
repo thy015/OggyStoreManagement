@@ -394,11 +394,11 @@ receiptRouter.post('/text-convert', async (req, res) => {
     return res.status(403).json({ message: 'Missing or invalid request body' });
   }
   try {
-    const json = await generateTextChat(text);
-    if (json) {
-      return res.status(200).json(json);
+    const response = await generateTextChat (text);
+    if ((response.items.length === 0 && response.totalAmount === 0) || (response.category === 'undefined')) {
+      return res.status (400).json ({message: 'Undefined - Please check your message'});
     } else {
-      return res.status(500).json({ message: 'Failed to generate JSON' });
+      return res.status (200).json (response);
     }
   } catch (e) {
     console.log ('Error in /text-convert:', e);

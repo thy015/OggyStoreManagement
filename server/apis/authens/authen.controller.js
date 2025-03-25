@@ -8,7 +8,19 @@ authenRouter.post('/sign-up', async (req, res) => {
   if (!email || !password) {
     return res.status(403).json({ message: 'Missing email or password' });
   }
+  // if (!validator.isEmail(email)) {
+  //   return res.status(400).json({ message: 'Invalid email format' });
+  // }
+  // if (password.length < 6) {
+  //   return res.status(400).json({ message: 'Password must be at least 6 characters' });
+  // }
   try {
+    const existingUser = await admin.auth ().getUserByEmail (email);
+    if (existingUser) {
+      return res.status (400).json ({
+        message: 'User already exists',
+      });
+    }
     const user = await admin.auth().createUser({
       email,
       password,

@@ -32,21 +32,27 @@ describe('Chat bot', () => {
     expect(response.body.message).toBe('Missing or invalid request body');
   });
 
-  test('should return 403 for invalid text field', async () => {
+  test ('should return 400 for invalid text field', async () => {
     const response = await request(app)
       .post('/api/v1/receipts/text-convert')
       .send({ text: 'a12345' });
 
-    expect(response.statusCode).toBe(403);
-    expect (response.body.message).toBe ('undefine');
+    expect (response.statusCode).toBe (400);
+    expect (response.body.message).toBe ('Undefined - Please check your message');
   });
 
-  test('should return 403 for invalid text field', async () => {
+  test ('should return 400 for invalid text field', async () => {
     const response = await request(app)
       .post('/api/v1/receipts/text-convert').send ({text: '10000'});
 
-    expect(response.statusCode).toBe(403);
-    expect (response.body.message).toBe ('undefine');
+    expect (response.statusCode).toBe (400);
+    expect (response.body.message).toBe ('Undefined - Please check your message');
   });
 
+  test ('should return 400 for invalid text field', async () => {
+    const response = await request (app).post ('/api/v1/receipts/text-convert').send ({text: '@z 10k'});
+
+    expect (response.statusCode).toBe (400);
+    expect (response.body.message).toBe ('Undefined - Please check your message');
+  });
 });
