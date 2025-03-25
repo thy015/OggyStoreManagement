@@ -1,7 +1,7 @@
-import api from "@/utils/api";
+import api from '@/utils/api';
 import axios from 'axios';
 import { Alert } from 'react-native';
-
+import { date } from 'zod';
 
 class AuthensAPI {
   setAIKey() {
@@ -41,8 +41,11 @@ class AuthensAPI {
         password,
       }
     );
-    if (response && response.data) {
-      return response.data;
+    if (response.status >= 200 && response.status <= 300) {
+      return {
+        ok: true,
+        data: response.data,
+      };
     } else {
       Alert.alert('Sign-up failed. Please check your email and password.');
     }
