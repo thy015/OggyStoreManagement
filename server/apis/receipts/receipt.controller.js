@@ -68,7 +68,8 @@ receiptRouter.post ('/converted', async (req, res) => {
   }
 });
 
-const convertImageToBase64 = async (imageUri) => {
+receiptRouter.post ('/convert-image-to-base64', async (req, res) => {
+  const {imageUri} = req.body
   try {
     console.log(`Fetching image from: ${imageUri}`);
     const response = await axios.get(imageUri, { responseType: 'arraybuffer' });
@@ -79,7 +80,8 @@ const convertImageToBase64 = async (imageUri) => {
     console.error('Error fetching image:', error.message);
     throw new Error('Failed to fetch image');
   }
-};
+})
+
 
 const generateTextImage = async (text) => {
   console.log('🔥 Text:', text);
@@ -135,7 +137,7 @@ receiptRouter.post(
 
     try {
       const imageUrl = req.file.path;
-      const base64Image = await convertImageToBase64(imageUrl);
+      const base64Image = await axios.post ('/convert-image-to-base64', imageUrl);
 
       const imageConvert = await axios.post(
         `https://vision.googleapis.com/v1/images:annotate?key=${process.env.GOOGLE_VISION_API_KEY}`,

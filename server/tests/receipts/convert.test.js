@@ -3,6 +3,7 @@ const express = require ('express');
 const axios = require ('axios');
 const receiptRouter = require ("../../apis/receipts/receipt.controller");
 
+
 jest.mock ('axios');
 
 const app = express ();
@@ -78,4 +79,67 @@ describe ('POST /api/v1/receipts/converted', () => {
     expect (response.body).toEqual ({});
   });
 
+});
+
+describe ('Convert image to base 64 (POST /api/v1/receipts/convert-image-to-base64)', () => {
+  const mockImageUrl = (__dirname, 'tieng_viet.jpg');
+  const mockBase64Data = Buffer.from ('test-image-data').toString ('base64');
+
+  beforeEach (() => {
+    jest.clearAllMocks ();
+  });
+
+  it ('should successfully convert image to base64', async () => {
+    axios.get.mockResolvedValue ({
+      data: Buffer.from ('test-image-data')
+    });
+
+    const response = await request (app).post ('/api/v1/receipts/convert-image-to-base64').send ({imageUri: mockImageUrl});
+
+    expect (response.status).toBe (200);
+    expect (response.text).toBe (mockBase64Data);
+    expect (axios.get).toHaveBeenCalledWith (mockImageUrl, {
+      responseType: 'arraybuffer'
+    });
+  });
+
+  it ('should return 400 if imageUri is missing', async () => {
+    const response = await request (app).post ('/api/v1/receipts/convert-image-to-base64').send ({});
+
+    expect (response.status).toBe (400);
+    expect (response.body).toEqual ({
+      message: 'Missing image URI',
+      error: 'Failed to fetch image'
+    });
+  });
+
+  it ('should return 500 when image fetch fails', async () => {
+    const mockError = new Error ('Network error');
+    axios.get.mockRejectedValue (mockError);
+
+    const response = await request (app).post ('/api/v1/receipts/convert-image-to-base64').send ({imageUri: mockImageUrl});
+
+    expect (response.status).toBe (500);
+    expect (response.body).toEqual ({
+      message: 'Image conversion failed',
+      error: 'Failed to fetch image'
+    });
+  });
+
+  it ('should return 500 for invalid URLs', async () => {
+    const response = await request (app).post ('/api/v1/receipts/convert-image-to-base64').send ({imageUri: 'invalid-url'});
+
+    expect (response.status).toBe (500);
+  });
+
+  it ('should log the image URI and success message', async () => {
+    axios.get.mockResolvedValue ({
+      data: Buffer.from ('test-image-data')
+    });
+
+    await request (app).post ('/api/v1/receipts/convert-image-to-base64').send ({imageUri: mockImageUrl});
+
+    expect (console.log).toHaveBeenCalledWith (`Fetching image from: ${mockImageUrl}`);
+    expect (console.log).toHaveBeenCalledWith ('Image fetched successfully!');
+  });
 });
