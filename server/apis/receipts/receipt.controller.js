@@ -6,11 +6,81 @@ const genAI = new GoogleGenerativeAI(process.env.AI_KEY);
 const uploadCloud = require('../../config/cloudinary.config');
 
 /** GET */
+// key validation
 receiptRouter.get('/get-vision-key', async (req, res) => {
-  return res.status(200).json({ visionKey: process.env.GOOGLE_VISION_API_KEY });
+  try {
+    if (!process.env.GOOGLE_VISION_API_KEY) {
+      return res.status (503).json ({
+        success: false,
+        message: 'Google Vision API key not configured',
+        error: 'Service unavailable'
+      });
+    }
+    return res.status (200).json ({
+      success: true,
+      visionKey: process.env.GOOGLE_VISION_API_KEY
+    });
+  } catch (error) {
+    console.error ('Error getting vision key:', error);
+    return res.status (500).json ({
+      success: false,
+      message: 'Internal server error',
+      error: error.message
+    });
+  }
+});
+receiptRouter.get ('/get-money-key', async (req, res) => {
+  try {
+    if (!process.env.KEY_MONEY) {
+      return res.status (503).json ({
+        success: false,
+        message: 'Google Vision API key not configured',
+        error: 'Service unavailable'
+      });
+    }
+    return res.status (200).json ({
+      success: true,
+      moneyKey: process.env.KEY_MONEY
+    });
+  } catch (error) {
+    console.error ('Error getting vision key:', error);
+    return res.status (500).json ({
+      success: false,
+      message: 'Internal server error',
+      error: error.message
+    });
+  }
 });
 receiptRouter.get('/get-ai-key', async (req, res) => {
-  res.json({ apiKey: process.env.AI_KEY });
+  try {
+    if (!process.env.AI_KEY) {
+      return res.status (503).json ({
+        success: false,
+        message: 'AI API key not configured',
+        error: 'Service unavailable'
+      });
+    }
+
+    if (process.env.AI_KEY.length < 32) {
+      return res.status (500).json ({
+        success: false,
+        message: 'Invalid AI key configuration',
+        error: 'Malformed API key'
+      });
+    }
+
+    return res.status (200).json ({
+      success: true,
+      apiKey: process.env.AI_KEY
+    });
+  } catch (error) {
+    console.error ('Error getting AI key:', error);
+    return res.status (500).json ({
+      success: false,
+      message: 'Internal server error',
+      error: error.message
+    });
+  }
 });
 
 /** POST */
