@@ -19,13 +19,17 @@ import {
   getDoc,
   updateDoc,
   doc,
+  setDoc,
   onSnapshot,
+  query,
+  where,
 } from 'firebase/firestore';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { ArrowDownCircle } from 'lucide-react-native';
 import { receiptsAPI } from '@/apis/receipts/index.ts';
 import axios from 'axios';
+import { getAuth } from 'firebase/auth';
 
 interface MoneyDB {
   Spended: number;
@@ -190,26 +194,36 @@ const Receipt = () => {
   });
 
   useEffect(() => {
-    const unsubscribe = onSnapshot(
+    const auth = getAuth();
+    const user = auth.currentUser;
+
+    if (!user) {
+      console.error('Người dùng chưa đăng nhập!');
+      return;
+    }
+
+    const userId = user.uid;
+    const moneyQuery = query(
       collection(FIREBASE_DB, 'Money'),
-      (querySnapshot) => {
-        const fetchedData: MoneyDB[] = [];
-
-        let totalSpendedCalc = 0;
-        let totalIncomeCalc = 0;
-
-        querySnapshot.forEach((doc) => {
-          const data = doc.data() as MoneyDB;
-          fetchedData.push(data);
-          totalSpendedCalc += data.Spended || 0;
-          totalIncomeCalc += data.Income || 0;
-        });
-
-        setMoneyDB(fetchedData);
-        setTotalSpended(totalSpendedCalc);
-        setTotalIncome(totalIncomeCalc);
-      }
+      where('__name__', '==', userId)
     );
+
+    const unsubscribe = onSnapshot(moneyQuery, (querySnapshot) => {
+      let fetchedData: MoneyDB[] = [];
+      let totalSpendedCalc = 0;
+      let totalIncomeCalc = 0;
+
+      querySnapshot.forEach((doc) => {
+        const data = doc.data() as MoneyDB;
+        fetchedData.push(data);
+        totalSpendedCalc += data.Spended || 0;
+        totalIncomeCalc += data.Income || 0;
+      });
+
+      setMoneyDB(fetchedData);
+      setTotalSpended(totalSpendedCalc);
+      setTotalIncome(totalIncomeCalc);
+    });
 
     return () => unsubscribe();
   }, []);
@@ -217,7 +231,7 @@ const Receipt = () => {
   const SaveReceipt = async () => {
     try {
       const docRef = await addDoc(collection(FIREBASE_DB, 'History'), {
-        date: new Date(),
+        date: data.Date,
         category: data.category,
         totalAmount: data.totalAmount,
         items: data.items,
@@ -233,24 +247,38 @@ const Receipt = () => {
 
   const updateMoney = async () => {
     try {
-      const moneyRef = doc(FIREBASE_DB, 'Money', '01');
+      const auth = getAuth();
+      const user = auth.currentUser;
+
+      if (!user) {
+        console.error('Người dùng chưa đăng nhập!');
+        return;
+      }
+
+      const userId = user.uid;
+      const moneyRef = doc(FIREBASE_DB, 'Money', userId);
       const moneySnap = await getDoc(moneyRef);
+
+      let newIncome = 0;
+      let newSpended = 0;
 
       if (moneySnap.exists()) {
         const moneyData = moneySnap.data() as MoneyDB;
-        let newIncome = moneyData.Income || 0;
-        let newSpended = moneyData.Spended || 0;
-
-        newSpended += data.totalAmount;
-        await updateDoc(moneyRef, {
-          Income: newIncome,
-          Spended: newSpended,
-        });
-
-        console.log('Cập nhật thành công!');
+        newIncome = moneyData.Income || 0;
+        newSpended = moneyData.Spended || 0;
       } else {
-        console.error('Không tìm thấy dữ liệu!');
+        await setDoc(moneyRef, {
+          Income: 0,
+          Spended: 0,
+        });
       }
+
+      await updateDoc(moneyRef, {
+        Income: newIncome,
+        Spended: newSpended,
+      });
+
+      console.log('Cập nhật thành công!');
     } catch (error) {
       console.error('Lỗi cập nhật Firestore:', error);
     }

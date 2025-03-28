@@ -8,13 +8,21 @@ import {
 } from 'react-native';
 import { ScrollView } from 'react-native-gesture-handler';
 import { FIREBASE_DB } from '../../config/firebaseConfig.ts';
-import { collection, onSnapshot, Query, Timestamp } from 'firebase/firestore';
+import {
+  collection,
+  onSnapshot,
+  query,
+  Query,
+  Timestamp,
+  where,
+} from 'firebase/firestore';
 import AntDesign from '@expo/vector-icons/AntDesign';
 import DetailHis from '../(page)/detailHis.tsx';
 import { ArrowLeftIcon, ArrowRightIcon } from 'lucide-react-native';
 import { black } from 'tailwindcss/colors';
 import { Button } from '@/components/ui/button/index.tsx';
 import QueryDateMonthBox from '@/components/queryDateMonthBox.tsx';
+import { getAuth } from 'firebase/auth';
 
 interface Transaction {
   category: string;
@@ -44,26 +52,36 @@ const History = () => {
   const [id, setId] = useState<number>();
 
   useEffect(() => {
-    const unsubscribe = onSnapshot(
+    const auth = getAuth();
+    const user = auth.currentUser;
+
+    if (!user) {
+      console.error('Người dùng chưa đăng nhập!');
+      return;
+    }
+
+    const userId = user.uid;
+    const moneyQuery = query(
       collection(FIREBASE_DB, 'Money'),
-      (querySnapshot) => {
-        const fetchedData: MoneyDB[] = [];
-
-        let totalSpendedCalc = 0;
-        let totalIncomeCalc = 0;
-
-        querySnapshot.forEach((doc) => {
-          const data = doc.data() as MoneyDB;
-          fetchedData.push(data);
-          totalSpendedCalc += data.Spended || 0;
-          totalIncomeCalc += data.Income || 0;
-        });
-
-        setMoneyDB(fetchedData);
-        setTotalSpended(totalSpendedCalc);
-        setTotalIncome(totalIncomeCalc);
-      }
+      where('__name__', '==', userId) // Chỉ lấy dữ liệu của user hiện tại
     );
+
+    const unsubscribe = onSnapshot(moneyQuery, (querySnapshot) => {
+      let fetchedData: MoneyDB[] = [];
+      let totalSpendedCalc = 0;
+      let totalIncomeCalc = 0;
+
+      querySnapshot.forEach((doc) => {
+        const data = doc.data() as MoneyDB;
+        fetchedData.push(data);
+        totalSpendedCalc += data.Spended || 0;
+        totalIncomeCalc += data.Income || 0;
+      });
+
+      setMoneyDB(fetchedData);
+      setTotalSpended(totalSpendedCalc);
+      setTotalIncome(totalIncomeCalc);
+    });
 
     return () => unsubscribe();
   }, []);
@@ -125,7 +143,6 @@ const History = () => {
       }).start();
     });
   };
- 
 
   const backgroundColor = colorAnim.interpolate({
     inputRange: [0, 1],

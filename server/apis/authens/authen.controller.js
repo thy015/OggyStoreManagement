@@ -6,28 +6,29 @@ const axios = require('axios');
 authenRouter.post('/sign-up', async (req, res) => {
   const { email, password } = req.body;
   if (!email || !password) {
-    return res.status(403).json({ message: 'Missing email or password' });
+    return res.status(400).json({ message: 'Missing email or password' });
   }
-  // if (!validator.isEmail(email)) {
-  //   return res.status(400).json({ message: 'Invalid email format' });
-  // }
-  // if (password.length < 6) {
-  //   return res.status(400).json({ message: 'Password must be at least 6 characters' });
-  // }
+  if (password.length < 6) {
+    return res
+      .status(400)
+      .json({ message: 'Password must be at least 6 characters' });
+  }
+
   try {
-    const existingUser = await admin.auth().getUserByEmail(email);
-    if (!existingUser) {
-      return res.status(400).json({
-        message: 'User already exists',
-      });
+    await admin.auth().getUserByEmail(email);
+    return res.status(400).json({ message: 'User already exists' });
+  } catch (error) {
+    if (error.code === 'auth/user-not-found') {
+      try {
+        const user = await admin.auth().createUser({ email, password });
+        return res
+          .status(201)
+          .json({ message: 'User created successfully', user });
+      } catch (createError) {
+        return res.status(500).json({ message: createError.message });
+      }
     }
-    const user = await admin.auth().createUser({
-      email,
-      password,
-    });
-    return res.status(201).json({ message: 'User created successfully', user });
-  } catch (e) {
-    return res.status(500).json({ message: e.message, e });
+    return res.status(500).json({ message: error.message });
   }
 });
 

@@ -21,7 +21,15 @@ import Feather from '@expo/vector-icons/Feather';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { useFocusEffect } from '@react-navigation/native';
 import { FIREBASE_DB } from '@/config/firebaseConfig.ts';
-import { collection, addDoc, getDoc, updateDoc, doc } from 'firebase/firestore';
+import { getAuth } from 'firebase/auth';
+import {
+  collection,
+  addDoc,
+  getDoc,
+  updateDoc,
+  doc,
+  setDoc,
+} from 'firebase/firestore';
 import axios from 'axios';
 import { receiptsAPI } from '@/apis/receipts/index.ts';
 import { formatAmount } from '@/utils';
@@ -106,29 +114,46 @@ const Chat_Speech = () => {
     }
 
     try {
-      const moneyRef = doc(FIREBASE_DB, 'Money', '01');
+      const auth = getAuth();
+      const user = auth.currentUser;
+
+      if (!user) {
+        console.error('Người dùng chưa đăng nhập!');
+        return;
+      }
+
+      const userId = user.uid;
+      const moneyRef = doc(FIREBASE_DB, 'Money', userId);
       const moneySnap = await getDoc(moneyRef);
+
+      let newIncome = 0;
+      let newSpended = 0;
 
       if (moneySnap.exists()) {
         const moneyData = moneySnap.data() as MoneyDB;
-        let newIncome = moneyData.Income || 0;
-        let newSpended = moneyData.Spended || 0;
+        newIncome = moneyData.Income || 0;
+        newSpended = moneyData.Spended || 0;
+      }
 
-        if (generatedData.type.toLowerCase() === 'thu nhập') {
-          newIncome += generatedData.totalAmount;
-        } else if (generatedData.type.toLowerCase() === 'chi tiêu') {
-          newSpended += generatedData.totalAmount;
-        }
+      if (generatedData.type.toLowerCase() === 'thu nhập') {
+        newIncome += generatedData.totalAmount;
+      } else if (generatedData.type.toLowerCase() === 'chi tiêu') {
+        newSpended += generatedData.totalAmount;
+      }
 
+      if (moneySnap.exists()) {
         await updateDoc(moneyRef, {
           Income: newIncome,
           Spended: newSpended,
         });
-
-        console.log('Cập nhật thành công!');
       } else {
-        console.error('Không tìm thấy dữ liệu!');
+        await setDoc(moneyRef, {
+          Income: newIncome,
+          Spended: newSpended,
+        });
       }
+
+      console.log('Cập nhật thành công!');
     } catch (error) {
       console.error('Lỗi cập nhật Firestore:', error);
     }
@@ -136,16 +161,29 @@ const Chat_Speech = () => {
 
   const Save = async (data: any) => {
     try {
+      const auth = getAuth();
+      const user = auth.currentUser;
+
+      if (!user) {
+        console.error('Người dùng chưa đăng nhập!');
+        return;
+      }
+
+      const userId = user.uid;
+
       const docRef = await addDoc(collection(FIREBASE_DB, 'History'), {
+        userId,
         date: new Date(),
         category: data.category,
         totalAmount: data.totalAmount,
         items: data.items,
         type: data.type,
       });
+
       await updateMoney(data);
+      console.log('Lưu lịch sử thành công:', docRef.id);
     } catch (e) {
-      console.error('Error adding document: ', e);
+      console.error('Lỗi khi thêm tài liệu:', e);
     }
   };
 
