@@ -70,7 +70,11 @@ const DetailHis: React.FC<DetailHisProps> = ({ type, data }) => {
       <View className="border-b p-2 border-gray-300">
         <Text className="text-lg text-[#8477d8] font-inriaRegular">Date</Text>
         <Text className="text-xl ml-2 font-inriaRegular">
-          {data?.date ? data.date.toDate().toLocaleDateString() : 'N/A'}
+          {data?.date
+            ? typeof data.date === 'string'
+              ? data.date
+              : new Date(data.date.seconds * 1000).toLocaleDateString()
+            : 'N/A'}
         </Text>
       </View>
       <View className="border-b p-2 border-gray-300">

@@ -1,5 +1,14 @@
 import { useState } from 'react';
-import { ScrollView, TextInput, Text, Alert, KeyboardAvoidingView, Platform, Image, Dimensions } from 'react-native';
+import {
+  ScrollView,
+  TextInput,
+  Text,
+  Alert,
+  KeyboardAvoidingView,
+  Platform,
+  Image,
+  Dimensions,
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { UserIcon } from 'lucide-react-native';
 import { Button, ButtonText } from '@/components/ui/button';
@@ -10,42 +19,65 @@ import { ThemedView } from '@/components/ThemedView';
 import { SignInForm } from '@/share/types/authens';
 import { getAuth, signInWithEmailAndPassword } from '@firebase/auth';
 import { authensAPI } from '@/apis/authens';
+import { auth } from '@/config/firebaseConfig';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 
 const SignIn = () => {
   const router = useRouter();
-  const [formField, setFormField] = useState<SignInForm>({ Email: '', Password: '' });
+  const [formField, setFormField] = useState<SignInForm>({
+    Email: '',
+    Password: '',
+  });
   const [focusEmail, setFocusEmail] = useState(false);
   const [focusPassword, setFocusPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   //validate
   const SignInSchema = z.object({
-    Email: z.string().email("Invalid email"),
-    Password: z.string().min(6, "Password must be at least 6 characters"),
+    Email: z.string().email('Invalid email'),
+    Password: z.string().min(6, 'Password must be at least 6 characters'),
   });
-  
+
+  const handleAlert = (title: string, message: string) => {
+    if (Platform.OS === 'web') {
+      window.alert(`${title}: ${message}`);
+    } else {
+      Alert.alert(title, message);
+    }
+  };
+
   const submit = async () => {
     if (!formField.Email || !formField.Password) {
-      return Alert.alert('Error', 'Please fill in all fields');
+      return handleAlert('Error', 'Missing email or password');
     }
     try {
-      // Validate input
       SignInSchema.parse(formField);
       setLoading(true);
-      const response = await authensAPI.signIn(
+
+      const userCredential = await signInWithEmailAndPassword(
+        auth,
         formField.Email,
         formField.Password
       );
-      if (response.ok) {
-        router.replace('/Home');
-      } else {
-        Alert.alert('Error', 'Invalid credentials');
-      }
+
+      const userId = userCredential.user.uid;
+      await AsyncStorage.setItem('userId', userId);
+      window.alert('Sign-in successful');
+
+      router.replace('/Home');
     } catch (error: any) {
-      if (error instanceof z.ZodError) {
-        // Show validation errors
-        Alert.alert('Validation Error', error.errors[0].message);
-      } else {
-        Alert.alert('Login Error', 'Please check your email and password');
+      console.error(error);
+
+      switch (error.code) {
+        case 'auth/user-not-found':
+          handleAlert('Error', 'User not found');
+          break;
+        case 'auth/wrong-password':
+          handleAlert('Error', 'Incorrect password');
+          break;
+        default:
+          handleAlert('Login Error', 'Please check your email and password');
+          break;
       }
     } finally {
       setLoading(false);
@@ -54,20 +86,40 @@ const SignIn = () => {
 
   return (
     <SafeAreaView className="flex-1 bg-white">
-      <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
-        <ScrollView className="h-full overflow-y-auto" contentContainerStyle={{ flexGrow: 1, paddingBottom: 20 }}>
-          <ThemedView className="w-full flex px-4" style={{ minHeight: Dimensions.get('window').height, justifyContent: focusEmail || focusPassword ? 'flex-start' : 'center' }}>
+      <KeyboardAvoidingView
+        style={{ flex: 1 }}
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      >
+        <ScrollView
+          className="h-full overflow-y-auto"
+          contentContainerStyle={{ flexGrow: 1, paddingBottom: 20 }}
+        >
+          <ThemedView
+            className="w-full flex px-4"
+            style={{
+              minHeight: Dimensions.get('window').height,
+              justifyContent:
+                focusEmail || focusPassword ? 'flex-start' : 'center',
+            }}
+          >
             <ThemedView className="ml-2">
               <ThemedView className="flex items-center relative w-full h-fit my-20">
-                <Text className="text-6xl font-inriaRegular mt-6 text-purpleDark">Oggy</Text>
-                <Text className="text-3xl font-inriaRegular mt-2 text-purpleDark">Financial Management</Text>
+                <Text className="text-6xl font-inriaRegular mt-6 text-purpleDark">
+                  Oggy
+                </Text>
+                <Text className="text-3xl font-inriaRegular mt-2 text-purpleDark">
+                  Financial Management
+                </Text>
               </ThemedView>
             </ThemedView>
 
             <ThemedView className="mt-8 items-center">
-              <ThemedView className={`w-[90%] h-16 px-4 rounded-2xl border flex flex-row items-center ${focusEmail ? 'border-purple' : 'border-[#e1e2ef]'}`}>
+              <ThemedView
+                className={`w-[90%] h-16 px-4 rounded-2xl border flex flex-row items-center ${focusEmail ? 'border-purple' : 'border-[#e1e2ef]'}`}
+              >
                 <UserIcon color={'#a294f9'} className="w-6 h-6" />
                 <TextInput
+                  id="email"
                   onFocus={() => setFocusEmail(true)}
                   onBlur={() => setFocusEmail(false)}
                   className="flex-1 w-full py-4 ml-4 text-black text-base"
@@ -79,44 +131,83 @@ const SignIn = () => {
             </ThemedView>
 
             <ThemedView className="mt-8 items-center">
-              <ThemedView className={`w-[90%] h-16 px-4 rounded-2xl border flex flex-row items-center ${focusPassword ? 'border-purple' : 'border-[#e1e2ef]'}`}>
-                <UserIcon color={'#a294f9'} className="w-6 h-6" />
+              <ThemedView
+                className={`w-[90%] h-16 px-4 rounded-2xl border flex flex-row items-center ${focusPassword ? 'border-purple' : 'border-[#e1e2ef]'}`}
+              >
+                <MaterialIcons
+                  name="password"
+                  className="w-6 h-6"
+                  color={'#a294f9'}
+                />
+
                 <TextInput
+                  id="password"
                   onFocus={() => setFocusPassword(true)}
                   onBlur={() => setFocusPassword(false)}
-                  value={formField.Password}
-                  className="flex-1 w-full ml-4 text-black text-base"
+                  className="flex-1 w-full py-4 ml-4 text-black text-base"
                   placeholder="Password"
-                  placeholderTextColor="#7B7B8B"
                   secureTextEntry
-                  onChangeText={(e) => setFormField({ ...formField, Password: e })}
+                  onChangeText={(e) =>
+                    setFormField({ ...formField, Password: e })
+                  }
+                  placeholderTextColor="#7B7B8B"
                 />
               </ThemedView>
             </ThemedView>
 
-            <ThemedView className="items-center justify-center mt-6 flex">
+            <ThemedView
+              id="signIn"
+              className="items-center justify-center mt-6 flex"
+            >
               {loading && <Spinner />}
               <Button
-                style={{ width: '90%', height: 50, borderRadius: 10, backgroundColor: '#a294f9', justifyContent: 'center', alignItems: 'center' }}
+                id="sign-in-button"
+                style={{
+                  width: '90%',
+                  height: 50,
+                  borderRadius: 10,
+                  backgroundColor: '#a294f9',
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                }}
                 onPress={submit}
               >
                 <ButtonText className="text-white text-lg">SIGN IN</ButtonText>
               </Button>
 
-              <Link href="/(authens)/sign-up" className="text-[#8a8a91] text-md mt-6 font-semibold">FORGOT PASSWORD?</Link>
+              <Link
+                href="/(authens)/sign-up"
+                className="text-[#8a8a91] text-md mt-6 font-semibold"
+              >
+                FORGOT PASSWORD?
+              </Link>
             </ThemedView>
 
             <ThemedView className="items-center justify-center mt-6 flex flex-row">
-              <Text className="text-[#8a8a91] text-md font-semibold mr-3">Don't have an account?</Text>
-              <Link href="/(authens)/sign-up" className="text-[#a294f9] text-md font-semibold underline">SIGN UP</Link>
+              <Text className="text-[#8a8a91] text-md font-semibold mr-3">
+                Don't have an account?
+              </Text>
+              <Link
+                id="sign-up-link"
+                href="/(authens)/sign-up"
+                className="text-[#a294f9] text-md font-semibold underline"
+              >
+                SIGN UP
+              </Link>
             </ThemedView>
 
             <ThemedView className="flex items-center relative w-full h-fit opacity-[0.5] mt-4">
-              <Image source={require('@/assets/images/money-investment.png')} className="h-48 items-center justify-center flex" resizeMode="contain" />
+              <Image
+                source={require('@/assets/images/money-investment.png')}
+                className="h-48 items-center justify-center flex"
+                resizeMode="contain"
+              />
             </ThemedView>
 
             <ThemedView className="flex items-center relative w-full h-fit mt-7">
-              <Text className="text-2xl font-inriaRegular mt-6 text-purple opacity-[0.8]">EST. 2025</Text>
+              <Text className="text-2xl font-inriaRegular mt-6 text-purple opacity-[0.8]">
+                EST. 2025
+              </Text>
             </ThemedView>
           </ThemedView>
         </ScrollView>

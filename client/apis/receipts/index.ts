@@ -24,7 +24,7 @@ class ReceiptsAPI {
   async setAIKey() {
     try {
       const response = await axios.get<GetAIKeyResponse>(
-        `${process.env.EXPO_PUBLIC_SERVER_URL}/api/v1/receipts/get-ai-key`
+        `https://oggy-store-management-be.vercel.app/api/v1/receipts/get-ai-key`
       );
       console.log('AI key', response.data.apiKey);
       return response.data.apiKey;
@@ -37,7 +37,7 @@ class ReceiptsAPI {
   async setMoneyKey() {
     try {
       const response = await axios.get<GetMoneyKeyResponse>(
-        `${process.env.EXPO_PUBLIC_SERVER_URL}/api/v1/receipts/get-money-key`
+        `https://oggy-store-management-be.vercel.app/api/v1/receipts/get-money-key`
       );
       console.log('Money key', response.data.moneyKey);
       return response.data.moneyKey;
@@ -60,7 +60,7 @@ class ReceiptsAPI {
         } as any);
       }
       const response = await fetch(
-        `${process.env.EXPO_PUBLIC_SERVER_URL}/api/v1/receipts/upload-and-convert`,
+        `https://oggy-store-management-be.vercel.app/api/v1/receipts/upload-and-convert`,
         {
           method: 'POST',
           body: formData,
@@ -76,7 +76,7 @@ class ReceiptsAPI {
   async setVisionKey() {
     try {
       const response = await axios.get<GetVisionKeyResponse>(
-        `${process.env.EXPO_PUBLIC_SERVER_URL}/api/v1/receipts/get-vision-key`
+        `https://oggy-store-management-be.vercel.app/api/v1/receipts/get-vision-key`
       );
       console.log('Vision key', response.data.visionKey);
       return response.data.visionKey;

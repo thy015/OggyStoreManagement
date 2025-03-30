@@ -10,19 +10,19 @@ authenRouter.post('/sign-up', async (req, res) => {
   }
   if (password.length < 6) {
     return res
-      .status(400)
+      .status(401)
       .json({ message: 'Password must be at least 6 characters' });
   }
 
   try {
     await admin.auth().getUserByEmail(email);
-    return res.status(400).json({ message: 'User already exists' });
+    return res.status(402).json({ message: 'User already exists' });
   } catch (error) {
     if (error.code === 'auth/user-not-found') {
       try {
         const user = await admin.auth().createUser({ email, password });
         return res
-          .status(201)
+          .status(200)
           .json({ message: 'User created successfully', user });
       } catch (createError) {
         return res.status(500).json({ message: createError.message });
@@ -61,14 +61,14 @@ authenRouter.post('/sign-in', async (req, res) => {
 
     if (errorCode) {
       if (errorCode === 'EMAIL_NOT_FOUND' || errorCode === 'INVALID_EMAIL') {
-        return res.status(400).json({ error: 'Invalid email address' });
+        return res.status(401).json({ error: 'Invalid email address' });
       }
 
       if (
         errorCode === 'INVALID_PASSWORD' ||
         errorCode === 'MISSING_PASSWORD'
       ) {
-        return res.status(400).json({ error: 'Incorrect password' });
+        return res.status(402).json({ error: 'Incorrect password' });
       }
 
       if (errorCode === 'USER_DISABLED') {
@@ -76,7 +76,7 @@ authenRouter.post('/sign-in', async (req, res) => {
       }
     }
     // Generic error fallback
-    res.status(400).json({ error: 'Authentication failed' });
+    res.status(501).json({ error: 'Authentication failed' });
   }
 });
 

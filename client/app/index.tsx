@@ -12,21 +12,19 @@ const Index = () => {
   const auth = FIREBASE_AUTH;
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
-
-      setTimeout(() => {
-        if (user) {
-          router.push('/(tabs)/Receipt');
-        } else {
-          router.push('/(authens)/sign-in');
-        }
-      }, 2000);
+      if (user) {
+        console.log('User logged in:', user.uid);
+        router.push('/(tabs)/Receipt');
+      } else {
+        console.log('No user found, redirecting to sign-in');
+        router.push('/(authens)/sign-in');
+      }
     });
 
     return () => unsubscribe();
   }, []);
 
   return (
-  
     <SafeAreaView className="w-full h-screen overflow-auto px-4 bg-white">
       <ThemedView className="flex-row items-center justify-center w-full h-fit mt-32 ml-4">
         <Image
@@ -50,10 +48,7 @@ const Index = () => {
         </Text>
       </ThemedView>
     </SafeAreaView>
-
   );
 };
 
 export default Index;
-
-

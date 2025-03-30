@@ -22,7 +22,8 @@ import { ArrowLeftIcon, ArrowRightIcon } from 'lucide-react-native';
 import { black } from 'tailwindcss/colors';
 import { Button } from '@/components/ui/button/index.tsx';
 import QueryDateMonthBox from '@/components/queryDateMonthBox.tsx';
-import { getAuth } from 'firebase/auth';
+import { getAuth, onAuthStateChanged } from 'firebase/auth';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 interface Transaction {
   category: string;
@@ -53,61 +54,85 @@ const History = () => {
 
   useEffect(() => {
     const auth = getAuth();
-    const user = auth.currentUser;
 
-    if (!user) {
-      console.error('Người dùng chưa đăng nhập!');
-      return;
-    }
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (!user) {
+        console.error('Người dùng chưa đăng nhập!');
+        return;
+      }
 
-    const userId = user.uid;
-    const moneyQuery = query(
-      collection(FIREBASE_DB, 'Money'),
-      where('__name__', '==', userId) // Chỉ lấy dữ liệu của user hiện tại
-    );
+      const userId = user.uid;
+      console.log('User ID:', userId);
 
-    const unsubscribe = onSnapshot(moneyQuery, (querySnapshot) => {
-      let fetchedData: MoneyDB[] = [];
-      let totalSpendedCalc = 0;
-      let totalIncomeCalc = 0;
+      const moneyQuery = query(
+        collection(FIREBASE_DB, 'Money'),
+        where('__name__', '==', userId)
+      );
 
-      querySnapshot.forEach((doc) => {
-        const data = doc.data() as MoneyDB;
-        fetchedData.push(data);
-        totalSpendedCalc += data.Spended || 0;
-        totalIncomeCalc += data.Income || 0;
+      const moneyUnsubscribe = onSnapshot(moneyQuery, (querySnapshot) => {
+        let fetchedData: MoneyDB[] = [];
+        let totalSpendedCalc = 0;
+        let totalIncomeCalc = 0;
+
+        querySnapshot.forEach((doc) => {
+          const data = doc.data() as MoneyDB;
+          fetchedData.push(data);
+          totalSpendedCalc += data.Spended || 0;
+          totalIncomeCalc += data.Income || 0;
+        });
+
+        setMoneyDB(fetchedData);
+        setTotalSpended(totalSpendedCalc);
+        setTotalIncome(totalIncomeCalc);
       });
 
-      setMoneyDB(fetchedData);
-      setTotalSpended(totalSpendedCalc);
-      setTotalIncome(totalIncomeCalc);
+      return () => moneyUnsubscribe();
     });
 
     return () => unsubscribe();
   }, []);
 
   useEffect(() => {
-    const unsubscribe = onSnapshot(
-      collection(FIREBASE_DB, 'History'),
-      (querySnapshot) => {
-        const fetchedData: Transaction[] = [];
+    const fetchTransactions = async () => {
+      try {
+        const userId = await AsyncStorage.getItem('userId');
 
-        querySnapshot.forEach((doc) => {
-          const data = doc.data() as Transaction;
-          fetchedData.push(data);
+        if (!userId) {
+          console.error('Không tìm thấy userId!');
+          return;
+        }
+
+        const transactionsQuery = query(
+          collection(FIREBASE_DB, 'transactions'),
+          where('userId', '==', userId) // Lọc theo userId
+        );
+
+        const unsubscribe = onSnapshot(transactionsQuery, (querySnapshot) => {
+          const fetchedData: Transaction[] = [];
+
+          querySnapshot.forEach((doc) => {
+            const data = doc.data() as Transaction;
+            fetchedData.push(data);
+          });
+
+          const spendedTransactions = fetchedData.filter(
+            (transaction) => transaction.type === 'chi tiêu'
+          );
+          const incomeTransactions = fetchedData.filter(
+            (transaction) => transaction.type === 'thu nhập'
+          );
+
+          setSpend(spendedTransactions);
+          setIncome(incomeTransactions);
         });
-        const spendedTransactions = fetchedData.filter(
-          (transaction) => transaction.type === 'chi tiêu'
-        );
-        const incomeTransactions = fetchedData.filter(
-          (transaction) => transaction.type === 'thu nhập'
-        );
-        setSpend(spendedTransactions);
-        setIncome(incomeTransactions);
-      }
-    );
 
-    return () => unsubscribe();
+        return () => unsubscribe();
+      } catch (error) {
+        console.error('Lỗi khi lấy giao dịch:', error);
+      }
+    };
+
+    fetchTransactions();
   }, []);
 
   useEffect(() => {
@@ -280,10 +305,10 @@ const History = () => {
                         opacity: fadeAnim,
                       }}
                     >
-                      {item.date.toDate().toLocaleString('vi-VN', {
+                      {/* {item.date.toDate().toLocaleString('vi-VN', {
                         month: 'long',
                         timeZone: 'Asia/Ho_Chi_Minh',
-                      })}
+                      })} */}
                     </Animated.Text>
                     <View
                       style={{
@@ -339,9 +364,9 @@ const History = () => {
                               opacity: fadeAnim,
                             }}
                           >
-                            {item.date.toDate().toLocaleString('vi-VN', {
+                            {/* {item.date.toDate().toLocaleString('vi-VN', {
                               timeZone: 'Asia/Ho_Chi_Minh',
-                            })}
+                            })} */}
                           </Animated.Text>
                         </View>
                         <View
@@ -399,10 +424,10 @@ const History = () => {
                         opacity: fadeAnim,
                       }}
                     >
-                      {item.date.toDate().toLocaleString('vi-VN', {
+                      {/* {item.date.toDate().toLocaleString('vi-VN', {
                         month: 'long',
                         timeZone: 'Asia/Ho_Chi_Minh',
-                      })}
+                      })} */}
                     </Animated.Text>
                     <View
                       style={{
@@ -458,9 +483,9 @@ const History = () => {
                               opacity: fadeAnim,
                             }}
                           >
-                            {item.date.toDate().toLocaleString('vi-VN', {
+                            {/* {item.date.toDate().toLocaleString('vi-VN', {
                               timeZone: 'Asia/Ho_Chi_Minh',
-                            })}
+                            })} */}
                           </Animated.Text>
                         </View>
                         <View

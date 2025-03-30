@@ -17,52 +17,57 @@ import { Button, ButtonText } from '@/components/ui/button';
 import Spinner from '@/components/spinner';
 import { z } from 'zod';
 import { authensAPI } from '@/apis/authens';
+import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 
 const SignUp = () => {
-  useEffect(() => {
-    Alert.alert('Test', 'This is a test alert');
-  }, []);
   const [formField, setFormField] = useState({ Email: '', Password: '' });
   const [focusEmail, setFocusEmail] = useState(false);
   const [focusPassword, setFocusPassword] = useState(false);
   const [loading, setLoading] = useState<boolean>(false);
 
-    //validate
-    const SignUpSchema = z.object({
-      Email: z.string().email("Invalid email"),
-      Password: z.string().min(6, "Password must be at least 6 characters"),
-    });
-    
-    const submit = async () => {
-      if (!formField.Email || !formField.Password) {
-        return Alert.alert('Error', 'Please fill in all fields');
-      }
-      try {
-        // Validate input
-        SignUpSchema.parse(formField);
-        setLoading(true);
-        const user = await authensAPI.signUp(
-          formField.Email,
-          formField.Password
-        );
-        console.log('Sign-up response:', user);
-        if (!user) {
-          return;
-        }
-        Alert.alert('Sign-up successful');
-        router.replace('/Home');
-      } catch (error: any) {
-        if (error instanceof z.ZodError) {
-          // Show validation errors
-          Alert.alert('Validation Error', error.errors[0].message);
-        } else {
-          Alert.alert('Login Error', 'Please check your email and password');
-        }
-      } finally {
-        setLoading(false);
-      }
-    };
+  //validate
+  const SignUpSchema = z.object({
+    Email: z.string().email('Invalid email'),
+    Password: z.string().min(6, 'Password must be at least 6 characters'),
+  });
 
+  const submit = async () => {
+    if (!formField.Email || !formField.Password) {
+      if (Platform.OS === 'web') {
+        window.alert('Error: Missing email or password');
+        console.log('click');
+      } else {
+        return Alert.alert('Error: Missing email or password');
+      }
+    }
+    try {
+      // Validate input bằng Zod
+      SignUpSchema.parse(formField);
+      setLoading(true);
+
+      const user = await authensAPI.signUp(formField.Email, formField.Password);
+      console.log('Sign-up response:', user);
+
+      if (Platform.OS === 'web') {
+        window.alert('Sign-up successful');
+      } else {
+        Alert.alert('Sign-up successful');
+      }
+      router.replace('/(authens)/sign-in');
+    } catch (error: any) {
+      if (error instanceof z.ZodError) {
+        Alert.alert('Validation Error', error.errors[0].message);
+      } else {
+        if (Platform.OS === 'web') {
+          window.alert(error.message || 'Please check your email and password');
+        } else {
+          Alert.alert('Error: {0}', error.message);
+        }
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <SafeAreaView className="flex-1 bg-white">
@@ -98,12 +103,14 @@ const SignUp = () => {
 
             <ThemedView className="mt-8 items-center">
               <ThemedView
+                id="email-signup"
                 className={`w-[90%] h-16 px-4  rounded-2xl border flex flex-row items-center ${
                   focusEmail ? 'border-purple' : 'border-[#e1e2ef]'
                 }`}
               >
                 <UserIcon color={'#a294f9'} className="w-6 h-6" />
                 <TextInput
+                  id="email-signup-input"
                   onFocus={() => setFocusEmail(true)}
                   onBlur={() => setFocusEmail(false)}
                   className="flex-1 w-full py-4 ml-4 text-black text-base"
@@ -116,28 +123,32 @@ const SignUp = () => {
 
             <ThemedView className="mt-8 items-center">
               <ThemedView
-                className={`w-[90%] h-16 px-4  rounded-2xl border flex flex-row items-center ${
-                  focusPassword ? 'border-purple' : 'border-[#e1e2ef]'
-                }`}
+                id="password-signup"
+                className={`w-[90%] h-16 px-4 rounded-2xl border flex flex-row items-center ${focusPassword ? 'border-purple' : 'border-[#e1e2ef]'}`}
               >
-                <UserIcon color={'#a294f9'} className="w-6 h-6" />
+                <MaterialIcons
+                  name="password"
+                  className="w-6 h-6"
+                  color={'#a294f9'}
+                />
                 <TextInput
+                  id="password-signup-input"
                   onFocus={() => setFocusPassword(true)}
                   onBlur={() => setFocusPassword(false)}
-                  value={formField.Password}
-                  className="flex-1 w-full ml-4 text-black text-base"
+                  className="flex-1 w-full py-4 ml-4 text-black text-base"
                   placeholder="Password"
-                  placeholderTextColor="#7B7B8B"
                   secureTextEntry
                   onChangeText={(e) =>
                     setFormField({ ...formField, Password: e })
                   }
+                  placeholderTextColor="#7B7B8B"
                 />
               </ThemedView>
             </ThemedView>
             <ThemedView className="items-center justify-center mt-6 flex">
               {loading && <Spinner />}
               <Button
+                id="signup-button"
                 style={{
                   width: '90%',
                   height: 50,
@@ -150,14 +161,6 @@ const SignUp = () => {
               >
                 <ButtonText className="text-white text-lg">SIGN UP</ButtonText>
               </Button>
-
-              <Link
-                href="/(authens)/sign-up"
-                className="text-[#8a8a91] text-md mt-6 font-semibold"
-              >
-                {' '}
-                FORGOT PASSWORD?
-              </Link>
             </ThemedView>
 
             <ThemedView className="items-center justify-center mt-6 flex flex-row">

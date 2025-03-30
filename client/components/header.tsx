@@ -4,14 +4,16 @@ import { Avatar, AvatarImage } from './ui/avatar';
 import { LogOut } from 'lucide-react-native';
 import { getAuth, signOut } from '@firebase/auth';
 import { isIOS } from '@/utils';
+import { router } from 'expo-router';
 
 const CustomHeader: React.FC = () => {
   const handleSignOut = async () => {
     try {
       await signOut(getAuth());
+      router.push('/(authens)/sign-in');
       Alert.alert('Successfully sign out');
     } catch (error) {
-      console.error("Error signing out:", error);
+      console.error('Error signing out:', error);
     }
   };
   return (
@@ -25,7 +27,6 @@ const CustomHeader: React.FC = () => {
             <Text className="text-2xl text-purpleDark font-inriaBold mr-3">
               Thy
             </Text>
-            {/* Sign-out */}
             <LogOut
               size={24}
               color="#bbbbbb"

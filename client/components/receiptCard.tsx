@@ -3,18 +3,25 @@ import { ReceiptProps } from '@/app/types';
 import React from 'react';
 import { View, Text, FlatList } from 'react-native';
 
-const ReceiptCard: React.FC<ReceiptProps> = ({ amount, date, category, action }) => {
+const ReceiptCard: React.FC<ReceiptProps> = ({
+  amount,
+  date,
+  category,
+  action,
+}) => {
   return (
-    <View className='bg-white rounded-md w-[94%] items-center justify-center mt-4 h-16'>
-      <View className='p-4 flex flex-row'>
-        <View className='flex-[0.3]'>
-          <Text className='italic'>{date.toLocaleDateString()}</Text>
+    <View className="bg-white rounded-md w-[94%] items-center justify-center mt-4 h-16">
+      <View className="p-4 flex flex-row">
+        <View className="flex-[0.3]">
+          <Text className="italic">{date.toLocaleDateString()}</Text>
         </View>
-        <View className='flex-[0.4]'>
+        <View className="flex-[0.4]">
           <Text>{category} Receipt</Text>
         </View>
-        <View className='flex-[0.3]'>
-          <Text className={`text-sm font-bold ${action === 'Expense' ? 'text-red-500' : 'text-green-500'}`}>
+        <View className="flex-[0.3]">
+          <Text
+            className={`text-sm font-bold ${action === 'Expense' ? 'text-red-500' : 'text-green-500'}`}
+          >
             {action === 'Expense' ? `-${amount} VND` : `+${amount} VND`}
           </Text>
         </View>

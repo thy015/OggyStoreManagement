@@ -29,7 +29,7 @@ import { GoogleGenerativeAI } from '@google/generative-ai';
 import { ArrowDownCircle } from 'lucide-react-native';
 import { receiptsAPI } from '@/apis/receipts/index.ts';
 import axios from 'axios';
-import { getAuth } from 'firebase/auth';
+import { getAuth, onAuthStateChanged } from 'firebase/auth';
 
 interface MoneyDB {
   Spended: number;
@@ -195,34 +195,39 @@ const Receipt = () => {
 
   useEffect(() => {
     const auth = getAuth();
-    const user = auth.currentUser;
 
-    if (!user) {
-      console.error('Người dùng chưa đăng nhập!');
-      return;
-    }
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (!user) {
+        console.error('Người dùng chưa đăng nhập!');
+        return;
+      }
 
-    const userId = user.uid;
-    const moneyQuery = query(
-      collection(FIREBASE_DB, 'Money'),
-      where('__name__', '==', userId)
-    );
+      const userId = user.uid;
+      console.log('User ID:', userId);
 
-    const unsubscribe = onSnapshot(moneyQuery, (querySnapshot) => {
-      let fetchedData: MoneyDB[] = [];
-      let totalSpendedCalc = 0;
-      let totalIncomeCalc = 0;
+      const moneyQuery = query(
+        collection(FIREBASE_DB, 'Money'),
+        where('__name__', '==', userId)
+      );
 
-      querySnapshot.forEach((doc) => {
-        const data = doc.data() as MoneyDB;
-        fetchedData.push(data);
-        totalSpendedCalc += data.Spended || 0;
-        totalIncomeCalc += data.Income || 0;
+      const moneyUnsubscribe = onSnapshot(moneyQuery, (querySnapshot) => {
+        let fetchedData: MoneyDB[] = [];
+        let totalSpendedCalc = 0;
+        let totalIncomeCalc = 0;
+
+        querySnapshot.forEach((doc) => {
+          const data = doc.data() as MoneyDB;
+          fetchedData.push(data);
+          totalSpendedCalc += data.Spended || 0;
+          totalIncomeCalc += data.Income || 0;
+        });
+
+        setMoneyDB(fetchedData);
+        setTotalSpended(totalSpendedCalc);
+        setTotalIncome(totalIncomeCalc);
       });
 
-      setMoneyDB(fetchedData);
-      setTotalSpended(totalSpendedCalc);
-      setTotalIncome(totalIncomeCalc);
+      return () => moneyUnsubscribe();
     });
 
     return () => unsubscribe();
@@ -230,13 +235,33 @@ const Receipt = () => {
 
   const SaveReceipt = async () => {
     try {
-      const docRef = await addDoc(collection(FIREBASE_DB, 'History'), {
+      const auth = getAuth();
+
+      // Đợi xác nhận user đã đăng nhập
+      if (!auth.currentUser) {
+        console.error('User chưa đăng nhập, đang kiểm tra lại...');
+
+        // Đợi 1 giây để Firebase cập nhật user
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+
+        if (!auth.currentUser) {
+          console.error('User vẫn chưa đăng nhập sau khi chờ.');
+          return;
+        }
+      }
+
+      const user = auth.currentUser;
+      console.log('User ID:', user.uid);
+
+      await addDoc(collection(FIREBASE_DB, 'transactions'), {
+        userId: user.uid,
         date: data.Date,
         category: data.category,
         totalAmount: data.totalAmount,
         items: data.items,
         type: 'chi tiêu',
       });
+
       updateMoney();
       setImage('');
       setTextImage('');

@@ -11,31 +11,26 @@ class AuthensAPI {
   async signUp(email: string, password: string) {
     try {
       const response = await axios.post(
-        `${process.env.EXPO_PUBLIC_SERVER_URL}/api/v1/authens/sign-up`,
-        {
-          email,
-          password,
-        }
+        `http://localhost:8082/api/v1/authens/sign-up`,
+        { email, password }
       );
-      if (response && response.data) {
-        console.log(response.data);
-        return response.data;
-      }
-      Alert.alert('Sign-up failed. Please check your email and password.');
-      throw new Error('Sign-up failed. Please check your email and password.');
+
+      console.log('Success response:', response.data);
+      return response.data; // Trả về data khi thành công
     } catch (error: any) {
-      Alert.alert(
-        'Sign-up error',
-        error.response?.data?.message ||
-          'If you have an account, please sign in'
-      );
-      return null;
+      console.log('Error response:', error.response);
+
+      const errorMessage =
+        error.response?.data?.message || 'An unknown error occurred';
+      console.error(errorMessage);
+
+      throw new Error(errorMessage);
     }
   }
 
   async signIn(email: string, password: string) {
     const response = await axios.post(
-      `${process.env.EXPO_PUBLIC_SERVER_URL}/api/v1/authens/sign-in`,
+      `https://oggy-store-management-be.vercel.app/api/v1/authens/sign-in`,
       {
         email,
         password,

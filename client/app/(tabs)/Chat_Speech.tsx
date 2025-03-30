@@ -171,7 +171,7 @@ const Chat_Speech = () => {
 
       const userId = user.uid;
 
-      const docRef = await addDoc(collection(FIREBASE_DB, 'History'), {
+      const docRef = await addDoc(collection(FIREBASE_DB, 'transactions'), {
         userId,
         date: new Date(),
         category: data.category,
