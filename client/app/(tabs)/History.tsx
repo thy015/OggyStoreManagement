@@ -93,6 +93,8 @@ const History = () => {
   }, []);
 
   useEffect(() => {
+    let unsubscribe: () => void;
+
     const fetchTransactions = async () => {
       try {
         const userId = await AsyncStorage.getItem('userId');
@@ -104,10 +106,10 @@ const History = () => {
 
         const transactionsQuery = query(
           collection(FIREBASE_DB, 'transactions'),
-          where('userId', '==', userId) // Lọc theo userId
+          where('userId', '==', userId)
         );
 
-        const unsubscribe = onSnapshot(transactionsQuery, (querySnapshot) => {
+        unsubscribe = onSnapshot(transactionsQuery, (querySnapshot) => {
           const fetchedData: Transaction[] = [];
 
           querySnapshot.forEach((doc) => {
@@ -125,14 +127,18 @@ const History = () => {
           setSpend(spendedTransactions);
           setIncome(incomeTransactions);
         });
-
-        return () => unsubscribe();
       } catch (error) {
         console.error('Lỗi khi lấy giao dịch:', error);
       }
     };
 
     fetchTransactions();
+
+    return () => {
+      if (unsubscribe) {
+        unsubscribe();
+      }
+    };
   }, []);
 
   useEffect(() => {
