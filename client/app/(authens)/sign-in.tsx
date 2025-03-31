@@ -47,13 +47,12 @@ const SignIn = () => {
   };
 
   const submit = async () => {
-    if (!formField.Email || !formField.Password) {
-      return handleAlert('Error', 'Missing email or password');
-    }
     try {
       SignInSchema.parse(formField);
       setLoading(true);
-
+      if (!formField.Email || !formField.Password) {
+        return handleAlert('Error', 'Missing email or password');
+      }
       const userCredential = await signInWithEmailAndPassword(
         auth,
         formField.Email,

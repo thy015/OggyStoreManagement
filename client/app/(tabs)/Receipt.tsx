@@ -19,17 +19,13 @@ import {
   getDoc,
   updateDoc,
   doc,
-  setDoc,
   onSnapshot,
-  query,
-  where,
 } from 'firebase/firestore';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { ArrowDownCircle } from 'lucide-react-native';
 import { receiptsAPI } from '@/apis/receipts/index.ts';
 import axios from 'axios';
-import { getAuth, onAuthStateChanged } from 'firebase/auth';
 
 interface MoneyDB {
   Spended: number;
@@ -104,38 +100,17 @@ const Receipt = () => {
   const [totalSpended, setTotalSpended] = useState(0);
   const [totalIncome, setTotalIncome] = useState(0);
 
-  // TODO: write API transfer money func for others price
-  const generateText = async (text: string) => {
+  const recognizeText = async () => {
     try {
-      const prompt = `
-        Chuyển đổi đoạn văn bản sau thành định dạng JSON của hóa đơn thanh toán.
-        ghi là 'json {....}'
-         ${text} Đảm bảo JSON chỉ bao gồm các trường:  'items' (mỗi item có 'productName', 'quantity', 'price'), 'totalAmount', 'Date','category'.
-        nếu price là giá tiền nước khác thì chuyển thành định dạng số tiền price của các nước khác thành VND.
-        Đảm bảo có phân loại "category" thể loại giao dịch ví dụ như ( đồ ăn , vui chơi , mua sắm, sinh hoạt ,...)
-        Bạn chỉ cần viết ra mỗi json không cần giải thích thêm.
-      `;
-
-      const model = genAI?.getGenerativeModel({ model: 'gemini-1.5-flash' });
-
-      const response = await model?.generateContent([prompt]);
-
-      const result =
-        response?.response.candidates?.[0]?.content?.parts?.[0]?.text || '';
-
-      setGeneratedText(result || '');
-      setTextImage(result || '');
-      console.log('Generated text:', result);
-      const Json = 'text:' + result;
-      const cleanedResult = Json.replace(/text:\s*```json|```/g, '').trim();
-
-      // Chuyển đổi thành object
-      const json = JSON.parse(cleanedResult);
-      console.log('Json:', json);
-      setData(json);
+      setLoading(true);
+      console.log('Start recognize text');
+      const response = await receiptsAPI.recognizeText(image);
+      setTextImage(response);
+      setData(response);
+      setLoading(false);
     } catch (error) {
-      console.error('Error generating text:', error);
-      setGeneratedText('Lỗi khi gọi API!');
+      console.error('Failed to recognize text:', error);
+      setLoading(false);
     }
   };
 
@@ -194,24 +169,11 @@ const Receipt = () => {
   });
 
   useEffect(() => {
-    const auth = getAuth();
+    const unsubscribe = onSnapshot(
+      collection(FIREBASE_DB, 'Money'),
+      (querySnapshot) => {
+        const fetchedData: MoneyDB[] = [];
 
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      if (!user) {
-        console.error('Người dùng chưa đăng nhập!');
-        return;
-      }
-
-      const userId = user.uid;
-      console.log('User ID:', userId);
-
-      const moneyQuery = query(
-        collection(FIREBASE_DB, 'Money'),
-        where('__name__', '==', userId)
-      );
-
-      const moneyUnsubscribe = onSnapshot(moneyQuery, (querySnapshot) => {
-        let fetchedData: MoneyDB[] = [];
         let totalSpendedCalc = 0;
         let totalIncomeCalc = 0;
 
@@ -225,43 +187,21 @@ const Receipt = () => {
         setMoneyDB(fetchedData);
         setTotalSpended(totalSpendedCalc);
         setTotalIncome(totalIncomeCalc);
-      });
-
-      return () => moneyUnsubscribe();
-    });
+      }
+    );
 
     return () => unsubscribe();
   }, []);
 
   const SaveReceipt = async () => {
     try {
-      const auth = getAuth();
-
-      // Đợi xác nhận user đã đăng nhập
-      if (!auth.currentUser) {
-        console.error('User chưa đăng nhập, đang kiểm tra lại...');
-
-        // Đợi 1 giây để Firebase cập nhật user
-        await new Promise((resolve) => setTimeout(resolve, 1000));
-
-        if (!auth.currentUser) {
-          console.error('User vẫn chưa đăng nhập sau khi chờ.');
-          return;
-        }
-      }
-
-      const user = auth.currentUser;
-      console.log('User ID:', user.uid);
-
-      await addDoc(collection(FIREBASE_DB, 'transactions'), {
-        userId: user.uid,
-        date: data.Date,
+      const docRef = await addDoc(collection(FIREBASE_DB, 'History'), {
+        date: new Date(),
         category: data.category,
         totalAmount: data.totalAmount,
         items: data.items,
         type: 'chi tiêu',
       });
-
       updateMoney();
       setImage('');
       setTextImage('');
@@ -272,38 +212,24 @@ const Receipt = () => {
 
   const updateMoney = async () => {
     try {
-      const auth = getAuth();
-      const user = auth.currentUser;
-
-      if (!user) {
-        console.error('Người dùng chưa đăng nhập!');
-        return;
-      }
-
-      const userId = user.uid;
-      const moneyRef = doc(FIREBASE_DB, 'Money', userId);
+      const moneyRef = doc(FIREBASE_DB, 'Money', '01');
       const moneySnap = await getDoc(moneyRef);
-
-      let newIncome = 0;
-      let newSpended = 0;
 
       if (moneySnap.exists()) {
         const moneyData = moneySnap.data() as MoneyDB;
-        newIncome = moneyData.Income || 0;
-        newSpended = moneyData.Spended || 0;
-      } else {
-        await setDoc(moneyRef, {
-          Income: 0,
-          Spended: 0,
+        let newIncome = moneyData.Income || 0;
+        let newSpended = moneyData.Spended || 0;
+
+        newSpended += data.totalAmount;
+        await updateDoc(moneyRef, {
+          Income: newIncome,
+          Spended: newSpended,
         });
+
+        console.log('Cập nhật thành công!');
+      } else {
+        console.error('Không tìm thấy dữ liệu!');
       }
-
-      await updateDoc(moneyRef, {
-        Income: newIncome,
-        Spended: newSpended,
-      });
-
-      console.log('Cập nhật thành công!');
     } catch (error) {
       console.error('Lỗi cập nhật Firestore:', error);
     }
@@ -366,41 +292,6 @@ const Receipt = () => {
       reader.onerror = reject;
       reader.readAsDataURL(blob);
     });
-  };
-
-  const recognizeText = async () => {
-    try {
-      console.log('Recognizing text from image:', image);
-      if (!image) {
-        throw new Error('Image is not defined');
-      }
-      const base64Image = await convertImageToBase64(image);
-
-      const response = await axios.post(
-        `https://vision.googleapis.com/v1/images:annotate?key=${visionKey}`,
-        {
-          requests: [
-            {
-              image: { content: base64Image },
-              features: [{ type: 'TEXT_DETECTION' }],
-            },
-          ],
-        }
-      );
-
-      const textAnnotations = response.data.responses[0].textAnnotations;
-      if (textAnnotations && textAnnotations.length > 0) {
-        console.log('Text:', textAnnotations[0].description);
-        generateText(textAnnotations[0].description);
-      } else {
-        setTextImage('Không tìm thấy văn bản nào!');
-      }
-    } catch (error) {
-      console.error('Lỗi OCR:', error);
-      setTextImage('Lỗi khi nhận diện văn bản.');
-    } finally {
-      setLoading(false);
-    }
   };
 
   return (

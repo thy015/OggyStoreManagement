@@ -60,14 +60,14 @@ class ReceiptsAPI {
         } as any);
       }
       const response = await fetch(
-        `https://oggy-store-management-be.vercel.app/api/v1/receipts/upload-and-convert`,
+        'http://localhost:8082/api/v1/receipts/upload-and-convert',
         {
           method: 'POST',
           body: formData,
         }
       );
-      console.log('response', response);
-      return await response.json();
+      const data = await response.json();
+      return data.result;
     } catch (error) {
       console.log(error);
     }

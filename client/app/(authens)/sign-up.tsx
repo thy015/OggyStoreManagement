@@ -33,18 +33,13 @@ const SignUp = () => {
 
   const submit = async () => {
     if (!formField.Email || !formField.Password) {
-      if (Platform.OS === 'web') {
-        window.alert('Error: Missing email or password');
-        console.log('click');
-      } else {
-        return Alert.alert('Error: Missing email or password');
-      }
+      window.alert('Missing email or password');
+      Alert.alert('Error', 'Missing email or password');
+      return;
     }
     try {
-      // Validate input bằng Zod
-      SignUpSchema.parse(formField);
       setLoading(true);
-
+      SignUpSchema.parse(formField);
       const user = await authensAPI.signUp(formField.Email, formField.Password);
       console.log('Sign-up response:', user);
 
