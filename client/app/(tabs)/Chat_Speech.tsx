@@ -371,7 +371,11 @@ const Chat_Speech = () => {
 
     const generatedData = await generateText(transcription);
 
-    if (generatedData && generatedData.type != 'undefined') {
+    if (
+      generatedData &&
+      generatedData.type != 'undefined' &&
+      generatedData.category != 'Không xác định'
+    ) {
       setTimeout(() => {
         setMessages((prev) => [
           ...prev,

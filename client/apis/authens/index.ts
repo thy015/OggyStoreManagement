@@ -11,7 +11,7 @@ class AuthensAPI {
   async signUp(email: string, password: string) {
     try {
       const response = await axios.post(
-        `http://localhost:8082/api/v1/authens/sign-up`,
+        `https://oggy-store-management-be.vercel.app/api/v1/authens/sign-up`,
         { email, password }
       );
 
